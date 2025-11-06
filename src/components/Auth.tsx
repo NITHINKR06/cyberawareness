@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/FirebaseAuthContext';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, User } from 'lucide-react';
 import { validateUsername, validateEmail, validatePassword } from '../utils/validationTest';
 
@@ -12,8 +13,16 @@ export default function Auth() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
-  const { login, register } = useAuth();
+  const { user, login, register } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/app/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

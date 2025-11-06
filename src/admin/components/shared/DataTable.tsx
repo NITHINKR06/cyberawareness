@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Search, Trash2, Edit, Trash } from 'lucide-react';
 import '../../styles/kali-theme.css';
 
 interface Column {
@@ -125,8 +126,9 @@ const DataTable: React.FC<DataTableProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ flex: 1 }}
             />
-            <button type="submit" className="terminal-btn">
-              🔍 Search
+            <button type="submit" className="terminal-btn flex items-center gap-2">
+              <Search className="w-4 h-4" />
+              Search
             </button>
           </form>
         )}
@@ -137,8 +139,9 @@ const DataTable: React.FC<DataTableProps> = ({
               {selectedRows.size} selected
             </span>
             {onBulkDelete && (
-              <button onClick={handleBulkDelete} className="terminal-btn terminal-btn-danger">
-                🗑️ Delete Selected
+              <button onClick={handleBulkDelete} className="terminal-btn terminal-btn-danger flex items-center gap-2">
+                <Trash2 className="w-4 h-4" />
+                Delete Selected
               </button>
             )}
           </div>
@@ -208,12 +211,13 @@ const DataTable: React.FC<DataTableProps> = ({
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           {onEdit && (
-                            <button
-                              onClick={() => onEdit(row)}
-                              className="terminal-btn terminal-btn-primary"
+                            <button 
+                              onClick={() => onEdit(row)} 
+                              className="terminal-btn terminal-btn-primary flex items-center gap-1"
                               style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                             >
-                              ✏️ Edit
+                              <Edit className="w-3 h-3" />
+                              Edit
                             </button>
                           )}
                           {onDelete && (
@@ -223,10 +227,11 @@ const DataTable: React.FC<DataTableProps> = ({
                                   onDelete(row);
                                 }
                               }}
-                              className="terminal-btn terminal-btn-danger"
+                              className="terminal-btn terminal-btn-danger flex items-center gap-1"
                               style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                             >
-                              🗑️ Delete
+                              <Trash className="w-3 h-3" />
+                              Delete
                             </button>
                           )}
                         </div>

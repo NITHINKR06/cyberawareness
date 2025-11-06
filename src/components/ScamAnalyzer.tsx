@@ -302,15 +302,15 @@ export default function ScamAnalyzer() {
         // Show warnings for detected patterns
         textValidation.warnings.forEach(warning => {
           if (textValidation.threatLevel === 'high') {
-            toast.error(`⚠️ ${warning}`);
+            toast.error(`Warning: ${warning}`);
           } else {
-            toast.warning(`⚠️ ${warning}`);
+            toast.warning(`Warning: ${warning}`);
           }
         });
         
         // Add a summary warning
         if (textValidation.threatLevel === 'high') {
-          toast.error('🚨 HIGH RISK: Multiple scam indicators detected! Proceed with extreme caution.');
+          toast.error('HIGH RISK: Multiple scam indicators detected! Proceed with extreme caution.');
         }
       }
     }
@@ -325,11 +325,11 @@ export default function ScamAnalyzer() {
       setResult(analysisResult);
 
       if (analysisResult.threatLevel === 'dangerous') {
-        toast.error('⚠️ High threat detected! Please be extremely cautious.');
+        toast.error('High threat detected! Please be extremely cautious.');
       } else if (analysisResult.threatLevel === 'suspicious') {
-        toast.warning('⚠️ Suspicious content detected. Proceed with caution.');
+        toast.warning('Suspicious content detected. Proceed with caution.');
       } else {
-        toast.success('✅ Content appears safe, but always stay vigilant!');
+        toast.success('Content appears safe, but always stay vigilant!');
       }
     } catch (err) {
       console.error(`Error analyzing ${type}:`, err);
@@ -386,11 +386,11 @@ export default function ScamAnalyzer() {
       
       // Show appropriate toast based on threat level
       if (analysisResult.threatLevel === 'dangerous') {
-        toast.error('⚠️ High threat detected! Please be extremely cautious.');
+        toast.error('High threat detected! Please be extremely cautious.');
       } else if (analysisResult.threatLevel === 'suspicious') {
-        toast.warning('⚠️ Suspicious content detected. Please review the analysis.');
+        toast.warning('Suspicious content detected. Please review the analysis.');
       } else {
-        toast.success('✅ Content appears safe based on analysis.');
+        toast.success('Content appears safe based on analysis.');
       }
 
     } catch (err) {

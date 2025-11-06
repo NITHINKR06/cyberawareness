@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 // import { useAuth } from '../contexts/AuthContext';
 import { AlertTriangle, CheckCircle, Send, MapPin, Phone, Shield, Download, Map, ExternalLink, Globe } from 'lucide-react';
 import { submitScamReport, reportService } from '../services/backendApi';
 import MapPicker from './MapPicker';
 
 export default function ReportScam() {
+  const { t } = useTranslation();
   // const { user } = useAuth(); // Keep for potential future use
   const [formData, setFormData] = useState({
     scamType: '',
@@ -396,65 +398,65 @@ export default function ReportScam() {
             <div className="space-y-8">
               {/* Scam Report Section */}
               <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Scam Report Details</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('reportScam.scamDetails')}</h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Scam Type *
+                      {t('reportScam.scamType')} *
                     </label>
                     <select
                       name="scamType" value={formData.scamType} onChange={handleChange} required
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                      <option value="">Select a scam type</option>
+                      <option value="">{t('reportScam.selectType')}</option>
                       {scamTypes.map(type => (<option key={type} value={type}>{type}</option>))}
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description *
+                      {t('reportScam.description')} *
                     </label>
-                    <textarea
+                                        <textarea 
                       name="description" value={formData.description} onChange={handleChange} required rows={4}
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      placeholder="Please provide as much detail as possible about the scam..."
+                      placeholder={t('reportScam.descriptionPlaceholder')}
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Website URL</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.websiteUrl')}</label>
                       <input type="url" name="url" value={formData.url} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="https://example.com"
+                        placeholder={t('reportScam.urlPlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.phoneNumber')}</label>
                       <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="+1 (555) 123-4567"
+                        placeholder={t('reportScam.phonePlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.emailAddress')}</label>
                       <input type="email" name="email" value={formData.email} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="scammer@example.com"
+                        placeholder={t('reportScam.emailPlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Severity *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.severity')} *</label>
                       <select name="severity" value={formData.severity} onChange={handleChange} required
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
+                        <option value="low">{t('reportScam.severityLevels.low')}</option>
+                        <option value="medium">{t('reportScam.severityLevels.medium')}</option>
+                        <option value="high">{t('reportScam.severityLevels.high')}</option>
                       </select>
                     </div>
                   </div>
@@ -463,61 +465,61 @@ export default function ReportScam() {
 
               {/* Personal Details Section */}
               <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Complainant Details</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('reportScam.complainantDetails')}</h3>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.fullName')} *</label>
                       <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your full name"
+                        placeholder={t('reportScam.fullNamePlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.mobile')} *</label>
                       <input type="tel" name="mobile" value={formData.mobile} onChange={handleChange} required
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="9876543210"
+                        placeholder={t('reportScam.mobilePlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.gender')} *</label>
                       <select name="gender" value={formData.gender} onChange={handleChange} required
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
-                        <option value="">Select Gender</option>
+                        <option value="">{t('common.select')}</option>
                         {genders.map(gender => (<option key={gender} value={gender}>{gender}</option>))}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.dob')}</label>
                       <input type="date" name="dob" value={formData.dob} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.personalEmail')}</label>
                       <input type="email" name="emailAddress" value={formData.emailAddress} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="your@email.com"
+                        placeholder={t('reportScam.personalEmailPlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Spouse Name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.spouse')}</label>
                       <input type="text" name="spouse" value={formData.spouse} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Spouse name if applicable"
+                        placeholder={t('reportScam.spousePlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Relation with Victim</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.relation')}</label>
                       <input type="text" name="relationWithVictim" value={formData.relationWithVictim} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Self/Spouse/Parent/Guardian"
+                        placeholder={t('reportScam.relationPlaceholder')}
                       />
                     </div>
                   </div>
@@ -527,87 +529,87 @@ export default function ReportScam() {
               {/* Address Details Section */}
               <div className="border-b border-gray-200 pb-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Complainant Address</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">{t('reportScam.complainantAddress')}</h3>
                   <button type="button" onClick={() => setShowMap(true)}
                     className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
                   >
                     <Map size={16} />
-                    Select from Map
+                    {t('common.select')} from Map
                   </button>
                 </div>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">House No.</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.houseNo')}</label>
                       <input type="text" name="houseNo" value={formData.houseNo} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="House/Flat number"
+                        placeholder={t('reportScam.houseNoPlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Street Name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.street')}</label>
                       <input type="text" name="streetName" value={formData.streetName} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Street/Lane name"
+                        placeholder={t('reportScam.streetPlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Colony/Area</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.colony')}</label>
                       <input type="text" name="colony" value={formData.colony} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Colony/Area name"
+                        placeholder={t('reportScam.colonyPlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Village/Town</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.village')}</label>
                       <input type="text" name="village" value={formData.village} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Village/Town name"
+                        placeholder={t('reportScam.villagePlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Tehsil</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.tehsil')}</label>
                       <input type="text" name="tehsil" value={formData.tehsil} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Tehsil name"
+                        placeholder={t('reportScam.tehsilPlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">District</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.district')}</label>
                       <input type="text" name="district" value={formData.district} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="District name"
+                        placeholder={t('reportScam.districtPlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.state')}</label>
                       <select name="state" value={formData.state} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
-                        <option value="">Select State</option>
+                        <option value="">{t('common.select')}</option>
                         {states.map(state => (<option key={state} value={state}>{state}</option>))}
                       </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Police Station</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.policeStation')}</label>
                       <input type="text" name="policeStation" value={formData.policeStation} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Police station name"
+                        placeholder={t('reportScam.policePlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.pincode')}</label>
                       <div className="flex gap-2">
                         <div className="flex-1 relative">
                           <input type="text" name="pincode" value={formData.pincode} onChange={handleChange}
                             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="6-digit pincode" maxLength={6}
+                            placeholder={t('reportScam.pincodePlaceholder')} maxLength={6}
                           />
                           {isPincodeLoading && (
                             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -617,18 +619,19 @@ export default function ReportScam() {
                         </div>
                         {/* {pincodeSuccess && (
                           <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded-lg">
-                            <p className="text-sm text-green-800">
-                              ✅ {pincodeSuccess}
+                            <p className="text-sm text-green-800 flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4" />
+                              {pincodeSuccess}
                             </p>
                           </div>
                         )} */}
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.country')}</label>
                       <input type="text" name="country" value={formData.country} onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Country"
+                        placeholder={t('reportScam.countryPlaceholder')}
                       />
                     </div>
                   </div>
@@ -643,7 +646,7 @@ export default function ReportScam() {
                     className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                   >
                     <MapPin className="w-5 h-5" />
-                    Find Nearby Police Stations
+                    Find Police Stations
                   </button>
                   
                   <button type="submit" disabled={isSubmitting}
@@ -652,12 +655,12 @@ export default function ReportScam() {
                     {isSubmitting ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Submitting...
+                        {t('common.submit')}...
                       </>
                     ) : (
                       <>
                         <Send className="w-5 h-5" />
-                        Submit Official Complaint
+                        {t('reportScam.submitReport')}
                       </>
                     )}
                   </button>
@@ -674,44 +677,44 @@ export default function ReportScam() {
             <div className="flex items-start gap-3 mb-4">
               <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-bold text-gray-800 mb-2">Reporting Tips</h3>
+                <h3 className="font-bold text-gray-800 mb-2">{t('reportScam.reportingTips')}</h3>
                 <ul className="space-y-2 text-sm text-gray-700">
-                  <li>• Be as specific as possible</li>
-                  <li>• Include all relevant contact information</li>
-                  <li>• Don't interact with the scammer</li>
-                  <li>• Save any evidence you have</li>
-                  <li>• Report to authorities if needed</li>
+                  <li>• {t('reportScam.tips.1')}</li>
+                  <li>• {t('reportScam.tips.2')}</li>
+                  <li>• {t('reportScam.tips.3')}</li>
+                  <li>• {t('reportScam.tips.4')}</li>
+                  <li>• {t('reportScam.tips.5')}</li>
                 </ul>
               </div>
             </div>
           </div>
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-            <h3 className="font-bold text-gray-800 mb-3">Earn Points</h3>
-            <p className="text-sm text-gray-700 mb-3">Each verified report earns you:</p>
+            <h3 className="font-bold text-gray-800 mb-3">{t('reportScam.earnPoints')}</h3>
+            <p className="text-sm text-gray-700 mb-3">{t('reportScam.subtitle')}</p>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Report submission</span>
-                <span className="font-semibold text-blue-600">+25 pts</span>
+                <span className="text-gray-600">{t('reportScam.reportSubmission')}</span>
+                <span className="font-semibold text-blue-600">+25 {t('common.points')}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Verified report</span>
-                <span className="font-semibold text-blue-600">+50 pts</span>
+                <span className="text-gray-600">{t('reportScam.verifiedReport')}</span>
+                <span className="font-semibold text-blue-600">+50 {t('common.points')}</span>
               </div>
             </div>
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="font-bold text-gray-800 mb-3">Your Reports</h3>
+            <h3 className="font-bold text-gray-800 mb-3">{t('reportScam.yourReports')}</h3>
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Total Reports</span>
+                <span className="text-gray-600">{t('reportScam.totalReports')}</span>
                 <span className="font-semibold text-gray-800">0</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Verified</span>
+                <span className="text-gray-600">{t('reportScam.verified')}</span>
                 <span className="font-semibold text-green-600">0</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Pending</span>
+                <span className="text-gray-600">{t('reportScam.pending')}</span>
                 <span className="font-semibold text-yellow-600">0</span>
               </div>
             </div>

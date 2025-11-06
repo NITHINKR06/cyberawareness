@@ -214,7 +214,19 @@
     "vote": "वोट",
     "share": "शेयर",
     "report": "रिपोर्ट",
-    "comments": "टिप्पणियां"
+    "comments": "टिप्पणियां",
+    "searchPlaceholder": "चर्चाओं को खोजें...",
+    "addCommentPlaceholder": "एक टिप्पणी जोड़ें...",
+    "newPost": "नई पोस्ट",
+    "postTitle": "पोस्ट शीर्षक",
+    "postTitlePlaceholder": "शीर्षक दर्ज करें",
+    "postContent": "सामग्री",
+    "postContentPlaceholder": "अपने विचार साझा करें...",
+    "tags": "टैग",
+    "tagsPlaceholder": "अल्पविराम से अलग टैग दर्ज करें",
+    "submit": "पोस्ट सबमिट करें",
+    "cancel": "रद्द करें",
+    "createPost": "पोस्ट बनाएं"
   },
   "timeMachine": {
     "title": "स्कैम टाइम मशीन",
@@ -273,6 +285,24 @@
     "tryDifferentSpellings": "यदि कोई परिणाम नहीं मिले तो अलग वर्तनी आज़माएं",
     "examples": "उदाहरण: \"574110\", \"नई दिल्ली जीपीओ\", \"बैंगलोर, कर्नाटक\", \"मैसूर, कर्नाटक\""
   },
+  "profile": {
+    "title": "उपयोगकर्ता प्रोफाइल",
+    "subtitle": "अपनी खाता सेटिंग्स और प्राथमिकताओं को प्रबंधित करें",
+    "personalInfo": "व्यक्तिगत जानकारी",
+    "username": "उपयोगकर्ता नाम",
+    "usernamePlaceholder": "अपना उपयोगकर्ता नाम दर्ज करें",
+    "email": "ईमेल",
+    "emailPlaceholder": "अपना ईमेल दर्ज करें",
+    "changePassword": "पासवर्ड बदलें",
+    "currentPassword": "वर्तमान पासवर्ड",
+    "currentPasswordPlaceholder": "वर्तमान पासवर्ड दर्ज करें",
+    "newPassword": "नया पासवर्ड",
+    "newPasswordPlaceholder": "नया पासवर्ड दर्ज करें",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "confirmPasswordPlaceholder": "नए पासवर्ड की पुष्टि करें",
+    "updateProfile": "प्रोफाइल अपडेट करें",
+    "saveChanges": "परिवर्तन सहेजें"
+  },
   "common": {
     "loading": "लोड हो रहा है...",
     "error": "त्रुटि",
@@ -296,6 +326,8 @@
     "yes": "हां",
     "no": "नहीं",
     "confirm": "पुष्टि करें",
-    "level": "स्तर {{level}}"
+    "level": "स्तर {{level}}",
+    "select": "चुनें",
+    "points": "अंक"
   }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Tag } from 'lucide-react';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
 
@@ -177,7 +178,10 @@ const TopicsManager: React.FC = () => {
     <div>
       <div className="terminal-card">
         <div className="terminal-card-header">
-          <h2 className="terminal-card-title">🏷️ TOPIC MANAGEMENT</h2>
+          <h2 className="terminal-card-title flex items-center gap-2">
+            <Tag className="w-5 h-5" />
+            TOPIC MANAGEMENT
+          </h2>
           <button 
             onClick={() => {
               setEditingTopic(null);

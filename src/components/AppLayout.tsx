@@ -24,7 +24,9 @@ import {
   Clock,
   Bell,
   MessageSquare,
-  ChevronRight
+  ChevronRight,
+  Moon,
+  Sun
 } from 'lucide-react';
 
 export default function AppLayout() {
@@ -41,28 +43,28 @@ export default function AppLayout() {
 
   // Navigation structure - simplified without non-working items
   const dashboardItems = [
-    { id: 'dashboard', name: t('nav.dashboard'), icon: LayoutDashboard, onClick: () => navigate('/dashboard') },
+    { id: 'dashboard', name: t('nav.dashboard'), icon: LayoutDashboard, onClick: () => navigate('/app/dashboard') },
   ];
 
   const achievementsItems = [
-    { id: 'achievements', name: t('nav.achievements'), icon: Award, onClick: () => navigate('/achievements') },
+    { id: 'achievements', name: t('nav.achievements'), icon: Award, onClick: () => navigate('/app/achievements') },
   ];
 
   const userMenuItems = [
-    { id: 'profile', name: t('nav.profile', 'Profile'), icon: User, onClick: () => navigate('/profile') },
-    { id: 'settings', name: t('nav.settings', 'Settings'), icon: Settings, onClick: () => navigate('/settings') },
+    { id: 'profile', name: t('nav.profile', 'Profile'), icon: User, onClick: () => navigate('/app/profile') },
+    { id: 'settings', name: t('nav.settings', 'Settings'), icon: Settings, onClick: () => navigate('/app/settings') },
     { id: 'logout', name: t('nav.logout'), icon: LogOut, onClick: logout },
   ];
 
   const toolsNavigation = [
-    { id: 'analyzer', name: t('nav.scamAnalyzer'), icon: Search, path: '/analyzer', color: 'from-violet-500 to-purple-600' },
-    { id: 'sandbox', name: t('nav.securitySandbox', 'Security Sandbox'), icon: FlaskConical, path: '/sandbox', color: 'from-emerald-500 to-teal-600' },
+    { id: 'analyzer', name: t('nav.scamAnalyzer'), icon: Search, path: '/app/analyzer', color: 'from-violet-500 to-purple-600', openInNewTab: false },
+    { id: 'sandbox', name: t('nav.securitySandbox', 'Security Sandbox'), icon: FlaskConical, path: '/app/sandbox', color: 'from-emerald-500 to-teal-600', openInNewTab: false },
     { id: 'timemachine', name: t('nav.timeMachine', 'Time Machine'), icon: Clock, path: '/timemachine-standalone', color: 'from-amber-500 to-orange-600', openInNewTab: true },
-    { id: 'report', name: t('nav.reportScam'), icon: AlertTriangle, path: '/report', color: 'from-rose-500 to-red-600' },
-  ] as const;
+    { id: 'report', name: t('nav.reportScam'), icon: AlertTriangle, path: '/app/report', color: 'from-rose-500 to-red-600', openInNewTab: false },
+  ];
 
   const isActiveRoute = (path: string) => {
-    return location.pathname === path || (path === '/dashboard' && location.pathname === '/');
+    return location.pathname === path || (path === '/app/dashboard' && (location.pathname === '/app' || location.pathname === '/app/'));
   };
 
   return (
@@ -83,7 +85,7 @@ export default function AppLayout() {
             {/* Logo Section - Enhanced */}
             <div className="flex items-center min-w-fit">
               <button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/app/dashboard')}
                 className="flex items-center gap-3 group relative"
               >
                 <div className="relative">
@@ -106,16 +108,16 @@ export default function AppLayout() {
               {/* Core Navigation - Glass morphism pills */}
               <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-800/30 backdrop-blur-xl border border-slate-700/50">
                 <button
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate('/app/dashboard')}
                   className={`relative flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 ${
-                    isActiveRoute('/dashboard') 
+                    isActiveRoute('/app/dashboard') 
                       ? 'bg-gradient-to-r from-cyan-500 to-indigo-500 text-white shadow-lg shadow-cyan-500/25' 
                       : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   <span className="text-sm">{t('nav.dashboard')}</span>
-                  {isActiveRoute('/dashboard') && (
+                  {isActiveRoute('/app/dashboard') && (
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 blur-xl"></div>
                   )}
                 </button>
@@ -124,23 +126,23 @@ export default function AppLayout() {
                   label={t('nav.learn')}
                   icon={BookOpen}
                   items={[
-                    { id: 'modules', name: 'Learning Modules', icon: BookOpen, onClick: () => navigate('/modules') },
-                    { id: 'achievements', name: t('nav.achievements'), icon: Award, onClick: () => navigate('/achievements') },
+                    { id: 'modules', name: 'Learning Modules', icon: BookOpen, onClick: () => navigate('/app/modules') },
+                    { id: 'achievements', name: t('nav.achievements'), icon: Award, onClick: () => navigate('/app/achievements') },
                   ]}
-                  isActive={isActiveRoute('/modules') || isActiveRoute('/achievements')}
+                  isActive={isActiveRoute('/app/modules') || isActiveRoute('/app/achievements')}
                 />
 
                 <button
-                  onClick={() => navigate('/community')}
+                  onClick={() => navigate('/app/community')}
                   className={`relative flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 ${
-                    isActiveRoute('/community') 
+                    isActiveRoute('/app/community') 
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25' 
                       : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
                   <MessageSquare className="w-4 h-4" />
                   <span className="text-sm">Community</span>
-                  {isActiveRoute('/community') && (
+                  {isActiveRoute('/app/community') && (
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-xl"></div>
                   )}
                 </button>
@@ -207,9 +209,7 @@ export default function AppLayout() {
                   aria-label="Toggle theme"
                   className="p-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200 hover:rotate-12"
                 >
-                  <span className="text-xl">
-                    {isDark ? '🌙' : '☀️'}
-                  </span>
+                  {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                 </button>
               </div>
 
@@ -269,10 +269,10 @@ export default function AppLayout() {
                 </h3>
                 <div className="grid grid-cols-1 gap-2">
                   {[
-                    { path: '/dashboard', icon: LayoutDashboard, name: t('nav.dashboard'), gradient: 'from-cyan-500 to-indigo-500' },
-                    { path: '/modules', icon: BookOpen, name: 'Learning Modules', gradient: 'from-emerald-500 to-teal-500' },
-                    { path: '/achievements', icon: Award, name: t('nav.achievements'), gradient: 'from-amber-500 to-orange-500' },
-                    { path: '/community', icon: MessageSquare, name: 'Community', gradient: 'from-purple-500 to-pink-500' },
+                    { path: '/app/dashboard', icon: LayoutDashboard, name: t('nav.dashboard'), gradient: 'from-cyan-500 to-indigo-500' },
+                    { path: '/app/modules', icon: BookOpen, name: 'Learning Modules', gradient: 'from-emerald-500 to-teal-500' },
+                    { path: '/app/achievements', icon: Award, name: t('nav.achievements'), gradient: 'from-amber-500 to-orange-500' },
+                    { path: '/app/community', icon: MessageSquare, name: 'Community', gradient: 'from-purple-500 to-pink-500' },
                   ].map((item) => {
                     const Icon = item.icon;
                     const isActive = isActiveRoute(item.path);
@@ -345,7 +345,7 @@ export default function AppLayout() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => {
-                      navigate('/profile');
+                      navigate('/app/profile');
                       setMobileMenuOpen(false);
                     }}
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 border border-slate-700/50 transition-all duration-300"
@@ -355,7 +355,7 @@ export default function AppLayout() {
                   </button>
                   <button
                     onClick={() => {
-                      navigate('/settings');
+                      navigate('/app/settings');
                       setMobileMenuOpen(false);
                     }}
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 border border-slate-700/50 transition-all duration-300"

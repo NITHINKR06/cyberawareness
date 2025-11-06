@@ -10,7 +10,7 @@ const validationRules = {
       color: 'green',
       icon: 'CheckCircle',
       toastType: 'success',
-      toastMessage: '✅ Content appears safe, but always stay vigilant!',
+      toastMessage: 'Content appears safe, but always stay vigilant!',
       cssClasses: {
         container: 'text-green-600 bg-green-50 border-green-200',
         icon: 'text-green-600',
@@ -23,7 +23,7 @@ const validationRules = {
       color: 'yellow',
       icon: 'AlertCircle',
       toastType: 'warning',
-      toastMessage: '⚠️ Suspicious content detected. Proceed with caution.',
+      toastMessage: 'Suspicious content detected. Proceed with caution.',
       cssClasses: {
         container: 'text-yellow-600 bg-yellow-50 border-yellow-200',
         icon: 'text-yellow-600',
@@ -36,7 +36,7 @@ const validationRules = {
       color: 'red',
       icon: 'XCircle',
       toastType: 'error',
-      toastMessage: '⚠️ High threat detected! Please be extremely cautious.',
+      toastMessage: 'High threat detected! Please be extremely cautious.',
       cssClasses: {
         container: 'text-red-600 bg-red-50 border-red-200',
         icon: 'text-red-600',
@@ -161,14 +161,14 @@ const validationRules = {
       'Report any suspicious changes'
     ],
     suspicious: [
-      '⚠️ CAUTION: Verify before proceeding',
+      'CAUTION: Verify before proceeding',
       'Double-check the sender\'s identity',
       'Look for official contact information',
       'Never share sensitive information without verification',
       'Consider reporting this content'
     ],
     dangerous: [
-      '⚠️ HIGH RISK: Do not interact with this content',
+      'HIGH RISK: Do not interact with this content',
       'Do not click any links or download attachments',
       'Report this to relevant authorities immediately',
       'Block the sender if possible',
@@ -204,14 +204,12 @@ const validationRules = {
   // API timeout settings
   apiSettings: {
     huggingFaceTimeout: 10000,
-    googleSafeBrowsingTimeout: 10000,
     geminiTimeout: 10000
   },
 
   // Feature flags
   features: {
     useHuggingFace: true,
-    useGoogleSafeBrowsing: true,
     useGeminiSummary: true,
     useFallbackAnalysis: true,
     enableVulnerableMode: true  // For educational purposes

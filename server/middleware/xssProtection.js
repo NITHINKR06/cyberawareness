@@ -134,12 +134,19 @@ export const preventXSS = (options = {}) => {
           });
         }
 
-        // Sanitize request body
-        req.body = sanitizeObject(req.body, options);
+        // Sanitize request body - create new object instead of reassigning
+        const sanitizedBody = sanitizeObject(req.body, options);
+        // Use Object.defineProperty to safely update the body
+        Object.defineProperty(req, 'body', {
+          value: sanitizedBody,
+          writable: true,
+          enumerable: true,
+          configurable: true
+        });
       }
 
       // Check for XSS in query parameters
-      if (req.query) {
+      if (req.query && Object.keys(req.query).length > 0) {
         const queryString = new URLSearchParams(req.query).toString();
         const queryCheck = detectXSS(queryString);
         if (!queryCheck.safe) {
@@ -155,12 +162,19 @@ export const preventXSS = (options = {}) => {
           });
         }
 
-        // Sanitize query parameters
-        req.query = sanitizeObject(req.query, options);
+        // Sanitize query parameters - create new object instead of reassigning
+        const sanitizedQuery = sanitizeObject(req.query, options);
+        // Use Object.defineProperty to safely update the query
+        Object.defineProperty(req, 'query', {
+          value: sanitizedQuery,
+          writable: true,
+          enumerable: true,
+          configurable: true
+        });
       }
 
       // Check for XSS in route parameters
-      if (req.params) {
+      if (req.params && Object.keys(req.params).length > 0) {
         const paramsCheck = detectXSS(JSON.stringify(req.params));
         if (!paramsCheck.safe) {
           console.warn('XSS attempt detected in route parameters:', {
@@ -175,8 +189,15 @@ export const preventXSS = (options = {}) => {
           });
         }
 
-        // Sanitize route parameters
-        req.params = sanitizeObject(req.params, options);
+        // Sanitize route parameters - create new object instead of reassigning
+        const sanitizedParams = sanitizeObject(req.params, options);
+        // Use Object.defineProperty to safely update the params
+        Object.defineProperty(req, 'params', {
+          value: sanitizedParams,
+          writable: true,
+          enumerable: true,
+          configurable: true
+        });
       }
 
       next();

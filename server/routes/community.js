@@ -391,13 +391,13 @@ router.post('/topics/init', async (req, res) => {
       {
         name: 'Scam Alerts',
         description: 'Share and discuss latest scam alerts and warnings',
-        icon: '🚨',
+        icon: 'alert',
         color: '#EF4444'
       },
       {
         name: 'Success Stories',
         description: 'Share your success stories in avoiding or reporting scams',
-        icon: '🎉',
+        icon: 'celebration',
         color: '#10B981'
       },
       {

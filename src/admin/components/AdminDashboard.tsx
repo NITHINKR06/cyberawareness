@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserCheck, UserX, FileText, MessageSquare, Tag, Shield, Flag, Clock, Activity, Database, BarChart3 } from 'lucide-react';
+import { Users, UserCheck, UserX, FileText, MessageSquare, Tag, Shield, Flag, Clock, Activity, Database, BarChart3, AlertTriangle } from 'lucide-react';
 import '../styles/kali-theme.css';
 
 interface DashboardStats {
@@ -71,7 +71,10 @@ const AdminDashboard: React.FC = () => {
   if (error) {
     return (
       <div className="terminal-card" style={{ background: 'rgba(248, 81, 73, 0.1)', borderColor: 'var(--kali-red)' }}>
-        <p style={{ color: 'var(--kali-red)' }}>⚠️ {error}</p>
+        <p style={{ color: 'var(--kali-red)' }} className="flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4" />
+          {error}
+        </p>
       </div>
     );
   }

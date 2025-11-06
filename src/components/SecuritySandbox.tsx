@@ -57,13 +57,13 @@ export default function SecuritySandbox() {
       const [unsecured, secured] = await Promise.all([
         analyzeContentVulnerable('text', prompt).catch(e => ({ 
           analysisResult: { 
-            summary: `⚠️ VULNERABLE AI ERROR: ${e.message}. This demonstrates how an unsecured AI system can fail when attacked.`, 
+            summary: `VULNERABLE AI ERROR: ${e.message}. This demonstrates how an unsecured AI system can fail when attacked.`, 
             threatLevel: 'error' 
           } 
         })),
         analyzeContent('text', prompt).catch(e => ({ 
           analysisResult: { 
-            summary: `🛡️ SECURED AI ERROR: ${e.message}. Even when errors occur, the secured system maintains its protective stance.`, 
+            summary: `SECURED AI ERROR: ${e.message}. Even when errors occur, the secured system maintains its protective stance.`, 
             threatLevel: 'error' 
           } 
         }))
@@ -74,11 +74,11 @@ export default function SecuritySandbox() {
     } catch (error) {
       console.error('Attack simulation error:', error);
       setUnsecuredResult({
-        summary: '⚠️ VULNERABLE AI: Failed to process attack. This demonstrates system vulnerability.',
+        summary: 'VULNERABLE AI: Failed to process attack. This demonstrates system vulnerability.',
         threatLevel: 'error'
       });
       setSecuredResult({
-        summary: '🛡️ SECURED AI: System maintained security even during processing errors.',
+        summary: 'SECURED AI: System maintained security even during processing errors.',
         threatLevel: 'error'
       });
     } finally {

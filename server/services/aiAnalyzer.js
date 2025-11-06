@@ -1,25 +1,33 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import huggingfaceService from './huggingfaceService.js';
 
 dotenv.config();
 
 class AIAnalyzerService {
   constructor() {
     this.huggingFaceToken = process.env.HUGGINGFACE_API_KEY;
-    this.googleSafeBrowsingKey = process.env.GOOGLE_SAFE_BROWSING_API_KEY;
     this.geminiApiKey = process.env.GEMINI_API_KEY || 'key';
   }
 
-  
-
-  // Analyze text using hardcoded logic (replacing Hugging Face)
+  // Analyze text using Hugging Face API
   async analyzeTextWithHuggingFace(text) {
-    console.log('Using hardcoded text analysis instead of Hugging Face API');
-    return this.performHardcodedTextAnalysis(text);
+    try {
+      if (huggingfaceService.isConfigured()) {
+        console.log('Using Hugging Face API for text analysis');
+        return await huggingfaceService.analyzeText(text);
+      } else {
+        console.log('Hugging Face API not configured, using fallback');
+        return this.fallbackTextAnalysis(text);
+      }
+    } catch (error) {
+      console.error('Hugging Face API error, using fallback:', error.message);
+      return this.fallbackTextAnalysis(text);
+    }
   }
 
-  // Comprehensive hardcoded text analysis
-  performHardcodedTextAnalysis(text) {
+  // Fallback text analysis (minimal, used only when API unavailable)
+  fallbackTextAnalysis(text) {
     const lowerText = text.toLowerCase();
     
     // Enhanced keyword categories with weights
@@ -223,14 +231,24 @@ class AIAnalyzerService {
     return bonus;
   }
 
-  // Analyze URL using hardcoded logic (replacing Google Safe Browsing)
-  async analyzeUrlWithGoogleSafeBrowsing(url) {
-    console.log('Using hardcoded URL analysis instead of Google Safe Browsing API');
-    return this.performHardcodedUrlAnalysis(url);
+  // Analyze URL using Hugging Face API
+  async analyzeUrlWithHuggingFace(url) {
+    try {
+      if (huggingfaceService.isConfigured()) {
+        console.log('Using Hugging Face API for URL analysis');
+        return await huggingfaceService.analyzeUrl(url);
+      } else {
+        console.log('Hugging Face API not configured, using fallback');
+        return this.fallbackUrlAnalysis(url);
+      }
+    } catch (error) {
+      console.error('Hugging Face API error, using fallback:', error.message);
+      return this.fallbackUrlAnalysis(url);
+    }
   }
 
-  // Comprehensive hardcoded URL analysis
-  performHardcodedUrlAnalysis(url) {
+  // Fallback URL analysis (minimal, used only when API unavailable)
+  fallbackUrlAnalysis(url) {
     const lowerUrl = url.toLowerCase();
     let totalScore = 0;
     const threats = [];
@@ -253,6 +271,7 @@ class AIAnalyzerService {
         weight: 4,
         patterns: [
           /payp[a4]l(?!\.com)/i,
+          /paypa[1i](?!\.com)/i,
           /amaz[0o]n(?!\.com)/i,
           /g[0o]{2}gle(?!\.com)/i,
           /micr[0o]s[0o]ft(?!\.com)/i,
@@ -455,74 +474,76 @@ class AIAnalyzerService {
     };
   }
 
-// Generate summary using hardcoded logic (replacing Gemini AI)
+  // Generate summary using Hugging Face API
   async generateSummaryWithGemini(analysisData) {
-    // Directly use hardcoded summary without any API calls
-    return this.generateHardcodedSummary(analysisData);
+    try {
+      if (huggingfaceService.isConfigured()) {
+        console.log('Using Hugging Face API for summary generation');
+        return await huggingfaceService.generateSummary(analysisData);
+      } else {
+        console.log('Hugging Face API not configured, using fallback');
+        return this.generateFallbackSummary(analysisData);
+      }
+    } catch (error) {
+      console.error('Hugging Face API error, using fallback:', error.message);
+      return this.generateFallbackSummary(analysisData);
+    }
   }
 
-  // Comprehensive hardcoded summary generation
-  generateHardcodedSummary(analysisData) {
-    const { threatLevel, confidence, indicators = [], threats = [], keywords = [], inputType } = analysisData;
+  // Fallback summary generation - Enhanced with dynamic content analysis
+  generateFallbackSummary(analysisData) {
+    const { threatLevel, confidence, indicators = [], threats = [], keywords = [], inputType, scores } = analysisData;
     
     let summary = '';
     
+    // Analyze detected keywords to understand the scam type
+    const scamTypes = this.identifyScamTypes(keywords, indicators);
+    const specificThreats = this.getSpecificThreats(threats, indicators);
+    
     if (threatLevel === 'dangerous') {
-      // Dangerous threat level summaries
       if (inputType === 'url') {
-        summary = `🚨 CRITICAL SECURITY WARNING: This URL has been identified as highly dangerous with ${confidence}% confidence.\n\n`;
-        summary += `⚠️ THREAT ANALYSIS:\n`;
+        summary = `CRITICAL SECURITY WARNING: This URL has been identified as highly dangerous with ${confidence}% confidence.\n\n`;
+        summary += `THREAT ANALYSIS:\n`;
         
-        if (threats.includes('PHISHING_PATTERN')) {
-          summary += `• Phishing Attack Detected: This URL appears to be impersonating a legitimate website to steal your personal information.\n`;
-        }
-        if (threats.includes('TYPOSQUATTING')) {
-          summary += `• Brand Impersonation: The URL uses deceptive characters to mimic a trusted brand.\n`;
-        }
-        if (threats.includes('MALWARE')) {
-          summary += `• Malware Risk: This site may attempt to install harmful software on your device.\n`;
-        }
-        if (threats.includes('DATA_HARVESTING')) {
-          summary += `• Data Harvesting: This URL leads to a page designed to collect sensitive information.\n`;
+        // Dynamic threat description based on actual detected threats
+        if (specificThreats.length > 0) {
+          specificThreats.forEach(threat => {
+            summary += `• ${threat}\n`;
+          });
+        } else {
+          summary += `• Multiple malicious patterns detected in this URL\n`;
+          summary += `• This link may lead to a fraudulent or harmful website\n`;
         }
         
-        summary += `\n🛡️ IMMEDIATE ACTIONS REQUIRED:\n`;
+        summary += `\nIMMEDIATE ACTIONS REQUIRED:\n`;
         summary += `1. DO NOT click on this link or enter any information\n`;
         summary += `2. Delete the message containing this URL immediately\n`;
         summary += `3. Report this URL to your IT security team or relevant authorities\n`;
-        summary += `4. Run a security scan on your device if you've already visited this URL\n`;
-        summary += `5. Change passwords if you've entered any credentials on this site`;
+        summary += `4. Run a security scan if you've already visited this URL\n`;
+        summary += `5. Change passwords if you've entered any credentials`;
         
       } else {
-        // Text analysis - dangerous
-        summary = `🚨 HIGH-RISK SCAM DETECTED: This message exhibits multiple characteristics of a sophisticated scam with ${confidence}% confidence.\n\n`;
-        summary += `⚠️ IDENTIFIED SCAM INDICATORS:\n`;
+        // Text analysis - dangerous with dynamic scam type identification
+        summary = `HIGH-RISK SCAM DETECTED: This message exhibits multiple characteristics of a ${scamTypes.primary || 'sophisticated scam'} with ${confidence}% confidence.\n\n`;
+        summary += `IDENTIFIED SCAM INDICATORS:\n`;
         
-        if (keywords && keywords.length > 0) {
-          const keywordCategories = {
-            financial: ['bank', 'account', 'transfer', 'money', 'payment', 'card', 'bitcoin'],
-            urgency: ['urgent', 'immediately', 'expire', 'suspended', 'limited time'],
-            prize: ['winner', 'prize', 'lottery', 'congratulations', 'claim'],
-            phishing: ['verify', 'confirm', 'update', 'click here', 'security alert']
-          };
-          
-          for (const [category, terms] of Object.entries(keywordCategories)) {
-            const found = keywords.filter(k => terms.some(t => k.includes(t)));
-            if (found.length > 0) {
-              if (category === 'financial') {
-                summary += `• Financial Fraud Attempt: Message contains financial scam terminology\n`;
-              } else if (category === 'urgency') {
-                summary += `• Pressure Tactics: Creates false urgency to force quick action\n`;
-              } else if (category === 'prize') {
-                summary += `• Fake Prize/Lottery Scam: Claims you've won something you didn't enter\n`;
-              } else if (category === 'phishing') {
-                summary += `• Phishing Attempt: Trying to steal your login credentials or personal data\n`;
-              }
-            }
-          }
+        // Dynamic indicators based on actual detected keywords
+        if (scamTypes.details.length > 0) {
+          scamTypes.details.forEach(detail => {
+            summary += `• ${detail}\n`;
+          });
+        } else {
+          summary += `• Multiple scam indicators detected in this message\n`;
+          summary += `• Content designed to manipulate or deceive recipients\n`;
         }
         
-        summary += `\n🛡️ PROTECTIVE ACTIONS:\n`;
+        // Add specific keyword warnings if available
+        if (keywords && keywords.length > 0) {
+          const topKeywords = keywords.slice(0, 5).join('", "');
+          summary += `• Detected suspicious terms: "${topKeywords}"\n`;
+        }
+        
+        summary += `\nPROTECTIVE ACTIONS:\n`;
         summary += `1. DELETE this message immediately without responding\n`;
         summary += `2. BLOCK the sender to prevent future contact\n`;
         summary += `3. REPORT to anti-fraud authorities (spam@uce.gov, reportfraud.ftc.gov)\n`;
@@ -531,40 +552,49 @@ class AIAnalyzerService {
       }
       
     } else if (threatLevel === 'suspicious') {
-      // Suspicious threat level summaries
       if (inputType === 'url') {
-        summary = `⚠️ SUSPICIOUS URL DETECTED: This link shows concerning characteristics that require caution (${confidence}% confidence).\n\n`;
-        summary += `🔍 SUSPICIOUS ELEMENTS:\n`;
+        summary = `SUSPICIOUS URL DETECTED: This link shows concerning characteristics that require caution (${confidence}% confidence).\n\n`;
+        summary += `SUSPICIOUS ELEMENTS:\n`;
         
-        if (threats.includes('URL_SHORTENER')) {
-          summary += `• URL Shortener: The actual destination is hidden, which is often used in scams\n`;
-        }
-        if (threats.includes('SUSPICIOUS_TLD')) {
-          summary += `• Questionable Domain: Uses a domain extension commonly associated with scams\n`;
-        }
-        if (indicators.some(i => i.includes('long URL'))) {
-          summary += `• Unusually Long URL: May be attempting to hide malicious parameters\n`;
-        }
-        
-        summary += `\n✅ RECOMMENDED PRECAUTIONS:\n`;
-        summary += `1. Verify the sender through a separate, trusted communication channel\n`;
-        summary += `2. Hover over the link to see the actual destination (don't click)\n`;
-        summary += `3. Use a URL scanner service to check safety before visiting\n`;
-        summary += `4. Access the website directly through your browser instead of clicking the link\n`;
-        summary += `5. Ensure your antivirus and browser security are up-to-date`;
-        
-      } else {
-        // Text analysis - suspicious
-        summary = `⚠️ POTENTIALLY SUSPICIOUS MESSAGE: This content contains elements commonly found in scam messages (${confidence}% confidence).\n\n`;
-        summary += `🔍 WARNING SIGNS DETECTED:\n`;
-        
-        if (indicators && indicators.length > 0) {
+        // Dynamic suspicious elements based on actual threats
+        if (specificThreats.length > 0) {
+          specificThreats.forEach(threat => {
+            summary += `• ${threat}\n`;
+          });
+        } else if (indicators.length > 0) {
           indicators.slice(0, 3).forEach(indicator => {
             summary += `• ${indicator}\n`;
           });
+        } else {
+          summary += `• Some characteristics of this URL raise concerns\n`;
         }
         
-        summary += `\n✅ SAFETY RECOMMENDATIONS:\n`;
+        summary += `\nRECOMMENDED PRECAUTIONS:\n`;
+        summary += `1. Verify the sender through a separate, trusted communication channel\n`;
+        summary += `2. Hover over the link to see the actual destination (don't click)\n`;
+        summary += `3. Use a URL scanner service to check safety before visiting\n`;
+        summary += `4. Access the website directly through your browser instead\n`;
+        summary += `5. Ensure your antivirus and browser security are up-to-date`;
+        
+      } else {
+        // Text analysis - suspicious with dynamic content
+        summary = `POTENTIALLY SUSPICIOUS MESSAGE: This content contains elements commonly found in ${scamTypes.primary || 'scam messages'} (${confidence}% confidence).\n\n`;
+        summary += `WARNING SIGNS DETECTED:\n`;
+        
+        // Show actual detected indicators
+        if (scamTypes.details.length > 0) {
+          scamTypes.details.forEach(detail => {
+            summary += `• ${detail}\n`;
+          });
+        } else if (indicators.length > 0) {
+          indicators.slice(0, 3).forEach(indicator => {
+            summary += `• ${indicator}\n`;
+          });
+        } else {
+          summary += `• Some elements of this message warrant caution\n`;
+        }
+        
+        summary += `\nSAFETY RECOMMENDATIONS:\n`;
         summary += `1. Verify the sender's identity through official contact methods\n`;
         summary += `2. Don't click links or download attachments without verification\n`;
         summary += `3. Check for spelling errors and generic greetings (red flags)\n`;
@@ -575,12 +605,12 @@ class AIAnalyzerService {
     } else {
       // Safe threat level summaries
       if (inputType === 'url') {
-        summary = `✅ URL APPEARS SAFE: Initial analysis shows no immediate threats (${confidence}% confidence).\n\n`;
-        summary += `📋 ANALYSIS RESULTS:\n`;
+        summary = `URL APPEARS SAFE: Initial analysis shows no immediate threats (${confidence}% confidence).\n\n`;
+        summary += `ANALYSIS RESULTS:\n`;
         summary += `• No known malicious patterns detected\n`;
         summary += `• Domain appears legitimate\n`;
         summary += `• No suspicious URL characteristics found\n\n`;
-        summary += `💡 BEST PRACTICES:\n`;
+        summary += `BEST PRACTICES:\n`;
         summary += `• Always verify HTTPS connection (look for padlock icon)\n`;
         summary += `• Check the domain spelling carefully\n`;
         summary += `• Be cautious with personal information even on safe sites\n`;
@@ -589,12 +619,12 @@ class AIAnalyzerService {
         
       } else {
         // Text analysis - safe
-        summary = `✅ MESSAGE APPEARS LEGITIMATE: No significant scam indicators detected (${confidence}% confidence).\n\n`;
-        summary += `📋 ANALYSIS SUMMARY:\n`;
+        summary = `MESSAGE APPEARS LEGITIMATE: No significant scam indicators detected (${confidence}% confidence).\n\n`;
+        summary += `ANALYSIS SUMMARY:\n`;
         summary += `• No common scam keywords or patterns found\n`;
         summary += `• Message structure appears normal\n`;
         summary += `• No urgent threats or pressure tactics detected\n\n`;
-        summary += `💡 STAY SAFE ONLINE:\n`;
+        summary += `STAY SAFE ONLINE:\n`;
         summary += `• Continue to verify sender identity for important matters\n`;
         summary += `• Never share passwords or PINs, even with legitimate contacts\n`;
         summary += `• Keep personal information private unless absolutely necessary\n`;
@@ -609,6 +639,128 @@ class AIAnalyzerService {
     return summary;
   }
 
+  // Helper function to identify specific scam types from keywords
+  identifyScamTypes(keywords = [], indicators = []) {
+    const scamCategories = {
+      financial: {
+        keywords: ['bank', 'account', 'transfer', 'money', 'payment', 'card', 'bitcoin', 'cryptocurrency', 'wire', 'cvv', 'pin'],
+        description: 'Financial Fraud',
+        details: [
+          'Financial Fraud Attempt: Trying to steal money or financial information',
+          'Requests for banking details, passwords, or money transfers',
+          'May impersonate banks or financial institutions'
+        ]
+      },
+      urgency: {
+        keywords: ['urgent', 'immediately', 'expire', 'suspended', 'limited time', 'act now', 'deadline', 'hurry'],
+        description: 'Pressure Tactic Scam',
+        details: [
+          'Pressure Tactics: Creates false urgency to force quick decisions',
+          'Uses time-sensitive language to prevent careful consideration',
+          'Designed to bypass your normal security awareness'
+        ]
+      },
+      prize: {
+        keywords: ['winner', 'prize', 'lottery', 'congratulations', 'claim', 'won', 'jackpot', 'sweepstakes'],
+        description: 'Prize/Lottery Scam',
+        details: [
+          'Fake Prize/Lottery Scam: Claims you won something you never entered',
+          'Requires payment or personal information to "claim" the prize',
+          'Classic advance-fee fraud technique'
+        ]
+      },
+      phishing: {
+        keywords: ['verify', 'confirm', 'update', 'click here', 'security alert', 'validate', 'reset password'],
+        description: 'Phishing Attack',
+        details: [
+          'Phishing Attempt: Trying to steal login credentials or personal data',
+          'Impersonates legitimate organizations to gain trust',
+          'May lead to fake login pages or malware downloads'
+        ]
+      },
+      malware: {
+        keywords: ['virus', 'malware', 'infected', 'download', 'install', 'update required', 'scan', 'antivirus'],
+        description: 'Malware/Tech Support Scam',
+        details: [
+          'Malware/Tech Support Scam: Claims device is infected or at risk',
+          'Attempts to install malicious software or gain remote access',
+          'May impersonate tech support or security companies'
+        ]
+      },
+      identity: {
+        keywords: ['social security', 'ssn', 'passport', 'driver license', 'date of birth', 'mother maiden'],
+        description: 'Identity Theft Attempt',
+        details: [
+          'Identity Theft Attempt: Requesting sensitive personal information',
+          'Could be used for fraud, account takeover, or identity theft',
+          'Legitimate organizations never ask for this via email/text'
+        ]
+      }
+    };
+
+    let primaryType = null;
+    let maxMatches = 0;
+    const matchedDetails = [];
+
+    // Find which category has the most keyword matches
+    for (const [type, category] of Object.entries(scamCategories)) {
+      const matches = keywords.filter(k => 
+        category.keywords.some(ck => k.toLowerCase().includes(ck.toLowerCase()))
+      ).length;
+      
+      if (matches > maxMatches) {
+        maxMatches = matches;
+        primaryType = category.description;
+        matchedDetails.length = 0;
+        matchedDetails.push(...category.details);
+      } else if (matches > 0 && matches === maxMatches) {
+        // Multiple categories with same match count - add details from both
+        matchedDetails.push(category.details[0]);
+      }
+    }
+
+    return {
+      primary: primaryType,
+      details: matchedDetails.slice(0, 3) // Limit to top 3 details
+    };
+  }
+
+  // Helper function to get specific threat descriptions
+  getSpecificThreats(threats = [], indicators = []) {
+    const threatDescriptions = {
+      'PHISHING_PATTERN': 'Phishing Attack: URL designed to steal personal information by impersonating legitimate sites',
+      'TYPOSQUATTING': 'Brand Impersonation: Uses deceptive characters to mimic trusted brands',
+      'MALWARE': 'Malware Risk: Site may attempt to install harmful software on your device',
+      'DATA_HARVESTING': 'Data Harvesting: Page designed to collect sensitive information',
+      'URL_SHORTENER': 'URL Shortener: Actual destination is hidden, commonly used in scams',
+      'SUSPICIOUS_TLD': 'Questionable Domain: Uses domain extension commonly associated with scams',
+      'IP_ADDRESS': 'Direct IP Address: Using IP instead of domain name is suspicious',
+      'SUSPICIOUS_KEYWORD': 'Suspicious Keywords: URL contains terms commonly used in scams',
+      'EXCESSIVE_SUBDOMAINS': 'Excessive Subdomains: Unusually complex URL structure',
+      'SUSPICIOUS_PORT': 'Non-Standard Port: Using unusual port numbers',
+      'REDIRECT_CHAIN': 'Redirect Chain: May redirect through multiple sites',
+      'HOMOGRAPH_ATTACK': 'Homograph Attack: Uses lookalike characters to deceive users'
+    };
+
+    const descriptions = [];
+    
+    // Add descriptions for detected threats
+    threats.forEach(threat => {
+      if (threatDescriptions[threat]) {
+        descriptions.push(threatDescriptions[threat]);
+      }
+    });
+
+    // If no specific threats, use indicators
+    if (descriptions.length === 0 && indicators.length > 0) {
+      indicators.slice(0, 3).forEach(indicator => {
+        descriptions.push(indicator);
+      });
+    }
+
+    return descriptions;
+  }
+
   // ADD THIS NEW FUNCTION to aiAnalyzer.js
 
   // Intentionally vulnerable analyzer for demonstration purposes
@@ -616,7 +768,7 @@ class AIAnalyzerService {
     let analysisResult;
     // Perform the initial analysis (this part is the same)
     if (inputType === 'url') {
-        analysisResult = await this.analyzeUrlWithGoogleSafeBrowsing(inputContent);
+        analysisResult = await this.analyzeUrlWithHuggingFace(inputContent);
     } else {
         analysisResult = await this.analyzeTextWithHuggingFace(inputContent);
     }
@@ -632,7 +784,7 @@ class AIAnalyzerService {
 
     try {
         if (!this.geminiApiKey || this.geminiApiKey === 'key') {
-            analysisResult.summary = "⚠️ VULNERABLE AI: This is a demonstration of how an unsecured AI system responds to prompt injection attacks. The system directly includes user input in the prompt without protection, making it susceptible to manipulation.";
+            analysisResult.summary = "VULNERABLE AI: This is a demonstration of how an unsecured AI system responds to prompt injection attacks. The system directly includes user input in the prompt without protection, making it susceptible to manipulation.";
             return { analysisResult };
         }
 
@@ -655,11 +807,11 @@ class AIAnalyzerService {
         if (response.data.candidates && response.data.candidates[0] && response.data.candidates[0].content) {
             analysisResult.summary = response.data.candidates[0].content.parts[0]?.text || "Failed to get vulnerable summary.";
         } else {
-            analysisResult.summary = "⚠️ VULNERABLE AI: This demonstrates how an unsecured AI system can be manipulated. The system failed to properly analyze the malicious input.";
+            analysisResult.summary = "VULNERABLE AI: This demonstrates how an unsecured AI system can be manipulated. The system failed to properly analyze the malicious input.";
         }
     } catch (error) {
         console.log('Gemini API error (vulnerable):', error.response?.data || error.message);
-        analysisResult.summary = "⚠️ VULNERABLE AI: This is a demonstration of how an unsecured AI system responds to prompt injection attacks. The system directly includes user input in the prompt without protection, making it susceptible to manipulation.";
+        analysisResult.summary = "VULNERABLE AI: This is a demonstration of how an unsecured AI system responds to prompt injection attacks. The system directly includes user input in the prompt without protection, making it susceptible to manipulation.";
     }
 
     return { analysisResult };
@@ -668,152 +820,6 @@ class AIAnalyzerService {
 // You also need to export the new function.
 // Find the `export default new AIAnalyzerService();` line at the bottom
 // and add this line right before it:
-  // Fallback analysis for text (when APIs are not available)
-  fallbackTextAnalysis(text) {
-    const lowerText = text.toLowerCase();
-    
-    // Comprehensive scam keywords and patterns
-    const highRiskKeywords = [
-      // Urgency/pressure
-      'urgent', 'act now', 'immediately', 'expire', 'deadline', 'limited time', 'hurry',
-      'last chance', 'final notice', 'suspended', 'terminated',
-      
-      // Banking/financial scams
-      'verify account', 'verify bank', 'verify identity',
-      'bank security update', 'security update',
-      'otp', 'one time password', 'verification code',
-      'loan approved', 'loan offer', 'guaranteed loan', 'pre-approved',
-      'transfer funds', 'transfer money', 'processing fee',
-      'claim reward', 'claim prize', 'claim money', 'claim refund',
-      
-      // Lottery/prize scams
-      'congratulations', 'winner', 'prize', 'lottery', 'jackpot',
-      'you have won', 'you won', 'winning notification',
-      
-      // Malware/hacking threats
-      'virus', 'malware', 'trojan', 'ransomware',
-      'hack', 'hacked', 'hacker', 'hacking', 'compromised', 'breach',
-      'phishy', 'phishing', 'phisher', 'spoofing', 'spoofed',
-      'infected', 'threat detected', 'security risk', 'security threat',
-      
-      // Typosquatting patterns (common misspellings)
-      'paypa1', 'paypal1', 'paipal', 'payp4l',
-      'amaz0n', 'amazone', 'amazn',
-      'g00gle', 'googl3', 'gooogle',
-      'micr0soft', 'microsofy', 'mircosoft',
-      'app1e', 'appl3', 'appl1', 'appie',
-      'faceb00k', 'facebbok', 'facebok',
-      'netf1ix', 'netfllx', 'netfix'
-    ];
-    
-    const mediumRiskKeywords = [
-      '24 hours', '48 hours', 'today only', 'expires today', 'expires tomorrow',
-      'click here', 'click now', 'click below',
-      'update your', 'confirm your', 'validate your',
-      'unusual activity', 'suspicious activity',
-      'free gift', 'free money', 'free offer',
-      'investment opportunity', 'get rich'
-    ];
-    
-    // Count matches
-    let highRiskCount = 0;
-    let mediumRiskCount = 0;
-    const foundKeywords = [];
-    
-    // Check high risk keywords
-    highRiskKeywords.forEach(keyword => {
-      if (lowerText.includes(keyword)) {
-        highRiskCount++;
-        foundKeywords.push(keyword);
-      }
-    });
-    
-    // Check medium risk keywords
-    mediumRiskKeywords.forEach(keyword => {
-      if (lowerText.includes(keyword)) {
-        mediumRiskCount++;
-        foundKeywords.push(keyword);
-      }
-    });
-    
-    // Check for specific typosquatting patterns using regex
-    const typosquattingPatterns = [
-      /\b(paypa[1l]|pay-?pal[^.])\b/i,
-      /\b(amaz[0o]n|ama-?zon)\b/i,
-      /\b(g[0o]{2}gle|go{3,}gle)\b/i,
-      /\b(micr[0o]s[0o]ft|micro-?soft)\b/i,
-      /\b(app[1l]e|app-?le)\b/i,
-      /\b(faceb[0o]{2}k|face-?book)\b/i
-    ];
-    
-    typosquattingPatterns.forEach(pattern => {
-      if (pattern.test(text)) {
-        highRiskCount += 2; // Typosquatting is high risk
-        foundKeywords.push('typosquatting detected');
-      }
-    });
-    
-    // Determine threat level based on findings
-    let threatLevel = 'safe';
-    let confidence = 70;
-    
-    if (highRiskCount >= 2 || (highRiskCount >= 1 && mediumRiskCount >= 2)) {
-      threatLevel = 'dangerous';
-      confidence = Math.min(85 + (highRiskCount * 5), 95);
-    } else if (highRiskCount >= 1 || mediumRiskCount >= 2) {
-      threatLevel = 'suspicious';
-      confidence = Math.min(70 + (highRiskCount * 10 + mediumRiskCount * 3), 85);
-    } else if (mediumRiskCount >= 1) {
-      threatLevel = 'suspicious';
-      confidence = 60;
-    } else {
-      threatLevel = 'safe';
-      confidence = Math.max(90 - (foundKeywords.length * 5), 70);
-    }
-
-    return {
-      threatLevel,
-      confidence,
-      keywords: foundKeywords,
-      source: 'fallback',
-      highRiskCount,
-      mediumRiskCount
-    };
-  }
-
-  // Fallback analysis for URLs
-  fallbackUrlAnalysis(url) {
-    const suspiciousDomains = ['bit.ly', 'tinyurl', 'goo.gl'];
-    const isSuspicious = suspiciousDomains.some(domain => url.includes(domain));
-
-    return {
-      threatLevel: isSuspicious ? 'suspicious' : 'safe',
-      confidence: 60,
-      threats: isSuspicious ? ['URL_SHORTENER'] : [],
-      source: 'fallback'
-    };
-  }
-
-  // Generate fallback summary
-  generateFallbackSummary(analysisData) {
-    const { threatLevel, confidence, indicators = [] } = analysisData;
-    
-    let summary = '';
-    if (threatLevel === 'dangerous') {
-      summary = `⚠️ HIGH RISK DETECTED: This content shows strong indicators of being a scam or malicious. `;
-      summary += `We detected ${indicators.length} warning signs with ${confidence}% confidence. `;
-      summary += `DO NOT interact with this content and report it to authorities.`;
-    } else if (threatLevel === 'suspicious') {
-      summary = `⚠️ CAUTION ADVISED: This content has some suspicious characteristics. `;
-      summary += `We found ${indicators.length} potential warning signs. `;
-      summary += `Verify the source through official channels before proceeding.`;
-    } else {
-      summary = `✅ APPEARS SAFE: No immediate threats detected in this content. `;
-      summary += `However, always remain vigilant and verify information through official sources.`;
-    }
-
-    return summary;
-  }
 
   // Main analysis function
   async analyze(inputType, inputContent) {
@@ -828,7 +834,7 @@ class AIAnalyzerService {
 
     try {
       if (inputType === 'url') {
-        const urlAnalysis = await this.analyzeUrlWithGoogleSafeBrowsing(inputContent);
+        const urlAnalysis = await this.analyzeUrlWithHuggingFace(inputContent);
         analysisResult = { ...analysisResult, ...urlAnalysis };
         
         analysisResult.recommendations = [
@@ -867,10 +873,10 @@ class AIAnalyzerService {
       analysisResult.summary = await this.generateSummaryWithGemini(analysisResult);
 
       if (analysisResult.threatLevel === 'dangerous') {
-        analysisResult.recommendations.unshift('⚠️ HIGH RISK: Do not interact with this content');
+        analysisResult.recommendations.unshift('HIGH RISK: Do not interact with this content');
         analysisResult.recommendations.push('Report this to relevant authorities');
       } else if (analysisResult.threatLevel === 'suspicious') {
-        analysisResult.recommendations.unshift('⚠️ CAUTION: Verify before proceeding');
+        analysisResult.recommendations.unshift('CAUTION: Verify before proceeding');
       } else {
         analysisResult.recommendations.unshift('✓ Appears safe, but always remain vigilant');
       }

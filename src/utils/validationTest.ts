@@ -219,15 +219,15 @@ export const runFrontendValidationTests = () => {
   let failed = 0;
   
   // Test username validation
-  console.log('🔍 Testing Username Validation...');
+  console.log('Testing Username Validation...');
   testData.usernames.valid.forEach(username => {
     const result = validateUsername(username);
     if (result.isValid) {
       passed++;
-      console.log(`✅ Valid username: "${username}"`);
+      console.log(`PASSED: Valid username: "${username}"`);
     } else {
       failed++;
-      console.log(`❌ Valid username failed: "${username}" - ${result.errors.join(', ')}`);
+      console.log(`FAILED: Valid username failed: "${username}" - ${result.errors.join(', ')}`);
     }
   });
   
@@ -235,10 +235,10 @@ export const runFrontendValidationTests = () => {
     const result = validateUsername(username);
     if (!result.isValid) {
       passed++;
-      console.log(`✅ Invalid username rejected: "${username}"`);
+      console.log(`PASSED: Invalid username rejected: "${username}"`);
     } else {
       failed++;
-      console.log(`❌ Invalid username accepted: "${username}"`);
+      console.log(`FAILED: Invalid username accepted: "${username}"`);
     }
   });
   
@@ -248,10 +248,10 @@ export const runFrontendValidationTests = () => {
     const result = validateEmail(email);
     if (result.isValid) {
       passed++;
-      console.log(`✅ Valid email: "${email}"`);
+      console.log(`PASSED: Valid email: "${email}"`);
     } else {
       failed++;
-      console.log(`❌ Valid email failed: "${email}" - ${result.errors.join(', ')}`);
+      console.log(`FAILED: Valid email failed: "${email}" - ${result.errors.join(', ')}`);
     }
   });
   
@@ -259,23 +259,23 @@ export const runFrontendValidationTests = () => {
     const result = validateEmail(email);
     if (!result.isValid) {
       passed++;
-      console.log(`✅ Invalid email rejected: "${email}"`);
+      console.log(`PASSED: Invalid email rejected: "${email}"`);
     } else {
       failed++;
-      console.log(`❌ Invalid email accepted: "${email}"`);
+      console.log(`FAILED: Invalid email accepted: "${email}"`);
     }
   });
   
   // Test password validation
-  console.log('\n🔐 Testing Password Validation...');
+  console.log('\nTesting Password Validation...');
   testData.passwords.valid.forEach(password => {
     const result = validatePassword(password);
     if (result.isValid) {
       passed++;
-      console.log(`✅ Valid password: "${password}" (Strength: ${result.strength.description})`);
+      console.log(`PASSED: Valid password: "${password}" (Strength: ${result.strength.description})`);
     } else {
       failed++;
-      console.log(`❌ Valid password failed: "${password}" - ${result.errors.join(', ')}`);
+      console.log(`FAILED: Valid password failed: "${password}" - ${result.errors.join(', ')}`);
     }
   });
   
@@ -283,10 +283,10 @@ export const runFrontendValidationTests = () => {
     const result = validatePassword(password);
     if (!result.isValid) {
       passed++;
-      console.log(`✅ Invalid password rejected: "${password}"`);
+      console.log(`PASSED: Invalid password rejected: "${password}"`);
     } else {
       failed++;
-      console.log(`❌ Invalid password accepted: "${password}"`);
+      console.log(`FAILED: Invalid password accepted: "${password}"`);
     }
   });
   
@@ -296,10 +296,10 @@ export const runFrontendValidationTests = () => {
     const result = validateUrl(url);
     if (result.isValid) {
       passed++;
-      console.log(`✅ Valid URL: "${url}"`);
+      console.log(`PASSED: Valid URL: "${url}"`);
     } else {
       failed++;
-      console.log(`❌ Valid URL failed: "${url}" - ${result.errors.join(', ')}`);
+      console.log(`FAILED: Valid URL failed: "${url}" - ${result.errors.join(', ')}`);
     }
   });
   
@@ -307,20 +307,20 @@ export const runFrontendValidationTests = () => {
     const result = validateUrl(url);
     if (!result.isValid) {
       passed++;
-      console.log(`✅ Invalid URL rejected: "${url}"`);
+      console.log(`PASSED: Invalid URL rejected: "${url}"`);
     } else {
       failed++;
-      console.log(`❌ Invalid URL accepted: "${url}"`);
+      console.log(`FAILED: Invalid URL accepted: "${url}"`);
     }
   });
   
   // Print summary
-  console.log('\n📊 Frontend Validation Test Summary:');
-  console.log(`✅ Passed: ${passed}`);
-  console.log(`❌ Failed: ${failed}`);
+  console.log('\nFrontend Validation Test Summary:');
+  console.log(`PASSED: ${passed}`);
+  console.log(`FAILED: ${failed}`);
   
   const successRate = (passed / (passed + failed)) * 100;
-  console.log(`🎯 Success Rate: ${successRate.toFixed(1)}%`);
+  console.log(`Success Rate: ${successRate.toFixed(1)}%`);
   
   return { passed, failed, successRate };
 };

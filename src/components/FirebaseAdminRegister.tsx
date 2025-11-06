@@ -206,8 +206,9 @@ const FirebaseAdminRegister: React.FC = () => {
               Create the administrator account for your system
             </p>
             <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg">
-              <p className="text-yellow-400 text-xs">
-                ⚠️ Only one admin account can be created. After registration, this page will be permanently disabled.
+              <p className="text-yellow-400 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Only one admin account can be created. After registration, this page will be permanently disabled.
               </p>
             </div>
           </div>

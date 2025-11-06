@@ -242,10 +242,10 @@ export default function Community() {
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Community Forum
+          {t('community.title')}
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Connect, share experiences, and learn from others
+          {t('community.subtitle')}
         </p>
       </div>
 
@@ -330,7 +330,7 @@ export default function Community() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search discussions..."
+                  placeholder={t('community.searchPlaceholder')}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg"
                 />
               </div>
@@ -339,7 +339,7 @@ export default function Community() {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 <Plus className="w-5 h-5 inline mr-2" />
-                New Post
+                {t('community.newPost')}
               </button>
             </div>
           </div>
@@ -355,7 +355,7 @@ export default function Community() {
                 className="mb-4 text-blue-600 hover:underline flex items-center gap-2"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Back to discussions
+                {t('common.back')} to discussions
               </button>
 
               <h2 className="text-2xl font-bold mb-2">{selectedPost.title}</h2>
@@ -368,13 +368,13 @@ export default function Community() {
               <p className="whitespace-pre-wrap mb-6">{selectedPost.content}</p>
 
               <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Comments</h3>
+                <h3 className="text-lg font-semibold mb-4">{t('community.comments')}</h3>
                 
                 <div className="mb-4">
                   <textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
+                    placeholder={t('community.addCommentPlaceholder')}
                     className="w-full p-3 border rounded-lg"
                     rows={3}
                   />
@@ -453,7 +453,7 @@ export default function Community() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Create New Post</h2>
+              <h2 className="text-2xl font-bold">{t('community.createPost')}</h2>
               <button
                 onClick={() => setShowNewPostModal(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -470,7 +470,7 @@ export default function Community() {
                   onChange={(e) => setNewPost({ ...newPost, topicId: e.target.value })}
                   className="w-full p-3 border rounded-lg"
                 >
-                  <option value="">Select a topic</option>
+                  <option value="">{t('common.select')} a topic</option>
                   {topics.map(topic => (
                     <option key={topic._id} value={topic._id}>
                       {topic.icon} {topic.name}
@@ -480,34 +480,34 @@ export default function Community() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Title *</label>
+                <label className="block text-sm font-medium mb-2">{t('community.postTitle')} *</label>
                 <input
                   type="text"
                   value={newPost.title}
                   onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                  placeholder="Enter title"
+                  placeholder={t('community.postTitlePlaceholder')}
                   className="w-full p-3 border rounded-lg"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Content *</label>
+                <label className="block text-sm font-medium mb-2">{t('community.postContent')} *</label>
                 <textarea
                   value={newPost.content}
                   onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                  placeholder="Share your thoughts..."
+                  placeholder={t('community.postContentPlaceholder')}
                   className="w-full p-3 border rounded-lg"
                   rows={8}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Tags</label>
+                <label className="block text-sm font-medium mb-2">{t('community.tags')}</label>
                 <input
                   type="text"
                   value={newPost.tags}
                   onChange={(e) => setNewPost({ ...newPost, tags: e.target.value })}
-                  placeholder="Enter tags separated by commas"
+                  placeholder={t('community.tagsPlaceholder')}
                   className="w-full p-3 border rounded-lg"
                 />
               </div>
@@ -518,13 +518,13 @@ export default function Community() {
                 onClick={() => setShowNewPostModal(false)}
                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
               >
-                Cancel
+                {t('community.cancel')}
               </button>
               <button
                 onClick={handleCreatePost}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Create Post
+                {t('community.submit')}
               </button>
             </div>
           </div>

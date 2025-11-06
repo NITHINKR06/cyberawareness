@@ -20,6 +20,7 @@ import {
   Area,
   AreaChart
 } from 'recharts';
+import { AlertTriangle, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import api, { reportService } from '../services/backendApi';
@@ -349,10 +350,10 @@ export function LiveThreatFeed() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'phishing': return '🎣';
-      case 'malware': return '🦠';
-      case 'scam': return '⚠️';
-      default: return '🔒';
+      case 'phishing': return <span className="text-2xl">🎣</span>;
+      case 'malware': return <span className="text-2xl">🦠</span>;
+      case 'scam': return <AlertTriangle className="w-6 h-6 text-orange-500" />;
+      default: return <Lock className="w-6 h-6 text-gray-500" />;
     }
   };
 
@@ -375,7 +376,7 @@ export function LiveThreatFeed() {
             className={`p-3 rounded-lg border ${getSeverityColor(threat.severity)} transition-all hover:shadow-md`}
           >
             <div className="flex items-start gap-3">
-              <span className="text-2xl">{getTypeIcon(threat.type)}</span>
+              <span>{getTypeIcon(threat.type)}</span>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-semibold capitalize">{threat.type}</span>

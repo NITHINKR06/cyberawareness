@@ -214,7 +214,19 @@
     "vote": "ಮತ",
     "share": "ಹಂಚಿಕೊಳ್ಳಿ",
     "report": "ವರದಿ",
-    "comments": "ಕಾಮೆಂಟ್‌ಗಳು"
+    "comments": "ಕಾಮೆಂಟ್‌ಗಳು",
+    "searchPlaceholder": "ಚರ್ಚೆಗಳನ್ನು ಹುಡುಕಿ...",
+    "addCommentPlaceholder": "ಕಾಮೆಂಟ್ ಸೇರಿಸಿ...",
+    "newPost": "ಹೊಸ ಪೋಸ್ಟ್",
+    "postTitle": "ಪೋಸ್ಟ್ ಶೀರ್ಷಿಕೆ",
+    "postTitlePlaceholder": "ಶೀರ್ಷಿಕೆಯನ್ನು ನಮೂದಿಸಿ",
+    "postContent": "ವಿಷಯ",
+    "postContentPlaceholder": "ನಿಮ್ಮ ಆಲೋಚನೆಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ...",
+    "tags": "ಟ್ಯಾಗ್ಗಳು",
+    "tagsPlaceholder": "ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಟ್ಟ ಟ್ಯಾಗ್ಗಳನ್ನು ನಮೂದಿಸಿ",
+    "submit": "ಪೋಸ್ಟ್ ಸಲ್ಲಿಸಿ",
+    "cancel": "ರದ್ದುಮಾಡಿ",
+    "createPost": "ಪೋಸ್ಟ್ ರಚಿಸಿ"
   },
   "timeMachine": {
     "title": "ವಂಚನೆ ಟೈಮ್ ಮೆಷಿನ್",
@@ -273,6 +285,24 @@
     "tryDifferentSpellings": "ಯಾವುದೇ ಫಲಿತಾಂಶಗಳು ಸಿಗದಿದ್ದರೆ ಬೇರೆ ಶಬ್ದಕೋಶಗಳನ್ನು ಪ್ರಯತ್ನಿಸಿ",
     "examples": "ಉದಾಹರಣೆಗಳು: \"574110\", \"ನವದೆಹಲಿ GPO\", \"ಬೆಂಗಳೂರು, ಕರ್ನಾಟಕ\", \"ಮೈಸೂರು, ಕರ್ನಾಟಕ\""
   },
+  "profile": {
+    "title": "ಬಳಕೆದಾರ ಪ್ರೊಫೈಲ್",
+    "subtitle": "ನಿಮ್ಮ ಖಾತೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಆದ್ಯತೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+    "personalInfo": "ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ",
+    "username": "ಬಳಕೆದಾರ ಹೆಸರು",
+    "usernamePlaceholder": "ನಿಮ್ಮ ಬಳಕೆದಾರ ಹೆಸರನ್ನು ನಮೂದಿಸಿ",
+    "email": "ಇಮೇಲ್",
+    "emailPlaceholder": "ನಿಮ್ಮ ಇಮೇಲ್ ನಮೂದಿಸಿ",
+    "changePassword": "ಪಾಸ್‌ವರ್ಡ್ ಬದಲಾಯಿಸಿ",
+    "currentPassword": "ಪ್ರಸ್ತುತ ಪಾಸ್‌ವರ್ಡ್",
+    "currentPasswordPlaceholder": "ಪ್ರಸ್ತುತ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+    "newPassword": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್",
+    "newPasswordPlaceholder": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+    "confirmPassword": "ಪಾಸ್‌ವರ್ಡ್ ದೃಢೀಕರಿಸಿ",
+    "confirmPasswordPlaceholder": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ದೃಢೀಕರಿಸಿ",
+    "updateProfile": "ಪ್ರೊಫೈಲ್ ನವೀಕರಿಸಿ",
+    "saveChanges": "ಪರಿವರ್ತನೆಗಳನ್ನು ಉಳಿಸಿ"
+  },
   "common": {
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
     "error": "ದೋಷ",
@@ -296,6 +326,8 @@
     "yes": "ಹೌದು",
     "no": "ಇಲ್ಲ",
     "confirm": "ದೃಢೀಕರಿಸಿ",
-    "level": "ಮಟ್ಟ {{level}}"
+    "level": "ಮಟ್ಟ {{level}}",
+    "select": "ಆಯ್ಕೆಮಾಡಿ",
+    "points": "ಅಂಕಗಳು"
   }
 }

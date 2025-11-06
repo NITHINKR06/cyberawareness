@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Star } from 'lucide-react';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
 
@@ -184,7 +185,10 @@ const UsersManager: React.FC = () => {
       key: 'totalPoints',
       label: 'Points',
       render: (value: number) => (
-        <span style={{ color: 'var(--kali-yellow)' }}>⭐ {value}</span>
+        <span style={{ color: 'var(--kali-yellow)' }} className="flex items-center gap-1">
+          <Star className="w-4 h-4" />
+          {value}
+        </span>
       )
     },
     {

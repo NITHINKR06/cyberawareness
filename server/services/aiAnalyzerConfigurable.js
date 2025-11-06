@@ -1,5 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import huggingfaceService from './huggingfaceService.js';
 import { 
   getValidationRules, 
   getThreatLevelByScore, 
@@ -11,7 +12,6 @@ dotenv.config();
 class ConfigurableAIAnalyzerService {
   constructor() {
     this.huggingFaceToken = process.env.HUGGINGFACE_API_KEY;
-    this.googleSafeBrowsingKey = process.env.GOOGLE_SAFE_BROWSING_API_KEY;
     this.geminiApiKey = process.env.GEMINI_API_KEY || 'key';
     this.rules = getValidationRules();
   }
@@ -21,25 +21,52 @@ class ConfigurableAIAnalyzerService {
     this.rules = getValidationRules();
   }
 
-  // Analyze text using hardcoded logic (replacing Hugging Face)
+  // Analyze text using Hugging Face API
   async analyzeTextWithHuggingFace(text) {
-    console.log('Using hardcoded text analysis (configurable analyzer)');
-    // Always use fallback analysis which is now our primary hardcoded analysis
-    return this.fallbackTextAnalysis(text);
+    try {
+      if (huggingfaceService.isConfigured() && this.rules.features.useHuggingFace) {
+        console.log('Using Hugging Face API for text analysis (configurable)');
+        return await huggingfaceService.analyzeText(text);
+      } else {
+        console.log('Hugging Face API not configured or disabled, using fallback');
+        return this.fallbackTextAnalysis(text);
+      }
+    } catch (error) {
+      console.error('Hugging Face API error, using fallback:', error.message);
+      return this.fallbackTextAnalysis(text);
+    }
   }
 
-  // Analyze URL using hardcoded logic (replacing Google Safe Browsing)
-  async analyzeUrlWithGoogleSafeBrowsing(url) {
-    console.log('Using hardcoded URL analysis (configurable analyzer)');
-    // Always use fallback analysis which is now our primary hardcoded analysis
-    return this.fallbackUrlAnalysis(url);
+  // Analyze URL using Hugging Face API
+  async analyzeUrlWithHuggingFace(url) {
+    try {
+      if (huggingfaceService.isConfigured() && this.rules.features.useHuggingFace) {
+        console.log('Using Hugging Face API for URL analysis (configurable)');
+        return await huggingfaceService.analyzeUrl(url);
+      } else {
+        console.log('Hugging Face API not configured or disabled, using fallback');
+        return this.fallbackUrlAnalysis(url);
+      }
+    } catch (error) {
+      console.error('Hugging Face API error, using fallback:', error.message);
+      return this.fallbackUrlAnalysis(url);
+    }
   }
 
-  // Generate summary using hardcoded logic (replacing Gemini AI)
+  // Generate summary using Hugging Face API
   async generateSummaryWithGemini(analysisData) {
-    console.log('Using hardcoded summary generation (configurable analyzer)');
-    // Always use fallback summary which is now our primary hardcoded summary
-    return this.generateFallbackSummary(analysisData);
+    try {
+      if (huggingfaceService.isConfigured() && this.rules.features.useHuggingFace) {
+        console.log('Using Hugging Face API for summary generation (configurable)');
+        return await huggingfaceService.generateSummary(analysisData);
+      } else {
+        console.log('Hugging Face API not configured or disabled, using fallback');
+        return this.generateFallbackSummary(analysisData);
+      }
+    } catch (error) {
+      console.error('Hugging Face API error, using fallback:', error.message);
+      return this.generateFallbackSummary(analysisData);
+    }
   }
 
   // Fallback analysis for text using configurable keywords
@@ -153,15 +180,15 @@ class ConfigurableAIAnalyzerService {
     let summary = '';
     
     if (threatLevel === 'dangerous') {
-      summary = `⚠️ HIGH RISK DETECTED: This content shows strong indicators of being a scam or malicious. `;
+      summary = `HIGH RISK DETECTED: This content shows strong indicators of being a scam or malicious. `;
       summary += `We detected ${indicators.length} warning signs with ${confidence}% confidence. `;
       summary += `DO NOT interact with this content and report it to authorities.`;
     } else if (threatLevel === 'suspicious') {
-      summary = `⚠️ CAUTION ADVISED: This content has some suspicious characteristics. `;
+      summary = `CAUTION ADVISED: This content has some suspicious characteristics. `;
       summary += `We found ${indicators.length} potential warning signs. `;
       summary += `Verify the source through official channels before proceeding.`;
     } else {
-      summary = `✅ APPEARS SAFE: No immediate threats detected in this content. `;
+      summary = `APPEARS SAFE: No immediate threats detected in this content. `;
       summary += `However, always remain vigilant and verify information through official sources.`;
     }
 
@@ -184,7 +211,7 @@ class ConfigurableAIAnalyzerService {
 
     try {
       if (inputType === 'url') {
-        const urlAnalysis = await this.analyzeUrlWithGoogleSafeBrowsing(inputContent);
+        const urlAnalysis = await this.analyzeUrlWithHuggingFace(inputContent);
         analysisResult = { ...analysisResult, ...urlAnalysis };
         
         // Use configurable recommendations

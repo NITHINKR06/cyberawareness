@@ -1,6 +1,20 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/FirebaseAuthContext';
+import { 
+  Home, 
+  Users, 
+  FileText, 
+  MessageSquare, 
+  Tag, 
+  AlertTriangle, 
+  Flag, 
+  BarChart3, 
+  Monitor, 
+  LogOut, 
+  Menu, 
+  X 
+} from 'lucide-react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -18,14 +32,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   const navItems = [
-    { path: '/admin', label: 'Dashboard', icon: '🏠' },
-    { path: '/admin/users', label: 'Users', icon: '👥' },
-    { path: '/admin/posts', label: 'Posts', icon: '📝' },
-    { path: '/admin/comments', label: 'Comments', icon: '💬' },
-    { path: '/admin/topics', label: 'Topics', icon: '🏷️' },
-    { path: '/admin/scams', label: 'Scams', icon: '⚠️' },
-    { path: '/admin/reports', label: 'Reports', icon: '🚩' },
-    { path: '/admin/analytics', label: 'Analytics', icon: '📊' },
+    { path: '/admin', label: 'Dashboard', icon: Home },
+    { path: '/admin/users', label: 'Users', icon: Users },
+    { path: '/admin/posts', label: 'Posts', icon: FileText },
+    { path: '/admin/comments', label: 'Comments', icon: MessageSquare },
+    { path: '/admin/topics', label: 'Topics', icon: Tag },
+    { path: '/admin/scams', label: 'Scams', icon: AlertTriangle },
+    { path: '/admin/reports', label: 'Reports', icon: Flag },
+    { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 
   return (
@@ -44,14 +58,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         }}
         id="mobile-menu-toggle"
       >
-        {sidebarOpen ? '✕' : '☰'}
+        {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
       {/* Sidebar */}
       <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div style={{ padding: '1rem', borderBottom: '1px solid var(--kali-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '1.5rem' }}>💻</span>
+            <Monitor className="w-6 h-6" style={{ color: 'var(--kali-green)' }} />
             <h2 style={{ color: 'var(--kali-green)', fontSize: '1.2rem', margin: 0 }}>
               ADMIN TERMINAL
             </h2>
@@ -75,7 +89,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               className={`admin-nav-item ${location.pathname === item.path ? 'active' : ''}`}
               onClick={() => setSidebarOpen(false)}
             >
-              <span className="admin-nav-icon">{item.icon}</span>
+              <span className="admin-nav-icon">
+                <item.icon className="w-4 h-4" />
+              </span>
               {item.label}
             </Link>
           ))}
@@ -94,7 +110,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             className="terminal-btn terminal-btn-danger"
             style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
           >
-            🚪 LOGOUT
+            <LogOut className="w-4 h-4" />
+            LOGOUT
           </button>
         </div>
       </aside>

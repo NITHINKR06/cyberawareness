@@ -1,11 +1,15 @@
 import React from 'react';
+import { BarChart3, TrendingUp } from 'lucide-react';
 import '../styles/kali-theme.css';
 
 const AnalyticsManager: React.FC = () => {
   return (
     <div className="terminal-card">
       <div className="terminal-card-header">
-        <h2 className="terminal-card-title">📊 ANALYTICS & INSIGHTS</h2>
+        <h2 className="terminal-card-title flex items-center gap-2">
+          <BarChart3 className="w-5 h-5" />
+          ANALYTICS & INSIGHTS
+        </h2>
       </div>
       <div style={{ padding: '2rem' }}>
         <div className="ascii-art" style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -39,7 +43,10 @@ const AnalyticsManager: React.FC = () => {
         </div>
 
         <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--kali-bg)', borderRadius: '4px', border: '1px solid var(--kali-border)' }}>
-          <h3 style={{ color: 'var(--kali-green)', marginBottom: '1rem' }}>📈 Advanced Analytics Features</h3>
+          <h3 style={{ color: 'var(--kali-green)', marginBottom: '1rem' }} className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            Advanced Analytics Features
+          </h3>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             <li style={{ marginBottom: '0.5rem' }}>✓ Real-time threat monitoring</li>
             <li style={{ marginBottom: '0.5rem' }}>✓ User behavior analysis</li>

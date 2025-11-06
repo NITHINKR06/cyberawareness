@@ -33,8 +33,8 @@ const firebaseConfig = {
 
 // Check if configuration is properly set
 if (firebaseConfig.apiKey === "YOUR_API_KEY") {
-  console.error("⚠️ Firebase configuration not set! Please update src/config/firebase.ts with your Firebase project configuration.");
-  console.error("📖 See FIREBASE_SETUP.md for detailed instructions.");
+  console.error("Warning: Firebase configuration not set! Please update src/config/firebase.ts with your Firebase project configuration.");
+  console.error("See FIREBASE_SETUP.md for detailed instructions.");
 }
 
 // Initialize Firebase

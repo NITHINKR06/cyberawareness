@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Lock, Eye, Heart, Pin } from 'lucide-react';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
 
@@ -134,8 +135,14 @@ const PostsManager: React.FC = () => {
       render: (value: string, row: Post) => (
         <div>
           <div style={{ fontWeight: 'bold' }}>{value}</div>
-          {row.isPinned && <span className="badge badge-warning">📌 Pinned</span>}
-          {row.isLocked && <span className="badge badge-danger" style={{ marginLeft: '0.25rem' }}>🔒 Locked</span>}
+          {row.isPinned && <span className="badge badge-warning flex items-center gap-1">
+            <Pin className="w-3 h-3" />
+            Pinned
+          </span>}
+          {row.isLocked && <span className="badge badge-danger flex items-center gap-1" style={{ marginLeft: '0.25rem' }}>
+            <Lock className="w-3 h-3" />
+            Locked
+          </span>}
         </div>
       )
     },
@@ -155,14 +162,20 @@ const PostsManager: React.FC = () => {
       key: 'views',
       label: 'Views',
       render: (value: number) => (
-        <span style={{ color: 'var(--kali-cyan)' }}>👁️ {value}</span>
+        <span style={{ color: 'var(--kali-cyan)' }} className="flex items-center gap-1">
+          <Eye className="w-4 h-4" />
+          {value}
+        </span>
       )
     },
     {
       key: 'likes',
       label: 'Likes',
       render: (value: string[]) => (
-        <span style={{ color: 'var(--kali-yellow)' }}>❤️ {value.length}</span>
+        <span style={{ color: 'var(--kali-yellow)' }} className="flex items-center gap-1">
+          <Heart className="w-4 h-4" />
+          {value.length}
+        </span>
       )
     },
     {

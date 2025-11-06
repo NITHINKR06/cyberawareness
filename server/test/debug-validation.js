@@ -130,10 +130,10 @@ function runTest(testName, testFn) {
     const result = testFn();
     if (result) {
       results.passed++;
-      console.log(`✅ ${testName}`);
+      console.log(`PASSED: ${testName}`);
     } else {
       results.failed++;
-      console.log(`❌ ${testName}`);
+      console.log(`FAILED: ${testName}`);
     }
   } catch (error) {
     results.failed++;
@@ -144,7 +144,7 @@ function runTest(testName, testFn) {
 
 // Username validation tests
 function testUsernameValidation() {
-  console.log('\n🔍 Testing Username Validation...');
+  console.log('\nTesting Username Validation...');
   
   // Test valid usernames
   testData.usernames.valid.forEach(username => {
@@ -186,7 +186,7 @@ function testEmailValidation() {
 
 // Password validation tests
 function testPasswordValidation() {
-  console.log('\n🔐 Testing Password Validation...');
+  console.log('\nTesting Password Validation...');
   
   // Test valid passwords
   testData.passwords.valid.forEach(password => {
@@ -246,7 +246,7 @@ function testUrlValidation() {
 
 // XSS prevention tests
 function testXssPrevention() {
-  console.log('\n🛡️ Testing XSS Prevention...');
+  console.log('\nTesting XSS Prevention...');
   
   testData.maliciousInputs.forEach(input => {
     runTest(`XSS prevention: "${input.substring(0, 30)}..."`, () => {
@@ -261,7 +261,7 @@ function testXssPrevention() {
 
 // Performance tests
 function testPerformance() {
-  console.log('\n⚡ Testing Performance...');
+  console.log('\nTesting Performance...');
   
   const iterations = 1000;
   const start = performance.now();
@@ -332,28 +332,28 @@ async function runAllTests() {
   const totalTime = endTime - startTime;
   
   // Print summary
-  console.log('\n📊 Test Summary:');
-  console.log(`✅ Passed: ${results.passed}`);
-  console.log(`❌ Failed: ${results.failed}`);
-  console.log(`💥 Errors: ${results.errors.length}`);
-  console.log(`⏱️ Total Time: ${totalTime.toFixed(2)}ms`);
+  console.log('\nTest Summary:');
+  console.log(`PASSED: ${results.passed}`);
+  console.log(`FAILED: ${results.failed}`);
+  console.log(`ERRORS: ${results.errors.length}`);
+  console.log(`Total Time: ${totalTime.toFixed(2)}ms`);
   
   if (results.errors.length > 0) {
-    console.log('\n🚨 Errors:');
+    console.log('\nERRORS:');
     results.errors.forEach(({ test, error }) => {
       console.log(`  - ${test}: ${error}`);
     });
   }
   
   const successRate = (results.passed / (results.passed + results.failed)) * 100;
-  console.log(`\n🎯 Success Rate: ${successRate.toFixed(1)}%`);
+  console.log(`\nSuccess Rate: ${successRate.toFixed(1)}%`);
   
   if (successRate >= 95) {
-    console.log('🎉 Excellent! Validation system is working well.');
+    console.log('Excellent! Validation system is working well.');
   } else if (successRate >= 80) {
-    console.log('⚠️ Good, but some issues need attention.');
+    console.log('Good, but some issues need attention.');
   } else {
-    console.log('🚨 Critical issues detected! Please review the validation system.');
+    console.log('Critical issues detected! Please review the validation system.');
   }
 }
 
