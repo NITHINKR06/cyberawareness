@@ -1,226 +1,187 @@
-# WALRUS - Cybersecurity & Digital Safety Platform
+# 🛡️ WALRUS - Cybersecurity & Digital Safety Platform
 
-![WALRUS Logo](https://via.placeholder.com/200x100/4F46E5/FFFFFF?text=WALRUS)
+<div align="center">
 
-**WALRUS** is a comprehensive, gamified, multilingual, AI-powered cybersecurity education and protection platform designed to combat digital scams and cybercrime in India. The platform empowers citizens with knowledge, tools, and community support to navigate the digital world safely.
+**A comprehensive, gamified, multilingual, AI-powered cybersecurity education and protection platform**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+
+[Features](#-features) • [Installation](#-installation) • [Documentation](#-documentation) • [Contributing](#-contributing)
+
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Usage](#-usage)
+- [API Documentation](#-api-documentation)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 🌟 Overview
 
-WALRUS addresses the critical cybersecurity challenges facing India today:
+WALRUS addresses critical cybersecurity challenges in India:
+
 - **60% increase** in cybercrime cases in 2023
 - **₹10,319 crores** lost to digital fraud in 2022
 - **70% of Indians** have fallen victim to phone/online scams
-- **1.39 lakh** cybercrime complaints filed in 2022 alone
+- **1.39 lakh** cybercrime complaints filed in 2022
 
-Our solution transforms cybersecurity from a technical burden into an engaging, accessible, and community-driven experience.
+Our platform transforms cybersecurity from a technical burden into an engaging, accessible, and community-driven experience.
 
-## 🎯 Core Features
+## ✨ Features
 
-### 1. **AI-Powered Scam Analyzer**
-- **Real-time Analysis**: Instant text, URL, email, and phone number analysis
-- **Multi-format Support**: Text input, URL checking, image OCR, and file uploads
-- **Threat Detection**: Advanced pattern recognition for:
-  - Banking/financial scams
-  - Phishing attempts
-  - Social engineering tactics
-  - Malware threats
-  - Urgency pressure tactics
-- **Confidence Scoring**: Detailed threat assessment with actionable recommendations
-- **Anonymous Usage**: Works without registration for immediate protection
+### 🔍 AI-Powered Scam Analyzer
+- Real-time analysis of text, URLs, emails, and phone numbers
+- Multi-format support: text input, URL checking, image OCR, file uploads
+- Advanced threat detection with confidence scoring
+- Anonymous usage without registration
 
-### 2. **Gamified Learning System**
-- **Interactive Modules**: 5 comprehensive cybersecurity education modules
-- **Progressive Difficulty**: Beginner to advanced content
-- **Quiz System**: Knowledge assessment with immediate feedback
-- **Points & Levels**: Earn points for learning and threat detection
-- **Achievements**: Badges and milestones for motivation
-- **Streaks**: Daily engagement tracking
-- **Leaderboards**: Community competition
+### 🎮 Gamified Learning System
+- 5 comprehensive cybersecurity education modules
+- Progressive difficulty from beginner to advanced
+- Interactive quizzes with immediate feedback
+- Points, levels, achievements, and leaderboards
+- Daily engagement streaks
 
-### 3. **Community Features**
-- **Scam Reporting**: Easy fraud reporting with categorization
-- **Discussion Forums**: Community posts and comments
-- **Knowledge Sharing**: User-generated content and experiences
-- **Moderation**: Admin-managed content quality
-- **Topics**: Organized discussion categories
+### 👥 Community Features
+- Scam reporting with categorization
+- Discussion forums and knowledge sharing
+- User-generated content and experiences
+- Admin-managed content moderation
 
-### 4. **Multilingual Support**
-- **English**: Primary language
-- **Hindi (हिंदी)**: Full translation support
-- **Kannada (ಕನ್ನಡ)**: Regional language support
-- **Easy Switching**: Language toggle in navigation
+### 🌐 Multilingual Support
+- **English** (Primary)
+- **Hindi (हिंदी)** (Full translation)
+- **Kannada (ಕನ್ನಡ)** (Regional support)
+- Easy language switching
 
-### 5. **Admin Panel**
-- **User Management**: Comprehensive user administration
-- **Content Moderation**: Posts, comments, and reports management
-- **Analytics Dashboard**: Platform statistics and insights
-- **Scam Database**: Historical scam information management
-- **System Configuration**: Platform settings and rules
-
-## 🏗️ Technical Architecture
-
-### Frontend (React + TypeScript)
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    User Interface Layer                     │
-├─────────────────────────────────────────────────────────────┤
-│  React Components  │  State Management  │  Routing         │
-│  • ScamAnalyzer    │  • AuthContext     │  • React Router  │
-│  • Dashboard       │  • ThemeContext    │  • Protected     │
-│  • LearningModules │  • Local Storage   │    Routes        │
-│  • ReportScam      │                    │                  │
-│  • Achievements    │                    │                  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Backend (Node.js + Express)
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    API Layer                                │
-├─────────────────────────────────────────────────────────────┤
-│  Express Routes    │  Middleware        │  Services         │
-│  • /api/auth       │  • Security        │  • AI Analyzer    │
-│  • /api/analyzer   │  • Validation      │  • OCR Service    │
-│  • /api/reports    │  • Rate Limiting   │  • PDF Generator  │
-│  • /api/community  │  • Admin Auth      │  • Email Service  │
-│  • /api/admin      │                    │                  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Database (MongoDB + Firebase)
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Data Layer                               │
-├─────────────────────────────────────────────────────────────┤
-│  MongoDB Collections        │  Firebase Collections        │
-│  • Users                    │  • Admin Users               │
-│  • ScamReports              │  • Admin Sessions            │
-│  • AnalyzerHistory          │  • System Configuration      │
-│  • Posts & Comments         │                              │
-│  • Topics & Scams           │                              │
-└─────────────────────────────────────────────────────────────┘
-```
+### ⚙️ Admin Panel
+- User management and role assignment
+- Content moderation tools
+- Analytics dashboard with insights
+- Scam database management
 
 ## 🚀 Tech Stack
 
 ### Frontend
-- **Framework**: React 18 with TypeScript
+- **Framework**: React 18 + TypeScript
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
 - **Internationalization**: react-i18next
-- **State Management**: React Context API
 - **Charts**: Recharts
 - **Notifications**: React Toastify
 
 ### Backend
 - **Runtime**: Node.js
 - **Framework**: Express.js
-- **Database**: MongoDB with Mongoose ODM
+- **Database**: MongoDB with Mongoose
 - **Authentication**: JWT + Firebase Auth
 - **Security**: Helmet, CORS, Rate Limiting
-- **File Upload**: Multer
+- **File Processing**: Multer, Tesseract.js (OCR)
 - **PDF Generation**: jsPDF
-- **OCR**: Tesseract.js
 
-### AI & External Services
+### AI & Services
 - **AI Analysis**: Hugging Face Inference API
-- **URL Safety**: Google Safe Browsing API (planned)
-- **Email Validation**: Custom regex patterns
-- **Phone Validation**: Indian phone number patterns
+- **URL Safety**: Google Safe Browsing API
+- **Validation**: Custom regex patterns for Indian context
 
-## 📋 Prerequisites
+## 📦 Installation
 
-Before setting up the application, ensure you have:
+### Prerequisites
 
 - **Node.js** (v18 or higher)
 - **npm** or **yarn**
 - **MongoDB** (local or cloud instance)
 - **Firebase Project** (for admin authentication)
 
-## ⚙️ Installation & Setup
+### Step 1: Clone the Repository
 
-### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/walrus.git
-cd walrus
+git clone https://github.com/NITHINKR06/cyberawareness.git
+cd cyberawareness
 ```
 
-### 2. Install Dependencies
+### Step 2: Install Dependencies
+
 ```bash
 # Install all dependencies (frontend + backend)
 npm run install:all
 
 # Or install separately
 npm install                    # Frontend dependencies
-npm install --prefix server    # Backend dependencies
 ```
 
-### 3. Environment Configuration
+### Step 3: Environment Configuration
 
-Create `.env` file in the root directory:
+Copy `.env.example` to `.env` and configure:
+
+```bash
+cp .env.example .env
+```
+
+Update the following variables in `.env`:
+
 ```env
 # Database
 MONGODB_URI=mongodb://localhost:27017/walrus_db
 MONGODB_DBNAME=walrus_db
 
 # Security
-JWT_SECRET=your-super-secret-jwt-key-change-in-production
-SESSION_SECRET=your-session-secret-key-change-in-production
+JWT_SECRET=your-super-secret-jwt-key
+SESSION_SECRET=your-session-secret-key
 
 # Server
 PORT=5000
 NODE_ENV=development
 
 # Firebase (for admin panel)
-FIREBASE_API_KEY=your-firebase-api-key
-FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-FIREBASE_APP_ID=your-app-id
+VITE_FIREBASE_API_KEY=your-firebase-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
 
 # AI Services (optional)
 HUGGINGFACE_API_KEY=your-huggingface-api-key
 GOOGLE_SAFE_BROWSING_API_KEY=your-google-api-key
 ```
 
-### 4. Firebase Setup
+### Step 4: Firebase Setup
 
 1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
 2. Enable Authentication with Email/Password
 3. Create a Firestore database
-4. Update `src/config/firebase.ts` with your Firebase config
-5. Set up Firestore security rules (see `firestore.rules`)
+4. Copy your Firebase config to `.env`
+5. Set up Firestore security rules
 
-### 5. Database Setup
-
-#### MongoDB
-```bash
-# Start MongoDB (if running locally)
-mongod
-
-# The application will create collections automatically
-```
-
-#### Firestore
-- Create the following collections in Firestore:
-  - `users` (for admin users)
-  - `systemConfig` (for platform settings)
-
-### 6. Run the Application
+### Step 5: Run the Application
 
 #### Development Mode
+
 ```bash
 # Start both frontend and backend
 npm run dev:all
 
 # Or start separately
-npm run dev          # Frontend only (http://localhost:5173)
-npm run server:dev   # Backend only (http://localhost:5000)
+npm run dev          # Frontend (http://localhost:5173)
+npm run server:dev   # Backend (http://localhost:5000)
 ```
 
 #### Production Mode
+
 ```bash
 # Build frontend
 npm run build
@@ -229,102 +190,86 @@ npm run build
 npm run server
 ```
 
-## 🔄 Application Workflow
+## ⚙️ Configuration
+
+### Validation Rules
+Customize validation in `server/config/validationRules.js`:
+- Email validation patterns
+- Password strength requirements
+- Username constraints
+- Content length limits
+
+### AI Analyzer Configuration
+Configure analysis parameters in `server/services/aiAnalyzerConfigurable.js`:
+- Threat level thresholds
+- Confidence score weights
+- Pattern matching rules
+- Response templates
+
+### Localization
+Add new languages:
+1. Create locale file in `src/i18n/locales/`
+2. Add language option in `LanguageSwitcher.tsx`
+3. Update `src/i18n/index.ts`
+
+## 📖 Usage
 
 ### User Journey
 
-#### 1. **Anonymous User**
+1. **Anonymous User**: Use Scam Analyzer without registration
+2. **Registered User**: Access learning modules, achievements, and community
+3. **Admin User**: Manage users, moderate content, view analytics
+
+### Key Workflows
+
+- **Scam Analysis**: Input text/URL/email → Get threat assessment → View recommendations
+- **Learning**: Select module → Study content → Take quiz → Earn points
+- **Reporting**: Fill report form → Submit → Generate PDF → Track status
+
+## 📚 API Documentation
+
+### Authentication
 ```
-Landing Page → Scam Analyzer → Analysis Results → (Optional) Register
+POST /api/auth/register    # User registration
+POST /api/auth/login       # User login
+GET  /api/auth/profile     # Get user profile
+PUT  /api/auth/profile     # Update user profile
 ```
 
-#### 2. **Registered User**
+### Analyzer
 ```
-Login → Dashboard → Learning Modules → Achievements → Community → Report Scams
-```
-
-#### 3. **Admin User**
-```
-Admin Login → Admin Panel → User Management → Content Moderation → Analytics
+POST /api/analyzer/analyze           # Analyze content
+GET  /api/analyzer/history           # Get analysis history
+GET  /api/analyzer/session/:id       # Get session history
 ```
 
-### Core Processes
+### Community
+```
+GET    /api/community/posts          # Get community posts
+POST   /api/community/posts          # Create new post
+GET    /api/community/comments/:id   # Get post comments
+POST   /api/community/comments       # Add comment
+```
 
-#### Scam Analysis Flow
-1. **Input**: User provides text, URL, email, or image
-2. **Validation**: Server validates input format and content
-3. **AI Analysis**: Multiple AI engines analyze the content
-4. **Pattern Matching**: Local regex patterns check for known scam indicators
-5. **Scoring**: Threat level and confidence score calculation
-6. **Results**: Detailed analysis with recommendations
-7. **Storage**: Analysis history saved for future reference
+### Reports
+```
+POST /api/reports                    # Submit scam report
+GET  /api/reports                    # Get user reports
+GET  /api/reports/:id                # Get specific report
+```
 
-#### Learning Module Flow
-1. **Selection**: User chooses a learning module
-2. **Content**: Interactive content with examples and explanations
-3. **Quiz**: Knowledge assessment with multiple-choice questions
-4. **Scoring**: Points awarded based on performance
-5. **Progress**: Learning progress tracked and displayed
-6. **Achievements**: Badges unlocked for milestones
+### Admin
+```
+GET  /api/admin/stats                # Get system statistics
+GET  /api/admin/users                # Get users list
+PUT  /api/admin/users/:id            # Update user
+POST /api/admin/users/:id/ban        # Ban user
+```
 
-#### Report Submission Flow
-1. **Form**: User fills out scam report form
-2. **Validation**: Server validates all required fields
-3. **Processing**: Report categorized and stored
-4. **PDF Generation**: Official complaint document created
-5. **Notification**: User receives confirmation
-6. **Moderation**: Admin reviews and processes reports
+## 🚀 Deployment
 
-## 🛡️ Security Features
+### Vercel
 
-### Authentication & Authorization
-- **JWT Tokens**: Secure user authentication
-- **Firebase Auth**: Admin panel authentication
-- **Role-based Access**: User, Moderator, Admin, Super Admin roles
-- **Session Management**: Secure session handling
-
-### Input Validation & Sanitization
-- **Server-side Validation**: All inputs validated on backend
-- **XSS Protection**: HTML sanitization using DOMPurify
-- **SQL Injection Prevention**: Mongoose ODM protection
-- **Rate Limiting**: API endpoint protection
-
-### Data Protection
-- **Password Hashing**: bcrypt with salt rounds
-- **HTTPS Enforcement**: Secure communication
-- **CORS Configuration**: Controlled cross-origin requests
-- **Security Headers**: Helmet.js security middleware
-
-## 📊 Admin Panel Features
-
-### Dashboard
-- **System Statistics**: User counts, reports, activity metrics
-- **Recent Activity**: Latest users, reports, and posts
-- **Analytics Charts**: User registration trends, threat analysis
-- **Quick Actions**: Common administrative tasks
-
-### User Management
-- **User List**: Paginated user listing with search/filter
-- **User Details**: Comprehensive user information
-- **Role Management**: Assign/remove user roles
-- **Ban/Unban**: User account management
-- **Bulk Operations**: Mass user operations
-
-### Content Moderation
-- **Posts Management**: Community post moderation
-- **Comments Management**: Comment approval/rejection
-- **Reports Management**: Scam report processing
-- **Topics Management**: Discussion category management
-
-### Analytics
-- **User Analytics**: Registration trends, activity patterns
-- **Threat Analytics**: Scam analysis statistics
-- **Content Analytics**: Post and comment metrics
-- **Export Functions**: Data export capabilities
-
-## 🌐 Deployment
-
-### Vercel Deployment
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -335,10 +280,10 @@ vercel
 # Configure environment variables in Vercel dashboard
 ```
 
-### Heroku Deployment
+### Heroku
+
 ```bash
 # Install Heroku CLI
-# Login to Heroku
 heroku login
 
 # Create app
@@ -355,7 +300,8 @@ heroku config:set SESSION_SECRET=your-session-secret
 git push heroku main
 ```
 
-### Manual Server Deployment
+### Manual Server
+
 ```bash
 # Build the application
 npm run build
@@ -373,7 +319,6 @@ pm2 startup
 
 ## 🧪 Testing
 
-### Run Tests
 ```bash
 # Run all tests
 npm run test:all
@@ -384,79 +329,19 @@ npm run test:validation:debug  # Debug validation tests
 npm run test:security          # Security tests
 ```
 
-### Test Coverage
-- **Input Validation**: Email, password, username validation
-- **Security**: Authentication, authorization, input sanitization
-- **API Endpoints**: Request/response validation
-- **Database Operations**: CRUD operations testing
+## 🛡️ Security Features
 
-## 📱 API Documentation
+- **Authentication**: JWT tokens + Firebase Auth
+- **Authorization**: Role-based access control
+- **Input Validation**: Server-side validation and sanitization
+- **XSS Protection**: HTML sanitization using DOMPurify
+- **Rate Limiting**: API endpoint protection
+- **Security Headers**: Helmet.js middleware
+- **Password Hashing**: bcrypt with salt rounds
 
-### Authentication Endpoints
-```
-POST /api/auth/register    # User registration
-POST /api/auth/login       # User login
-GET  /api/auth/profile     # Get user profile
-PUT  /api/auth/profile     # Update user profile
-```
+## 🐛 Troubleshooting
 
-### Analyzer Endpoints
-```
-POST /api/analyzer/analyze           # Analyze content
-GET  /api/analyzer/history           # Get analysis history
-GET  /api/analyzer/session/:id       # Get session history
-```
-
-### Community Endpoints
-```
-GET    /api/community/posts          # Get community posts
-POST   /api/community/posts          # Create new post
-GET    /api/community/comments/:id   # Get post comments
-POST   /api/community/comments       # Add comment
-```
-
-### Report Endpoints
-```
-POST /api/reports                    # Submit scam report
-GET  /api/reports                    # Get user reports
-GET  /api/reports/:id                # Get specific report
-```
-
-### Admin Endpoints
-```
-GET  /api/admin/stats                # Get system statistics
-GET  /api/admin/users                # Get users list
-PUT  /api/admin/users/:id            # Update user
-POST /api/admin/users/:id/ban        # Ban user
-```
-
-## 🔧 Configuration
-
-### Validation Rules
-Customize validation rules in `server/config/validationRules.js`:
-- Email validation patterns
-- Password strength requirements
-- Username constraints
-- Content length limits
-
-### AI Analyzer Configuration
-Configure analysis parameters in `server/services/aiAnalyzerConfigurable.js`:
-- Threat level thresholds
-- Confidence score weights
-- Pattern matching rules
-- Response templates
-
-### Localization
-Add new languages by:
-1. Creating locale file in `src/i18n/locales/`
-2. Adding language option in `LanguageSwitcher.tsx`
-3. Updating `src/i18n/index.ts`
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-#### MongoDB Connection Error
+### MongoDB Connection Error
 ```bash
 # Check if MongoDB is running
 sudo systemctl status mongod
@@ -465,12 +350,12 @@ sudo systemctl status mongod
 sudo systemctl start mongod
 ```
 
-#### Firebase Authentication Issues
+### Firebase Authentication Issues
 - Verify Firebase configuration in `src/config/firebase.ts`
 - Check Firestore security rules
 - Ensure Firebase project has Authentication enabled
 
-#### Build Errors
+### Build Errors
 ```bash
 # Clear node_modules and reinstall
 rm -rf node_modules package-lock.json
@@ -480,7 +365,7 @@ npm install
 npm run typecheck
 ```
 
-#### Port Already in Use
+### Port Already in Use
 ```bash
 # Find process using port 5000
 lsof -ti:5000
@@ -491,12 +376,15 @@ kill -9 $(lsof -ti:5000)
 
 ## 🤝 Contributing
 
-### Development Workflow
+We welcome contributions! Please follow these steps:
+
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Run tests
-5. Submit a pull request
+4. Run tests (`npm run test:all`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
 ### Code Standards
 - Use TypeScript for type safety
@@ -511,27 +399,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-### Getting Help
 - **Documentation**: Check this README and inline code comments
-- **Issues**: Create GitHub issues for bugs or feature requests
-- **Discussions**: Use GitHub Discussions for questions
+- **Issues**: Create [GitHub Issues](https://github.com/NITHINKR06/cyberawareness/issues) for bugs or feature requests
+- **Discussions**: Use [GitHub Discussions](https://github.com/NITHINKR06/cyberawareness/discussions) for questions
 
-### Contact
-- **Email**: support@walrus.app
-- **GitHub**: [WALRUS Repository](https://github.com/your-username/walrus)
+## 🙏 Acknowledgments
 
-## 🎉 Acknowledgments
-
-- **React Team**: For the excellent frontend framework
-- **Express.js**: For the robust backend framework
-- **MongoDB**: For the flexible database solution
-- **Firebase**: For authentication and real-time features
-- **Tailwind CSS**: For the utility-first CSS framework
-- **Lucide**: For the beautiful icon library
+- React Team for the excellent frontend framework
+- Express.js for the robust backend framework
+- MongoDB for the flexible database solution
+- Firebase for authentication and real-time features
+- Tailwind CSS for the utility-first CSS framework
+- Lucide for the beautiful icon library
 
 ---
 
+<div align="center">
+
 **Built with ❤️ for a safer digital India**
 
-*WALRUS - Empowering citizens with cybersecurity knowledge and protection*#   c y b e r a w a r e n e s s  
- 
+*WALRUS - Empowering citizens with cybersecurity knowledge and protection*
+
+[⬆ Back to Top](#-walrus---cybersecurity--digital-safety-platform)
+
+</div>
