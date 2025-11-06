@@ -1,0 +1,83 @@
+{
+  "name": "WALRUS - Cybersecurity Platform",
+  "description": "A gamified, multilingual, AI-powered platform to educate citizens on cyber scams and enable fraud reporting",
+  "repository": "https://github.com/your-username/walrus",
+  "logo": "https://raw.githubusercontent.com/your-username/walrus/main/public/logo.png",
+  "keywords": [
+    "cybersecurity",
+    "education",
+    "scam-detection",
+    "fraud-prevention",
+    "react",
+    "node",
+    "express",
+    "mongodb"
+  ],
+  "website": "https://walrus.app",
+  "success_url": "/",
+  "stack": "heroku-22",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "addons": [
+    {
+      "plan": "mongolab:sandbox",
+      "as": "MONGODB"
+    },
+    {
+      "plan": "papertrail:choklad",
+      "as": "PAPERTRAIL"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production"
+    },
+    "SESSION_SECRET": {
+      "description": "Secret key for session encryption",
+      "generator": "secret"
+    },
+    "MONGODB_URI": {
+      "description": "MongoDB connection string (automatically set if using addon)",
+      "required": false
+    },
+    "MONGODB_DBNAME": {
+      "description": "MongoDB database name",
+      "value": "walrus_db"
+    },
+    "NPM_CONFIG_PRODUCTION": {
+      "description": "Install only production dependencies",
+      "value": "false"
+    }
+  },
+  "scripts": {
+    "postdeploy": "npm run build"
+  },
+  "environments": {
+    "test": {
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "addons": [
+        "mongolab:sandbox"
+      ]
+    },
+    "review": {
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "addons": [
+        "mongolab:sandbox"
+      ]
+    }
+  }
+}

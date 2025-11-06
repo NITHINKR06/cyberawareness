@@ -1,0 +1,76 @@
+{
+  "timestamp": "2025-10-16T06:14:30.881Z",
+  "results": {
+    "passed": 9,
+    "failed": 1,
+    "warnings": 3,
+    "tests": [
+      {
+        "name": "Environment Variables Security",
+        "status": "PASS",
+        "message": "OK"
+      },
+      {
+        "name": "Server Files Hardcoded Secrets",
+        "status": "PASS",
+        "message": "OK"
+      },
+      {
+        "name": "Security Middleware Files Exist",
+        "status": "PASS",
+        "message": "OK"
+      },
+      {
+        "name": "Security Dependencies Installed",
+        "status": "FAIL",
+        "message": "Required security dependency missing: bcrypt"
+      },
+      {
+        "name": "NoSQL Injection Prevention",
+        "status": "PASS",
+        "message": "OK"
+      },
+      {
+        "name": "XSS Protection Implementation",
+        "status": "PASS",
+        "message": "OK"
+      },
+      {
+        "name": "CSRF Protection Implementation",
+        "status": "PASS",
+        "message": "OK"
+      },
+      {
+        "name": "Enhanced Password Requirements",
+        "status": "PASS",
+        "message": "OK"
+      },
+      {
+        "name": "Rate Limiting Configuration",
+        "status": "PASS",
+        "message": "OK"
+      },
+      {
+        "name": "Server Security Integration",
+        "status": "PASS",
+        "message": "OK"
+      },
+      {
+        "name": "Firebase Admin SDK",
+        "status": "WARN",
+        "message": "Firebase Admin SDK not properly configured - requires manual setup"
+      },
+      {
+        "name": "HTTPS Configuration",
+        "status": "WARN",
+        "message": "HTTPS not configured - required for production"
+      },
+      {
+        "name": "MongoDB Authentication",
+        "status": "WARN",
+        "message": "MongoDB authentication not configured - recommended for production"
+      }
+    ]
+  },
+  "securityScore": 90
+}

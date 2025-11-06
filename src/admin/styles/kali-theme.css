@@ -1,0 +1,496 @@
+/* Kali Linux Terminal Theme for Admin Panel */
+
+:root {
+  --kali-bg: #0a0e14;
+  --kali-bg-secondary: #0d1117;
+  --kali-bg-tertiary: #161b22;
+  --kali-border: #30363d;
+  --kali-text: #c9d1d9;
+  --kali-text-secondary: #8b949e;
+  --kali-green: #39d353;
+  --kali-green-dark: #2ea043;
+  --kali-red: #f85149;
+  --kali-red-dark: #da3633;
+  --kali-blue: #58a6ff;
+  --kali-blue-dark: #1f6feb;
+  --kali-yellow: #d29922;
+  --kali-purple: #a371f7;
+  --kali-cyan: #56d4dd;
+  --kali-orange: #db6d28;
+  --terminal-font: 'Fira Code', 'Courier New', monospace;
+}
+
+.admin-panel {
+  background: var(--kali-bg);
+  color: var(--kali-text);
+  min-height: 100vh;
+  font-family: var(--terminal-font);
+}
+
+/* Terminal Header */
+.terminal-header {
+  background: linear-gradient(180deg, #1a1f2e 0%, var(--kali-bg-secondary) 100%);
+  border-bottom: 2px solid var(--kali-green);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.terminal-header::before {
+  content: "root@kali:~# ";
+  color: var(--kali-green);
+  font-weight: bold;
+}
+
+.terminal-title {
+  color: var(--kali-green);
+  font-size: 1.2rem;
+  text-shadow: 0 0 10px rgba(57, 211, 83, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Sidebar Navigation */
+.admin-sidebar {
+  background: var(--kali-bg-secondary);
+  border-right: 1px solid var(--kali-border);
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: var(--kali-text-secondary);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.admin-nav-item:hover {
+  background: var(--kali-bg-tertiary);
+  color: var(--kali-green);
+  border-left-color: var(--kali-green);
+}
+
+.admin-nav-item.active {
+  background: var(--kali-bg-tertiary);
+  color: var(--kali-green);
+  border-left-color: var(--kali-green);
+}
+
+.admin-nav-item::before {
+  content: "$ ";
+  color: var(--kali-green);
+  margin-right: 0.5rem;
+}
+
+.admin-nav-icon {
+  margin-right: 0.75rem;
+  font-size: 1.2rem;
+}
+
+/* Main Content Area */
+.admin-content {
+  margin-left: 250px;
+  padding: 2rem;
+  min-height: 100vh;
+  background: var(--kali-bg);
+}
+
+/* Terminal Cards */
+.terminal-card {
+  background: var(--kali-bg-secondary);
+  border: 1px solid var(--kali-border);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.terminal-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--kali-green), 
+    transparent);
+  animation: scan 3s linear infinite;
+}
+
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.terminal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--kali-border);
+}
+
+.terminal-card-title {
+  color: var(--kali-green);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Data Tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.data-table thead {
+  background: var(--kali-bg-tertiary);
+  border-bottom: 2px solid var(--kali-green);
+}
+
+.data-table th {
+  padding: 0.75rem;
+  text-align: left;
+  color: var(--kali-green);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--kali-border);
+  transition: background 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(57, 211, 83, 0.05);
+}
+
+.data-table td {
+  padding: 0.75rem;
+  color: var(--kali-text);
+}
+
+/* Status Badges */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-success {
+  background: rgba(57, 211, 83, 0.2);
+  color: var(--kali-green);
+  border: 1px solid var(--kali-green);
+}
+
+.badge-danger {
+  background: rgba(248, 81, 73, 0.2);
+  color: var(--kali-red);
+  border: 1px solid var(--kali-red);
+}
+
+.badge-warning {
+  background: rgba(210, 153, 34, 0.2);
+  color: var(--kali-yellow);
+  border: 1px solid var(--kali-yellow);
+}
+
+.badge-info {
+  background: rgba(88, 166, 255, 0.2);
+  color: var(--kali-blue);
+  border: 1px solid var(--kali-blue);
+}
+
+/* Terminal Buttons */
+.terminal-btn {
+  background: transparent;
+  border: 1px solid var(--kali-green);
+  color: var(--kali-green);
+  padding: 0.5rem 1rem;
+  font-family: var(--terminal-font);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.terminal-btn:hover {
+  background: var(--kali-green);
+  color: var(--kali-bg);
+  box-shadow: 0 0 20px rgba(57, 211, 83, 0.5);
+}
+
+.terminal-btn-danger {
+  border-color: var(--kali-red);
+  color: var(--kali-red);
+}
+
+.terminal-btn-danger:hover {
+  background: var(--kali-red);
+  box-shadow: 0 0 20px rgba(248, 81, 73, 0.5);
+}
+
+.terminal-btn-primary {
+  border-color: var(--kali-blue);
+  color: var(--kali-blue);
+}
+
+.terminal-btn-primary:hover {
+  background: var(--kali-blue);
+  box-shadow: 0 0 20px rgba(88, 166, 255, 0.5);
+}
+
+/* Terminal Input Fields */
+.terminal-input {
+  background: var(--kali-bg);
+  border: 1px solid var(--kali-border);
+  color: var(--kali-text);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--terminal-font);
+  font-size: 0.9rem;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.terminal-input:focus {
+  outline: none;
+  border-color: var(--kali-green);
+  box-shadow: 0 0 5px rgba(57, 211, 83, 0.3);
+}
+
+.terminal-select {
+  background: var(--kali-bg);
+  border: 1px solid var(--kali-border);
+  color: var(--kali-text);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--terminal-font);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--kali-bg-secondary);
+  border: 1px solid var(--kali-border);
+  padding: 1rem;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-icon {
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.stat-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--kali-green);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover::after {
+  transform: scaleX(1);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--kali-green);
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  color: var(--kali-text-secondary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--kali-bg-secondary);
+  border: 2px solid var(--kali-green);
+  border-radius: 4px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--kali-border);
+}
+
+.modal-title {
+  color: var(--kali-green);
+  font-size: 1.2rem;
+}
+
+/* Loading Animation */
+.terminal-loader {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 20px;
+}
+
+.terminal-loader::after {
+  content: "Loading...";
+  position: absolute;
+  color: var(--kali-green);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { content: "Loading"; }
+  25% { content: "Loading."; }
+  50% { content: "Loading.."; }
+  75% { content: "Loading..."; }
+  100% { content: "Loading"; }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--kali-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--kali-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--kali-green);
+}
+
+/* ASCII Art Header */
+.ascii-art {
+  color: var(--kali-green);
+  font-size: 0.7rem;
+  line-height: 1;
+  white-space: pre;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+/* Terminal Command Line */
+.command-line {
+  display: flex;
+  align-items: center;
+  background: var(--kali-bg);
+  border: 1px solid var(--kali-border);
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  font-family: var(--terminal-font);
+}
+
+.command-prompt {
+  color: var(--kali-green);
+  margin-right: 0.5rem;
+}
+
+.command-input {
+  background: transparent;
+  border: none;
+  color: var(--kali-text);
+  flex: 1;
+  outline: none;
+  font-family: inherit;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .admin-content {
+    margin-left: 0;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
