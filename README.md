@@ -533,4 +533,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ for a safer digital India**
 
-*WALRUS - Empowering citizens with cybersecurity knowledge and protection*
+*WALRUS - Empowering citizens with cybersecurity knowledge and protection*#   c y b e r a w a r e n e s s  
+ 
