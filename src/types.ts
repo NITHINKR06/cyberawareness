@@ -10,6 +10,7 @@ export interface User {
   role?: 'user' | 'moderator' | 'admin' | 'superadmin';
 }
 
+
 export interface LearningModule {
   id: string;
   title: string;
