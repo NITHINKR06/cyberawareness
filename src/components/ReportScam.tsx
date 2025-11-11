@@ -111,9 +111,13 @@ export default function ReportScam() {
         colony: '', district: '', state: 'Karnataka', country: 'India', fullName: '', mobile: '',
         gender: '', dob: '', spouse: '', relationWithVictim: '', emailAddress: '',
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Report submission failed:', err);
-      alert('Failed to submit report. Please try again.');
+      if (err.code === 'ERR_NETWORK') {
+        alert('Unable to submit report. Please check if the server is running on port 5000.');
+      } else {
+        alert(err.response?.data?.error || 'Failed to submit report. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -132,9 +136,13 @@ export default function ReportScam() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch (err: any) {
       console.error('PDF download failed:', err);
-      alert('Failed to download PDF. Please try again.');
+      if (err.code === 'ERR_NETWORK') {
+        alert('Unable to download PDF. Please check if the server is running on port 5000.');
+      } else {
+        alert(err.response?.data?.error || 'Failed to download PDF. Please try again.');
+      }
     }
   };
 

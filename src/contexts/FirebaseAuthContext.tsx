@@ -48,6 +48,9 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       } else {
         setFirebaseUser(null);
         setUser(null);
+        // Clear Firebase user ID from localStorage on logout
+        localStorage.removeItem('firebaseUserId');
+        localStorage.removeItem('user');
       }
       setIsLoading(false);
     });
@@ -62,7 +65,7 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        setUser({
+        const userObj = {
           id: uid,
           username: userData.username || 'User',
           email: userData.email || '',
@@ -71,7 +74,15 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
           level: userData.level || 1,
           isAdmin: userData.isAdmin || false,
           role: userData.role || 'user',
-        });
+        };
+        
+        setUser(userObj);
+        
+        // Store user ID in localStorage for API authentication
+        // The backend expects the Firebase UID as the Bearer token
+        localStorage.setItem('firebaseUserId', uid);
+        // Also store user object for compatibility
+        localStorage.setItem('user', JSON.stringify(userObj));
 
         // Update last login
         await updateDoc(doc(db, 'users', uid), {
@@ -246,6 +257,9 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       await signOut(auth);
       setUser(null);
       setFirebaseUser(null);
+      // Clear Firebase user ID from localStorage
+      localStorage.removeItem('firebaseUserId');
+      localStorage.removeItem('user');
     } catch (error) {
       console.error('Logout error:', error);
       throw new Error('Failed to logout. Please try again.');

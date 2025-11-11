@@ -15,6 +15,7 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { communityService } from '../services/backendApi';
 
 interface Topic {
   _id: string;
@@ -84,52 +85,44 @@ export default function Community() {
 
   const initializeTopics = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await fetch(`${apiUrl}/api/community/topics/init`, {
-        method: 'POST',
-        headers: user ? { 'Authorization': `Bearer ${user.id}` } : {}
-      });
-    } catch (error) {
-      console.error('Error initializing topics:', error);
+      await communityService.initializeTopics();
+    } catch (error: any) {
+      // Silently fail - topics initialization is optional
+      if (error.code !== 'ERR_NETWORK') {
+        console.error('Error initializing topics:', error);
+      }
     }
   };
 
   const fetchTopics = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/community/topics`, {
-        headers: user ? { 'Authorization': `Bearer ${user.id}` } : {}
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTopics(data);
-      }
-    } catch (error) {
+      const data = await communityService.getTopics();
+      setTopics(Array.isArray(data) ? data : []);
+    } catch (error: any) {
       console.error('Error fetching topics:', error);
+      if (error.code === 'ERR_NETWORK') {
+        console.warn('Backend server is not running. Community features will be unavailable.');
+      }
+      setTopics([]);
     }
   };
 
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const params = new URLSearchParams({
-        topicId: selectedTopic,
-        page: '1',
-        limit: '20',
+      const data = await communityService.getPosts({
+        topicId: selectedTopic === 'all' ? undefined : selectedTopic,
+        page: 1,
+        limit: 20,
         sort: sortBy
       });
-      
-      const response = await fetch(`${apiUrl}/api/community/posts?${params}`, {
-        headers: user ? { 'Authorization': `Bearer ${user.id}` } : {}
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setPosts(data.posts);
-      }
-    } catch (error) {
+      setPosts(Array.isArray(data.posts) ? data.posts : []);
+    } catch (error: any) {
       console.error('Error fetching posts:', error);
+      if (error.code === 'ERR_NETWORK') {
+        console.warn('Backend server is not running. Community features will be unavailable.');
+      }
+      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -137,18 +130,14 @@ export default function Community() {
 
   const fetchPostDetails = async (postId: string) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/community/posts/${postId}`, {
-        headers: user ? { 'Authorization': `Bearer ${user.id}` } : {}
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedPost(data.post);
-        setComments(data.comments);
-      }
-    } catch (error) {
+      const data = await communityService.getPostDetails(postId);
+      setSelectedPost(data.post);
+      setComments(Array.isArray(data.comments) ? data.comments : []);
+    } catch (error: any) {
       console.error('Error fetching post details:', error);
+      if (error.code === 'ERR_NETWORK') {
+        toast.error('Unable to load post details. Please check if the server is running.');
+      }
     }
   };
 
@@ -164,31 +153,24 @@ export default function Community() {
     }
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/community/posts`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.id}`
-        },
-        body: JSON.stringify({
-          title: newPost.title,
-          content: newPost.content,
-          topicId: newPost.topicId,
-          tags: newPost.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-        })
+      const post = await communityService.createPost({
+        title: newPost.title,
+        content: newPost.content,
+        topicId: newPost.topicId,
+        tags: newPost.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
       });
-
-      if (response.ok) {
-        const post = await response.json();
-        setPosts([post, ...posts]);
-        setShowNewPostModal(false);
-        setNewPost({ title: '', content: '', topicId: '', tags: '' });
-        toast.success('Post created successfully!');
-      }
-    } catch (error) {
+      
+      setPosts([post, ...posts]);
+      setShowNewPostModal(false);
+      setNewPost({ title: '', content: '', topicId: '', tags: '' });
+      toast.success('Post created successfully!');
+    } catch (error: any) {
       console.error('Error creating post:', error);
-      toast.error('Failed to create post');
+      if (error.code === 'ERR_NETWORK') {
+        toast.error('Unable to create post. Please check if the server is running.');
+      } else {
+        toast.error(error.response?.data?.error || 'Failed to create post');
+      }
     }
   };
 
@@ -201,25 +183,17 @@ export default function Community() {
     }
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/community/posts/${selectedPost._id}/comments`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.id}`
-        },
-        body: JSON.stringify({ content: newComment })
-      });
-
-      if (response.ok) {
-        const comment = await response.json();
-        setComments([comment, ...comments]);
-        setNewComment('');
-        toast.success('Comment posted!');
-      }
-    } catch (error) {
+      const comment = await communityService.createComment(selectedPost._id, newComment);
+      setComments([comment, ...comments]);
+      setNewComment('');
+      toast.success('Comment posted!');
+    } catch (error: any) {
       console.error('Error creating comment:', error);
-      toast.error('Failed to post comment');
+      if (error.code === 'ERR_NETWORK') {
+        toast.error('Unable to post comment. Please check if the server is running.');
+      } else {
+        toast.error(error.response?.data?.error || 'Failed to post comment');
+      }
     }
   };
 

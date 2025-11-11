@@ -10,7 +10,7 @@ import {
   XCircle,
   Shield
 } from 'lucide-react';
-import axios from 'axios';
+import { configService } from '../services/backendApi';
 import { toast } from 'react-toastify';
 
 interface ValidationRules {
@@ -54,15 +54,19 @@ export default function ValidationRulesAdmin() {
   const fetchRules = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/config/validation-rules');
-      if (response.data.success) {
-        setRules(response.data.rules);
-        setEditingKeywords(response.data.rules.scamKeywords);
-        setEditingRecommendations(response.data.rules.recommendations);
+      const data = await configService.getValidationRules();
+      if (data.success) {
+        setRules(data.rules);
+        setEditingKeywords(data.rules.scamKeywords);
+        setEditingRecommendations(data.rules.recommendations);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch rules:', error);
-      toast.error('Failed to load validation rules');
+      if (error.code === 'ERR_NETWORK') {
+        toast.error('Unable to load validation rules. Please check if the server is running.');
+      } else {
+        toast.error('Failed to load validation rules');
+      }
     } finally {
       setLoading(false);
     }
@@ -79,14 +83,18 @@ export default function ValidationRulesAdmin() {
         recommendations: editingRecommendations
       };
       
-      const response = await axios.put('http://localhost:5000/api/config/validation-rules', updatedRules);
-      if (response.data.success) {
+      const data = await configService.updateValidationRules(updatedRules);
+      if (data.success) {
         toast.success('Validation rules updated successfully');
         setRules(updatedRules);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save rules:', error);
-      toast.error('Failed to save validation rules');
+      if (error.code === 'ERR_NETWORK') {
+        toast.error('Unable to save validation rules. Please check if the server is running.');
+      } else {
+        toast.error(error.response?.data?.error || 'Failed to save validation rules');
+      }
     } finally {
       setSaving(false);
     }

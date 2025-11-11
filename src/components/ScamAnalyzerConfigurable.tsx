@@ -13,9 +13,8 @@ import {
   Image as ImageIcon,
   Upload
 } from 'lucide-react';
-import { analyzeContent, ocrService } from '../services/backendApi';
+import { analyzeContent, ocrService, configService } from '../services/backendApi';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 
 interface ThreatLevelConfig {
   name: string;
@@ -73,12 +72,15 @@ export default function ScamAnalyzerConfigurable() {
 
   const fetchValidationRules = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/config/validation-rules');
-      if (response.data.success) {
-        setValidationRules(response.data.rules);
+      const data = await configService.getValidationRules();
+      if (data.success) {
+        setValidationRules(data.rules);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch validation rules:', err);
+      if (err.code === 'ERR_NETWORK') {
+        console.warn('Backend server is not running. Using default validation rules.');
+      }
       // Use default rules if fetch fails
     }
   };

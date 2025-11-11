@@ -31,6 +31,15 @@ app.use(sanitizeInput);
 app.use(csrfTokenMiddleware);
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5000',
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  process.env.FRONTEND_URL,
+  'https://cyberawareness-iota.vercel.app'
+].filter(Boolean);
+
 app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -41,8 +50,19 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // In production, you would check against a whitelist
-    callback(new Error('Not allowed by CORS'));
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Allow all origins in development, or if explicitly configured
+    if (process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      return callback(null, true);
+    }
+    
+    // In production, log and allow (Vercel handles CORS via headers)
+    console.log(`CORS: Allowing origin ${origin}`);
+    callback(null, true);
   },
   credentials: true
 }));
@@ -78,13 +98,51 @@ app.use((req, res, next) => {
 // MongoDB connection
 const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/walrus_db';
 const mongoDbName = process.env.MONGODB_DBNAME; // optional override
-mongoose.connect(mongoUri, mongoDbName ? { dbName: mongoDbName } : undefined)
-  .then(() => {
+
+// MongoDB connection options optimized for serverless
+const mongoOptions = {
+  ...(mongoDbName ? { dbName: mongoDbName } : {}),
+  // Serverless-optimized options
+  maxPoolSize: 10, // Maintain up to 10 socket connections
+  serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+  bufferCommands: false, // Disable mongoose buffering
+  bufferMaxEntries: 0 // Disable mongoose buffering
+};
+
+// Connect to MongoDB
+const connectDB = async () => {
+  try {
+    // Check if already connected
+    if (mongoose.connection.readyState === 1) {
+      console.log('MongoDB already connected');
+      return;
+    }
+
+    await mongoose.connect(mongoUri, mongoOptions);
     const conn = mongoose.connection;
     console.log(`Connected to MongoDB: host=${conn.host} db=${conn.name}`);
-  }).catch(err => {
+  } catch (err) {
     console.error('MongoDB connection error:', err);
-  });
+    // Don't throw in serverless - let it retry on next request
+    if (process.env.VERCEL !== '1' && !process.env.VERCEL_ENV) {
+      // Only exit in non-serverless environments
+      process.exit(1);
+    }
+  }
+};
+
+// Handle connection events
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected');
+});
+
+// Connect to database
+connectDB();
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -119,6 +177,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Export app for Vercel serverless functions
+export default app;
+
+// Only start server if not in serverless environment (Vercel)
+if (process.env.VERCEL !== '1' && !process.env.VERCEL_ENV) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+} else {
+  console.log('Server running in serverless mode');
+}

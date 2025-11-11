@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Use environment variable for API URL, fallback to relative path for production
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 
 // Create axios instance with default config
 const api = axios.create({
@@ -13,12 +15,47 @@ const api = axios.create({
 
 // Add token to requests if it exists
 api.interceptors.request.use((config) => {
+  // First, try to get the standard auth token
   const token = localStorage.getItem('authToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    // If no standard token, check for Firebase user ID
+    // This is needed for Firebase auth users
+    const firebaseUserId = localStorage.getItem('firebaseUserId');
+    if (firebaseUserId) {
+      // For Firebase auth, the backend expects the Firebase UID as the token
+      config.headers.Authorization = `Bearer ${firebaseUserId}`;
+    } else {
+      // Fallback: try to get user ID from user object
+      try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.id) {
+            config.headers.Authorization = `Bearer ${user.id}`;
+          }
+        }
+      } catch (e) {
+        // Ignore errors parsing user data
+      }
+    }
   }
   return config;
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle network errors (connection refused, etc.)
+    if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+      console.error('API Error: Backend server is not running or unreachable. Please start the server on port 5000.');
+      // You could show a toast notification here if needed
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Auth Services
 export const authService = {
@@ -176,6 +213,62 @@ export const userService = {
 
   updatePoints: async (points: number, reason: string) => {
     const response = await api.post('/user/points', { points, reason });
+    return response.data;
+  }
+};
+
+// Community Services
+export const communityService = {
+  initializeTopics: async () => {
+    const response = await api.post('/community/topics/init');
+    return response.data;
+  },
+
+  getTopics: async () => {
+    const response = await api.get('/community/topics');
+    return response.data;
+  },
+
+  getPosts: async (params: {
+    topicId?: string;
+    page?: number;
+    limit?: number;
+    sort?: 'recent' | 'popular' | 'views';
+  }) => {
+    const response = await api.get('/community/posts', { params });
+    return response.data;
+  },
+
+  getPostDetails: async (postId: string) => {
+    const response = await api.get(`/community/posts/${postId}`);
+    return response.data;
+  },
+
+  createPost: async (postData: {
+    title: string;
+    content: string;
+    topicId: string;
+    tags?: string[];
+  }) => {
+    const response = await api.post('/community/posts', postData);
+    return response.data;
+  },
+
+  createComment: async (postId: string, content: string) => {
+    const response = await api.post(`/community/posts/${postId}/comments`, { content });
+    return response.data;
+  }
+};
+
+// Config Services
+export const configService = {
+  getValidationRules: async () => {
+    const response = await api.get('/config/validation-rules');
+    return response.data;
+  },
+
+  updateValidationRules: async (rules: any) => {
+    const response = await api.put('/config/validation-rules', rules);
     return response.data;
   }
 };
