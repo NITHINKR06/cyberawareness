@@ -110,8 +110,8 @@ const mongoOptions = {
 };
 
 // Configure Mongoose buffering (Mongoose-specific, not MongoDB driver options)
+// Note: bufferMaxEntries is not a valid option in newer Mongoose versions
 mongoose.set('bufferCommands', false);
-mongoose.set('bufferMaxEntries', 0);
 
 // Connect to MongoDB
 const connectDB = async () => {
