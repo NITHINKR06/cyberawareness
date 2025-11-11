@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Use environment variable for API URL, fallback to relative path for production
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
+  (import.meta.env.PROD ? 'https://cyberawareness.onrender.com/api' : 'http://localhost:5000/api');
 
 // Create axios instance with default config
 const api = axios.create({

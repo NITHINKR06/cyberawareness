@@ -37,7 +37,8 @@ const allowedOrigins = [
   'http://localhost:5000',
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
   process.env.FRONTEND_URL,
-  'https://cyberawareness-iota.vercel.app'
+  'https://cyberawareness-iota.vercel.app',
+  'https://cyberawareness-iota.vercel.app/',
 ].filter(Boolean);
 
 app.use(cors({
@@ -106,9 +107,11 @@ const mongoOptions = {
   maxPoolSize: 10, // Maintain up to 10 socket connections
   serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
   socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-  bufferCommands: false, // Disable mongoose buffering
-  bufferMaxEntries: 0 // Disable mongoose buffering
 };
+
+// Configure Mongoose buffering (Mongoose-specific, not MongoDB driver options)
+mongoose.set('bufferCommands', false);
+mongoose.set('bufferMaxEntries', 0);
 
 // Connect to MongoDB
 const connectDB = async () => {
