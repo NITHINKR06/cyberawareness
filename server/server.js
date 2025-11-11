@@ -109,9 +109,8 @@ const mongoOptions = {
   socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
 };
 
-// Configure Mongoose buffering (Mongoose-specific, not MongoDB driver options)
-// Note: bufferMaxEntries is not a valid option in newer Mongoose versions
-mongoose.set('bufferCommands', false);
+// Mongoose buffering is handled automatically in Mongoose 8.x
+// No need to set bufferCommands or bufferMaxEntries
 
 // Connect to MongoDB
 const connectDB = async () => {
