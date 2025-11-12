@@ -10,18 +10,19 @@ class AIAnalyzerService {
     this.geminiApiKey = process.env.GEMINI_API_KEY || 'key';
   }
 
-  // Analyze text using Hugging Face API
+  // Analyze text using Hugging Face API (PRIMARY METHOD)
+  // Falls back to pattern analysis only if Hugging Face is unavailable
   async analyzeTextWithHuggingFace(text) {
     try {
       if (huggingfaceService.isConfigured()) {
-        console.log('Using Hugging Face API for text analysis');
+        console.log('🤖 Using Hugging Face AI for text analysis (PRIMARY)');
         return await huggingfaceService.analyzeText(text);
       } else {
-        console.log('Hugging Face API not configured, using fallback');
+        console.warn('⚠️  Hugging Face API not configured, using pattern analysis fallback');
         return this.fallbackTextAnalysis(text);
       }
     } catch (error) {
-      console.error('Hugging Face API error, using fallback:', error.message);
+      console.error('❌ Hugging Face API error, using pattern analysis fallback:', error.message);
       return this.fallbackTextAnalysis(text);
     }
   }
@@ -231,18 +232,19 @@ class AIAnalyzerService {
     return bonus;
   }
 
-  // Analyze URL using Hugging Face API
+  // Analyze URL using Hugging Face API (PRIMARY METHOD)
+  // Falls back to pattern analysis only if Hugging Face is unavailable
   async analyzeUrlWithHuggingFace(url) {
     try {
       if (huggingfaceService.isConfigured()) {
-        console.log('Using Hugging Face API for URL analysis');
+        console.log('🤖 Using Hugging Face AI for URL analysis (PRIMARY)');
         return await huggingfaceService.analyzeUrl(url);
       } else {
-        console.log('Hugging Face API not configured, using fallback');
+        console.warn('⚠️  Hugging Face API not configured, using pattern analysis fallback');
         return this.fallbackUrlAnalysis(url);
       }
     } catch (error) {
-      console.error('Hugging Face API error, using fallback:', error.message);
+      console.error('❌ Hugging Face API error, using pattern analysis fallback:', error.message);
       return this.fallbackUrlAnalysis(url);
     }
   }
@@ -474,18 +476,19 @@ class AIAnalyzerService {
     };
   }
 
-  // Generate summary using Hugging Face API
+  // Generate summary using Hugging Face API (PRIMARY METHOD)
+  // Enhanced summary generation with better detail and accuracy
   async generateSummaryWithGemini(analysisData) {
     try {
       if (huggingfaceService.isConfigured()) {
-        console.log('Using Hugging Face API for summary generation');
+        console.log('🤖 Using Hugging Face AI for enhanced summary generation (PRIMARY)');
         return await huggingfaceService.generateSummary(analysisData);
       } else {
-        console.log('Hugging Face API not configured, using fallback');
+        console.warn('⚠️  Hugging Face API not configured, using enhanced fallback summary');
         return this.generateFallbackSummary(analysisData);
       }
     } catch (error) {
-      console.error('Hugging Face API error, using fallback:', error.message);
+      console.error('❌ Hugging Face summary generation error, using enhanced fallback:', error.message);
       return this.generateFallbackSummary(analysisData);
     }
   }
@@ -822,6 +825,8 @@ class AIAnalyzerService {
 // and add this line right before it:
 
   // Main analysis function
+  // Uses Hugging Face AI as PRIMARY method for threat detection
+  // Falls back to pattern analysis only if Hugging Face is unavailable
   async analyze(inputType, inputContent) {
     let analysisResult = {
       inputType,
@@ -833,53 +838,95 @@ class AIAnalyzerService {
     };
 
     try {
+      // PRIMARY: Use Hugging Face AI for analysis
       if (inputType === 'url') {
         const urlAnalysis = await this.analyzeUrlWithHuggingFace(inputContent);
         analysisResult = { ...analysisResult, ...urlAnalysis };
         
-        analysisResult.recommendations = [
-          'Always verify URLs before clicking',
-          'Look for HTTPS and valid SSL certificates',
-          'Check the domain carefully for typos'
-        ];
+        // Enhanced, contextual recommendations based on threat level
+        if (analysisResult.threatLevel === 'dangerous') {
+          analysisResult.recommendations = [
+            'DO NOT visit this URL under any circumstances',
+            'Do not enter any information on this website',
+            'Report this URL to your security team or authorities',
+            'Run a security scan if you already visited this URL',
+            'Change passwords if you entered any credentials'
+          ];
+        } else if (analysisResult.threatLevel === 'suspicious') {
+          analysisResult.recommendations = [
+            'Verify the URL destination before clicking',
+            'Check the domain spelling carefully for typosquatting',
+            'Look for HTTPS and valid SSL certificates',
+            'Use a URL scanner service to verify safety',
+            'Access the website directly through your browser instead'
+          ];
+        } else {
+          analysisResult.recommendations = [
+            'Always verify URLs before clicking',
+            'Look for HTTPS and valid SSL certificates',
+            'Check the domain carefully for typos',
+            'Keep your browser and security software updated',
+            'Stay vigilant even with safe-looking URLs'
+          ];
+        }
       } else {
+        // Text or image analysis (image uses OCR then text analysis)
         const textAnalysis = await this.analyzeTextWithHuggingFace(inputContent);
         analysisResult = { ...analysisResult, ...textAnalysis };
         
-        analysisResult.recommendations = [
-          'Never share passwords or sensitive information',
-          'Verify sender identity through official channels',
-          'Be suspicious of unsolicited messages'
-        ];
+        // Enhanced, contextual recommendations based on threat level
+        if (analysisResult.threatLevel === 'dangerous') {
+          analysisResult.recommendations = [
+            'DELETE this message immediately without responding',
+            'DO NOT click any links or download attachments',
+            'DO NOT provide any personal or financial information',
+            'BLOCK the sender to prevent future contact',
+            'Report to anti-fraud authorities (spam@uce.gov, reportfraud.ftc.gov)',
+            'WARN others who may have received similar messages'
+          ];
+        } else if (analysisResult.threatLevel === 'suspicious') {
+          analysisResult.recommendations = [
+            'Verify the sender through official, separate communication channels',
+            'Do not click links or download attachments without verification',
+            'Check for spelling errors and generic greetings (red flags)',
+            'Contact the organization directly using known phone numbers/websites',
+            'Trust your instincts - if it seems too good to be true, it probably is',
+            'Never share passwords, PINs, or personal information'
+          ];
+        } else {
+          analysisResult.recommendations = [
+            'Continue to verify sender identity for important matters',
+            'Never share passwords or PINs, even with legitimate contacts',
+            'Keep personal information private unless absolutely necessary',
+            'Stay informed about new scam techniques',
+            'Trust your instincts if something feels wrong',
+            'Report any suspicious activity you encounter'
+          ];
+        }
       }
 
-      if (analysisResult.threatLevel === 'dangerous') {
-        analysisResult.indicators.push('High risk content detected');
-        if (analysisResult.threats) {
-          analysisResult.indicators.push(...analysisResult.threats);
+      // Enhanced indicators are already provided by Hugging Face AI
+      // Only add generic indicator if indicators array is empty
+      if (!analysisResult.indicators || analysisResult.indicators.length === 0) {
+        if (analysisResult.threatLevel === 'dangerous') {
+          analysisResult.indicators = ['High risk content detected via AI analysis'];
+          if (analysisResult.threats && analysisResult.threats.length > 0) {
+            analysisResult.indicators.push(...analysisResult.threats.slice(0, 3));
+          }
+        } else if (analysisResult.threatLevel === 'suspicious') {
+          analysisResult.indicators = ['Potentially suspicious content detected'];
+        } else {
+          analysisResult.indicators = ['No immediate threats detected'];
         }
-        if (analysisResult.keywords && analysisResult.keywords.length > 0) {
-          analysisResult.indicators.push(`Scam keywords detected: ${analysisResult.keywords.join(', ')}`);
-        }
-      } else if (analysisResult.threatLevel === 'suspicious') {
-        analysisResult.indicators.push('Potentially suspicious content');
-        if (analysisResult.keywords && analysisResult.keywords.length > 0) {
-          analysisResult.indicators.push(`Warning keywords detected: ${analysisResult.keywords.join(', ')}`);
-        }
-      } else {
-        analysisResult.indicators.push('No immediate threats detected');
       }
 
+      // Generate enhanced summary using Hugging Face AI
+      // Ensure inputType is passed for context-aware summarization
+      analysisResult.inputType = inputType;
       analysisResult.summary = await this.generateSummaryWithGemini(analysisResult);
 
-      if (analysisResult.threatLevel === 'dangerous') {
-        analysisResult.recommendations.unshift('HIGH RISK: Do not interact with this content');
-        analysisResult.recommendations.push('Report this to relevant authorities');
-      } else if (analysisResult.threatLevel === 'suspicious') {
-        analysisResult.recommendations.unshift('CAUTION: Verify before proceeding');
-      } else {
-        analysisResult.recommendations.unshift('✓ Appears safe, but always remain vigilant');
-      }
+      // Recommendations are already contextual and enhanced above
+      // No need to modify them further as they're tailored to threat level
 
     } catch (error) {
       console.error('Analysis error:', error);

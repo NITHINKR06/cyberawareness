@@ -40,279 +40,47 @@ export default function ScamAnalyzer() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateText = (text: string): { warnings: string[]; threatLevel?: 'high' | 'medium' | 'low' } => {
-    const warnings: string[] = [];
-    let maxThreatLevel: 'high' | 'medium' | 'low' = 'low';
-
-    // HIGH RISK: Urgent/pressure tactics
-    const urgentPatterns = [
-      { pattern: /urgent|immediately|expire|deadline|limited time|act now|hurry/i, message: 'Contains urgency pressure tactics', threat: 'high' },
-      { pattern: /last chance|final notice|account will be|suspended|terminated/i, message: 'Contains threatening language', threat: 'high' },
-      { pattern: /24 hours?|48 hours?|today only|expires? (today|tomorrow)/i, message: 'Contains time pressure', threat: 'medium' }
-    ];
-
-    // HIGH RISK: Financial/banking scams
-    const bankingPatterns = [
-      { pattern: /bank.{0,20}security.{0,20}update/i, message: 'SCAM ALERT: Bank security update request', threat: 'high' },
-      { pattern: /verify.{0,20}(bank|account|identity)/i, message: 'SCAM ALERT: Account verification request', threat: 'high' },
-      { pattern: /otp|one.?time.?password|verification.?code/i, message: 'WARNING: OTP/verification code request', threat: 'high' },
-      { pattern: /(loan|credit).{0,20}(approved|offer|guaranteed)/i, message: 'SCAM ALERT: Unsolicited loan offer', threat: 'high' },
-      { pattern: /pre.?approved.{0,20}(loan|credit|amount)/i, message: 'SCAM ALERT: Pre-approved loan scam', threat: 'high' },
-      { pattern: /transfer.{0,20}(money|funds|amount)/i, message: 'WARNING: Money transfer request', threat: 'medium' },
-      { pattern: /claim.{0,20}(reward|prize|money|refund)/i, message: 'SCAM ALERT: Prize/reward claim', threat: 'high' }
-    ];
-
-    // HIGH RISK: Malware/hacking threats
-    const malwarePatterns = [
-      { pattern: /virus|malware|trojan|ransomware/i, message: 'Contains malware-related terms', threat: 'high' },
-      { pattern: /hack(ed|er|ing)?|compromised|breach/i, message: 'Contains hacking-related threats', threat: 'high' },
-      { pattern: /phish(y|ing|er)?|spoof(ed|ing)?/i, message: 'Contains phishing indicators', threat: 'high' },
-      { pattern: /infected|detected.{0,20}threat|security.{0,20}(risk|threat)/i, message: 'Fake security threat warning', threat: 'high' }
-    ];
-
-    // Check all patterns
-    [...urgentPatterns, ...bankingPatterns, ...malwarePatterns].forEach(({ pattern, message, threat }) => {
-      if (pattern.test(text)) {
-        warnings.push(message);
-        if (threat === 'high' && maxThreatLevel !== 'high') maxThreatLevel = 'high';
-        else if (threat === 'medium' && maxThreatLevel === 'low') maxThreatLevel = 'medium';
-      }
-    });
-
-    return { warnings, threatLevel: warnings.length > 0 ? maxThreatLevel : undefined };
-  };
-
-  const validateURL = (url: string): { isValid: boolean; error?: string; threatLevel?: 'high' | 'medium' | 'low' } => {
-    // Basic URL validation
-    if (!url || !url.trim()) {
-      return { isValid: false, error: 'URL cannot be empty' };
+  // Basic validation only - no pattern matching, let Hugging Face AI do the analysis
+  const validateBasicInput = (type: 'text' | 'url', content: string): { isValid: boolean; error?: string } => {
+    if (!content || !content.trim()) {
+      return { isValid: false, error: type === 'url' ? 'Please enter a URL to analyze' : 'Please enter text to analyze' };
     }
 
-    // Check for valid URL format
-    try {
-      const urlObj = new URL(url);
-      const hostname = urlObj.hostname.toLowerCase();
-      const fullUrl = url.toLowerCase();
-      
-      // Check for valid protocol
-      if (!['http:', 'https:', 'ftp:'].includes(urlObj.protocol)) {
-        return { isValid: false, error: 'URL must start with http://, https://, or ftp://' };
-      }
-
-      // HIGH RISK: Banking/financial scam patterns in URL
-      const bankingUrlPatterns = [
-        { pattern: /bank.*security.*update/i, message: 'SCAM URL: Fake bank security update', threat: 'high' },
-        { pattern: /account.*verif/i, message: 'SCAM URL: Fake account verification', threat: 'high' },
-        { pattern: /(otp|verification).*code/i, message: 'SCAM URL: OTP/verification phishing', threat: 'high' },
-        { pattern: /loan.*approv/i, message: 'SCAM URL: Fake loan approval', threat: 'high' },
-        { pattern: /urgent.*action/i, message: 'SCAM URL: Urgent action required scam', threat: 'high' },
-        { pattern: /suspended.*account/i, message: 'SCAM URL: Account suspension scam', threat: 'high' }
-      ];
-
-      // HIGH RISK: Malware/virus patterns in URL
-      const malwareUrlPatterns = [
-        { pattern: /virus|malware|trojan|ransomware/i, message: 'DANGER: URL contains malware terms', threat: 'high' },
-        { pattern: /hack(ed|er|ing)?/i, message: 'DANGER: URL contains hacking terms', threat: 'high' },
-        { pattern: /phish(y|ing)?/i, message: 'DANGER: URL contains phishing terms', threat: 'high' },
-        { pattern: /infected|threat.*detected/i, message: 'SCAM URL: Fake threat detection', threat: 'high' }
-      ];
-
-      // Check banking and malware patterns first
-      for (const patterns of [bankingUrlPatterns, malwareUrlPatterns]) {
-        for (const { pattern, message, threat } of patterns) {
-          if (pattern.test(fullUrl)) {
-            return { isValid: true, error: message, threatLevel: threat as 'high' | 'medium' };
-          }
+    if (type === 'url') {
+      // Only validate URL format, no threat detection (Hugging Face will do that)
+      try {
+        const urlObj = new URL(content);
+        // Check for valid protocol
+        if (!['http:', 'https:'].includes(urlObj.protocol)) {
+          return { isValid: false, error: 'URL must start with http:// or https://' };
         }
-      }
-
-      // HIGH RISK: Known phishing patterns
-      const phishingPatterns = [
-        // Typosquatting popular services (like paypa1.com instead of paypal.com)
-        { pattern: /paypa[1l]\./, message: 'HIGH RISK: Looks like PayPal typosquatting', threat: 'high' },
-        { pattern: /pay-?pal[^.]/, message: 'HIGH RISK: PayPal-like domain', threat: 'high' },
-        { pattern: /amaz[0o]n\./, message: 'HIGH RISK: Looks like Amazon typosquatting', threat: 'high' },
-        { pattern: /g[0o]{2}gle\./, message: 'HIGH RISK: Looks like Google typosquatting', threat: 'high' },
-        { pattern: /micr[0o]s[0o]ft\./, message: 'HIGH RISK: Looks like Microsoft typosquatting', threat: 'high' },
-        { pattern: /app[1l]e\./, message: 'HIGH RISK: Looks like Apple typosquatting', threat: 'high' },
-        
-        // Subdomain abuse (like yourbank.com.security-update.info)
-        { pattern: /\.(com|org|net|edu|gov)\.[^\/]+\.(info|tk|ml|ga|cf)/, message: 'HIGH RISK: Deceptive subdomain mimicking legitimate site', threat: 'high' },
-        { pattern: /\.(com|org|net|edu|gov)\.[^\/]+/, message: 'WARNING: Suspicious subdomain structure', threat: 'medium' },
-        
-        // Security-related keywords in suspicious positions
-        { pattern: /security[- ]?update/, message: 'HIGH RISK: Fake security update domain', threat: 'high' },
-        { pattern: /account[- ]?verify/, message: 'HIGH RISK: Fake account verification', threat: 'high' },
-        { pattern: /secure[- ]?login/, message: 'HIGH RISK: Fake secure login page', threat: 'high' },
-        { pattern: /verify[- ]?account/, message: 'HIGH RISK: Fake verification page', threat: 'high' },
-        
-        // Known test malware URLs
-        { pattern: /testsafebrowsing\.appspot\.com/, message: 'TEST MALWARE URL: This is a known test URL for malware', threat: 'high' }
-      ];
-
-      // Check for phishing patterns
-      for (const { pattern, message, threat } of phishingPatterns) {
-        if (pattern.test(fullUrl)) {
-          return { isValid: true, error: message, threatLevel: threat as 'high' | 'medium' };
+        // Basic length check
+        if (content.length > 2000) {
+          return { isValid: false, error: 'URL is too long (maximum 2000 characters)' };
         }
+      } catch (e) {
+        return { isValid: false, error: 'Invalid URL format. Please enter a valid URL starting with http:// or https://' };
       }
-
-      // HIGH RISK: Direct IP addresses
-      const ipPattern = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-      if (ipPattern.test(hostname)) {
-        // Check if it's a private IP
-        const privateIpPatterns = [
-          /^10\./,
-          /^172\.(1[6-9]|2[0-9]|3[01])\./,
-          /^192\.168\./,
-          /^127\./
-        ];
-        
-        const isPrivateIp = privateIpPatterns.some(pattern => pattern.test(hostname));
-        if (isPrivateIp) {
-          return { isValid: true, error: 'WARNING: Private IP address - only access if you trust this network', threatLevel: 'medium' };
-        } else {
-          return { isValid: true, error: 'HIGH RISK: Direct IP address - often used in phishing attacks', threatLevel: 'high' };
-        }
+    } else {
+      // Basic length checks for text
+      if (content.trim().length < 3) {
+        return { isValid: false, error: 'Text is too short. Please enter at least 3 characters.' };
       }
-
-      // HIGH RISK: URL shorteners
-      const urlShorteners = [
-        'bit.ly', 'tinyurl.com', 'goo.gl', 'ow.ly', 'is.gd', 't.co', 
-        'buff.ly', 'short.link', 'tiny.cc', 'soo.gd', 'clck.ru',
-        'cutt.ly', 'shorturl.at', 'rb.gy', 'rotf.lol', 'short.link'
-      ];
-      
-      if (urlShorteners.some(shortener => hostname.includes(shortener))) {
-        return { isValid: true, error: 'HIGH RISK: URL shortener detected - destination unknown', threatLevel: 'high' };
+      if (content.length > 10000) {
+        return { isValid: false, error: 'Text is too long. Maximum 10,000 characters allowed.' };
       }
-
-      // Check for homograph attacks (similar looking characters)
-      const homographPatterns = [
-        { pattern: /[а-яА-Я]/, message: 'HIGH RISK: Cyrillic characters detected (homograph attack)', threat: 'high' },
-        { pattern: /[αβγδεζηθικλμνξοπρστυφχψω]/, message: 'HIGH RISK: Greek characters detected (homograph attack)', threat: 'high' },
-        { pattern: /[０-９]/, message: 'WARNING: Full-width numbers detected', threat: 'medium' }
-      ];
-      
-      for (const { pattern, message, threat } of homographPatterns) {
-        if (pattern.test(hostname)) {
-          return { isValid: true, error: message, threatLevel: threat as 'high' | 'medium' };
-        }
-      }
-
-      // Check for look-alike character substitutions
-      const lookAlikePatterns = [
-        { original: 'paypal', variants: ['paypa1', 'paypaI', 'pαypal'] },
-        { original: 'amazon', variants: ['amaz0n', 'amazοn', 'аmazon'] },
-        { original: 'google', variants: ['g00gle', 'gοοgle', 'googIe'] },
-        { original: 'microsoft', variants: ['micr0soft', 'microsoſt', 'miсrosoft'] },
-        { original: 'apple', variants: ['app1e', 'appIe', 'аpple'] },
-        { original: 'facebook', variants: ['faceb00k', 'facebοοk', 'fаcebook'] },
-        { original: 'netflix', variants: ['netf1ix', 'netfIix', 'netfliх'] },
-        { original: 'ebay', variants: ['ebαy', 'еbay'] },
-        { original: 'twitter', variants: ['tw1tter', 'twittеr'] },
-        { original: 'instagram', variants: ['instagгam', 'lnstagram'] }
-      ];
-
-      for (const { original, variants } of lookAlikePatterns) {
-        if (variants.some(variant => hostname.includes(variant))) {
-          return { isValid: true, error: `HIGH RISK: Possible ${original} phishing site (look-alike domain)`, threatLevel: 'high' };
-        }
-      }
-
-      // Check for excessive subdomains
-      const subdomains = hostname.split('.');
-      if (subdomains.length > 4) {
-        return { isValid: true, error: 'WARNING: Excessive subdomains - often used to deceive', threatLevel: 'medium' };
-      } 
-
-      // Check for suspicious TLDs
-      const suspiciousTlds = ['.tk', '.ml', '.ga', '.cf', '.click', '.download', '.review', '.work', '.top', '.buzz'];
-      if (suspiciousTlds.some(tld => hostname.endsWith(tld))) {
-        return { isValid: true, error: 'WARNING: Suspicious top-level domain - often used in scams', threatLevel: 'medium' };
-      }
-
-      // Check for suspicious patterns in URL path
-      const pathPatterns = [
-        { pattern: /@/, message: 'WARNING: @ symbol in URL - can be used to hide real destination', threat: 'high' },
-        { pattern: /[<>"]/, message: 'Invalid characters in URL', threat: 'medium' },
-        { pattern: /javascript:/i, message: 'BLOCKED: JavaScript URLs are not allowed', threat: 'high' },
-        { pattern: /data:/i, message: 'BLOCKED: Data URLs are not allowed', threat: 'high' },
-        { pattern: /vbscript:/i, message: 'BLOCKED: VBScript URLs are not allowed', threat: 'high' }
-      ];
-
-      for (const { pattern, message, threat } of pathPatterns) {
-        if (pattern.test(fullUrl)) {
-          if (threat === 'high' && message.startsWith('BLOCKED')) {
-            return { isValid: false, error: message };
-          }
-          return { isValid: true, error: message, threatLevel: threat as 'high' | 'medium' };
-        }
-      }
-
-      // Check URL length
-      if (url.length > 2000) {
-        return { isValid: false, error: 'URL is too long (maximum 2000 characters)' };
-      }
-
-      return { isValid: true };
-    } catch (e) {
-      return { isValid: false, error: 'Invalid URL format. Please enter a valid URL starting with http:// or https://' };
     }
+
+    return { isValid: true };
   };
 
   const handleAnalysis = async (type: 'text' | 'url', content: string) => {
-    if (!content || !content.trim()) {
-      setError(type === 'url' ? 'Please enter a URL to analyze' : 'Please enter text to analyze');
+    // Basic validation only - no pattern matching, let Hugging Face AI do the analysis
+    const validation = validateBasicInput(type, content);
+    if (!validation.isValid) {
+      setError(validation.error || 'Invalid input');
+      toast.error(validation.error || 'Invalid input');
       return;
-    }
-
-    // Frontend validation for URLs
-    if (type === 'url') {
-      const validation = validateURL(content);
-      if (!validation.isValid) {
-        setError(validation.error || 'Invalid URL');
-        toast.error(validation.error || 'Invalid URL');
-        return;
-      }
-      // Show warning if there's one but continue with analysis
-      if (validation.error) {
-        toast.warning(validation.error);
-      }
-    }
-
-    // Frontend validation for text
-    if (type === 'text') {
-      // Check minimum length
-      if (content.trim().length < 10) {
-        setError('Text is too short. Please enter at least 10 characters.');
-        toast.error('Text is too short for meaningful analysis');
-        return;
-      }
-      // Check maximum length
-      if (content.length > 10000) {
-        setError('Text is too long. Maximum 10,000 characters allowed.');
-        toast.error('Text exceeds maximum length');
-        return;
-      }
-      
-      // Check for scam patterns in text
-      const textValidation = validateText(content);
-      if (textValidation.warnings.length > 0) {
-        // Show warnings for detected patterns
-        textValidation.warnings.forEach(warning => {
-          if (textValidation.threatLevel === 'high') {
-            toast.error(`Warning: ${warning}`);
-          } else {
-            toast.warning(`Warning: ${warning}`);
-          }
-        });
-        
-        // Add a summary warning
-        if (textValidation.threatLevel === 'high') {
-          toast.error('HIGH RISK: Multiple scam indicators detected! Proceed with extreme caution.');
-        }
-      }
     }
 
     setIsProcessing(true);
@@ -320,10 +88,12 @@ export default function ScamAnalyzer() {
     setResult(null);
 
     try {
+      // Send directly to backend - Hugging Face AI will do all threat analysis
       const response = await analyzeContent(type, content);
       const analysisResult = response.analysisResult;
       setResult(analysisResult);
 
+      // Show results based on Hugging Face AI analysis
       if (analysisResult.threatLevel === 'dangerous') {
         toast.error('High threat detected! Please be extremely cautious.');
       } else if (analysisResult.threatLevel === 'suspicious') {
@@ -331,10 +101,10 @@ export default function ScamAnalyzer() {
       } else {
         toast.success('Content appears safe, but always stay vigilant!');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Error analyzing ${type}:`, err);
-      setError(`Failed to analyze ${type}. Please try again.`);
-      toast.error(`Analysis failed. There was a server error.`);
+      setError(`Failed to analyze ${type}. ${err.message || 'Please try again.'}`);
+      toast.error(`Analysis failed: ${err.message || 'Server error. Please check your Hugging Face API key configuration.'}`);
     } finally {
       setIsProcessing(false);
     }
@@ -372,31 +142,33 @@ export default function ScamAnalyzer() {
       // Step 2: Populate the text area and switch to text tab
       setTextInput(extractedText);
       setActiveTab('text');
-      toast.success('Text extracted! Analyzing for scam indicators...');
+      toast.success('Text extracted! Analyzing with Hugging Face AI...');
 
-      // Step 3: Automatically analyze the extracted text
+      // Step 3: Automatically analyze the extracted text using enhanced Hugging Face AI
+      // The backend will use enhanced text analysis which works perfectly for image-extracted text
       const analysisResponse = await analyzeContent('text', extractedText);
       const analysisResult = analysisResponse.analysisResult;
       
-      // Add OCR confidence info to the result
+      // Add OCR-specific information to the result
       analysisResult.ocrConfidence = response.confidence;
       analysisResult.extractedText = extractedText;
+      analysisResult.sourceType = 'image'; // Track that this came from image OCR
       
       setResult(analysisResult);
       
-      // Show appropriate toast based on threat level
+      // Show appropriate toast based on threat level from enhanced Hugging Face AI
       if (analysisResult.threatLevel === 'dangerous') {
-        toast.error('High threat detected! Please be extremely cautious.');
+        toast.error('High threat detected in image! Please be extremely cautious.');
       } else if (analysisResult.threatLevel === 'suspicious') {
-        toast.warning('Suspicious content detected. Please review the analysis.');
+        toast.warning('Suspicious content detected in image. Please review the analysis.');
       } else {
-        toast.success('Content appears safe based on analysis.');
+        toast.success('Image content appears safe based on AI analysis.');
       }
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error processing image:', err);
-      setError('Failed to process image. Please try again.');
-      toast.error('Image processing failed.');
+      setError(`Failed to process image. ${err.message || 'Please try again.'}`);
+      toast.error(`Image processing failed: ${err.message || 'Server error'}`);
     } finally {
       setIsProcessing(false);
     }
@@ -426,6 +198,9 @@ export default function ScamAnalyzer() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">{t('scamAnalyzer.title')}</h1>
         <p className="text-gray-600 dark:text-gray-400">{t('scamAnalyzer.subtitle')}</p>
+        <p className="text-sm text-blue-600 dark:text-blue-400 mt-2 flex items-center gap-2">
+          🤖 Powered by Hugging Face AI - Advanced threat detection using machine learning
+        </p>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
@@ -546,10 +321,15 @@ export default function ScamAnalyzer() {
             </div>
           )}
           
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800 flex items-center gap-2"><Shield className="w-4 h-4" /> {result.summary ? 'AI Summary' : t('scamAnalyzer.aiPowered')}</p>
-            {result.summary && <p className="text-sm text-blue-900 mt-2 whitespace-pre-wrap">{result.summary}</p>}
-          </div>
+          {result.summary && (
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800 flex items-center gap-2">
+                <Shield className="w-4 h-4" /> 
+                AI Summary (Powered by Hugging Face)
+              </p>
+              <p className="text-sm text-blue-900 mt-2 whitespace-pre-wrap">{result.summary}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
