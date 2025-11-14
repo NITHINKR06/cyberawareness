@@ -36,10 +36,14 @@ class HuggingFaceService {
    */
   async analyzeText(text) {
     if (!this.isConfigured()) {
+      console.error('❌ Hugging Face API key not configured!');
       throw new Error('Hugging Face API key not configured');
     }
 
     try {
+      console.log('🤖 Making Hugging Face API call for text analysis...');
+      console.log('📝 Text to analyze:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
+      
       // Enhanced labels for better classification accuracy
       const labels = [
         'phishing attack',
@@ -63,8 +67,12 @@ class HuggingFaceService {
       Identify if this is a phishing attempt, scam, spam, fraudulent content, or legitimate message.
       Consider: urgency tactics, financial requests, personal information requests, suspicious links, grammar errors, and scam patterns.`;
 
+      const apiUrl = `${this.baseUrl}/${this.models.textAnalysis}`;
+      console.log('🌐 API URL:', apiUrl);
+      console.log('🔑 API Key configured:', !!this.apiKey);
+      
       const response = await axios.post(
-        `${this.baseUrl}/${this.models.textAnalysis}`,
+        apiUrl,
         {
           inputs: enhancedPrompt,
           parameters: {
@@ -82,9 +90,25 @@ class HuggingFaceService {
         }
       );
 
-      return this.parseTextAnalysisResponse(response.data, text);
+      console.log('✅ Hugging Face API response received');
+      console.log('📊 Response data:', JSON.stringify(response.data, null, 2).substring(0, 500));
+      
+      const parsedResult = this.parseTextAnalysisResponse(response.data, text);
+      console.log('✅ Parsed result:', {
+        threatLevel: parsedResult.threatLevel,
+        confidence: parsedResult.confidence,
+        source: parsedResult.source
+      });
+      
+      return parsedResult;
     } catch (error) {
-      console.error('Hugging Face text analysis error:', error.message);
+      console.error('❌ Hugging Face text analysis error:', error.message);
+      console.error('❌ Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
       throw error;
     }
   }

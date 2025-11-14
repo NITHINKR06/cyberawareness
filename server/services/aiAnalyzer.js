@@ -16,19 +16,40 @@ class AIAnalyzerService {
     try {
       if (huggingfaceService.isConfigured()) {
         console.log('🤖 Using Hugging Face AI for text analysis (PRIMARY)');
-        return await huggingfaceService.analyzeText(text);
+        console.log('🔍 Checking API configuration...');
+        const result = await huggingfaceService.analyzeText(text);
+        console.log('✅ Hugging Face analysis completed successfully');
+        console.log('📊 Result source:', result.source);
+        return result;
       } else {
-        console.warn('⚠️  Hugging Face API not configured, using pattern analysis fallback');
-        return this.fallbackTextAnalysis(text);
+        console.error('❌❌❌ HUGGING FACE API NOT CONFIGURED ❌❌❌');
+        console.error('⚠️  Using HARDCODED pattern analysis fallback (NOT AI)');
+        console.error('⚠️  Set HUGGINGFACE_API_KEY environment variable to use REAL AI analysis');
+        const fallback = this.fallbackTextAnalysis(text);
+        fallback.source = 'pattern_analysis_fallback_no_api_key';
+        fallback.warning = '⚠️ WARNING: This is HARDCODED pattern matching, NOT Hugging Face AI. Set HUGGINGFACE_API_KEY to use real AI.';
+        fallback.isHardcoded = true;
+        return fallback;
       }
     } catch (error) {
-      console.error('❌ Hugging Face API error, using pattern analysis fallback:', error.message);
-      return this.fallbackTextAnalysis(text);
+      console.error('❌❌❌ HUGGING FACE API CALL FAILED ❌❌❌');
+      console.error('❌ Error:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      console.error('⚠️  Using HARDCODED pattern analysis fallback (NOT AI)');
+      const fallback = this.fallbackTextAnalysis(text);
+      fallback.source = 'pattern_analysis_fallback_api_error';
+      fallback.error = error.message;
+      fallback.warning = '⚠️ WARNING: Hugging Face API call failed. This is HARDCODED pattern matching, NOT AI.';
+      fallback.isHardcoded = true;
+      return fallback;
     }
   }
 
   // Fallback text analysis (minimal, used only when API unavailable)
+  // THIS IS HARDCODED PATTERN MATCHING - NOT AI!
   fallbackTextAnalysis(text) {
+    console.error('⚠️⚠️⚠️  USING HARDCODED PATTERN ANALYSIS (NOT AI) ⚠️⚠️⚠️');
+    console.error('⚠️  This is predefined keyword matching, NOT Hugging Face AI');
     const lowerText = text.toLowerCase();
     
     // Enhanced keyword categories with weights
@@ -202,7 +223,9 @@ class AIAnalyzerService {
       },
       keywords: detectedKeywords.slice(0, 10), // Limit to top 10
       indicators: detectedIndicators.slice(0, 5), // Limit to top 5
-      source: 'hardcoded_analysis'
+      source: 'hardcoded_pattern_analysis_not_ai',
+      isHardcoded: true,
+      warning: '⚠️ WARNING: This analysis uses HARDCODED pattern matching, NOT Hugging Face AI. Results are based on predefined keywords only.'
     };
   }
 

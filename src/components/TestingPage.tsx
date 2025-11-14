@@ -25,6 +25,10 @@ interface TestResult {
     indicators: string[];
     recommendations: string[];
     summary?: string;
+    source?: string;
+    isHardcoded?: boolean;
+    warning?: string;
+    error?: string;
   };
   error?: string;
   timestamp: string;
@@ -97,15 +101,35 @@ export default function TestingPage() {
     setTestResult(null);
 
     try {
+      console.log('🧪 Starting test analysis...');
       const response = await analyzeContent(testType, testInput);
+      console.log('📥 Full API response:', response);
+      
       const result: TestResult = {
         rawResponse: response,
         analysisResult: response.analysisResult,
         timestamp: new Date().toISOString()
       };
+      
+      // Check if response is from Hugging Face or fallback
+      const source = response.analysisResult?.source || 'unknown';
+      const isFromHuggingFace = source.includes('huggingface') || source.includes('hugging_face');
+      const isFallback = source.includes('fallback') || source.includes('pattern_analysis') || source.includes('hardcoded');
+      
+      console.log('🔍 Analysis source:', source);
+      console.log('🤖 From Hugging Face:', isFromHuggingFace);
+      console.log('⚠️  Is Fallback:', isFallback);
+      
       setTestResult(result);
       setTestHistory(prev => [result, ...prev].slice(0, 10)); // Keep last 10 tests
-      toast.success('Test analysis completed!');
+      
+      if (isFallback) {
+        toast.warning('⚠️ Using fallback analysis - Hugging Face API may not be configured!');
+      } else if (isFromHuggingFace) {
+        toast.success('✅ Analysis completed using Hugging Face AI!');
+      } else {
+        toast.success('Test analysis completed!');
+      }
     } catch (err: any) {
       console.error('Test analysis error:', err);
       const errorResult: TestResult = {
@@ -337,6 +361,49 @@ export default function TestingPage() {
                 <div className="space-y-4">
                   {testResult.analysisResult && (
                     <>
+                      {/* Source Indicator - Make it VERY obvious */}
+                      <div className={`mb-4 p-4 rounded-lg border-2 ${
+                        testResult.analysisResult.source?.includes('huggingface') || testResult.analysisResult.source?.includes('hugging_face')
+                          ? 'bg-green-50 dark:bg-green-900/20 border-green-400 text-green-800 dark:text-green-300'
+                          : testResult.analysisResult.isHardcoded || testResult.analysisResult.source?.includes('fallback') || testResult.analysisResult.source?.includes('pattern_analysis') || testResult.analysisResult.source?.includes('hardcoded')
+                          ? 'bg-red-50 dark:bg-red-900/20 border-red-500 text-red-800 dark:text-red-300 animate-pulse'
+                          : 'bg-gray-50 dark:bg-gray-800 border-gray-400 text-gray-800 dark:text-gray-300'
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          {(testResult.analysisResult.source?.includes('huggingface') || testResult.analysisResult.source?.includes('hugging_face')) ? (
+                            <>
+                              <CheckCircle className="w-6 h-6" />
+                              <div>
+                                <p className="font-bold text-lg">✅ Using Hugging Face AI</p>
+                                <p className="text-sm">Real AI analysis from Hugging Face model</p>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-6 h-6" />
+                              <div>
+                                <p className="font-bold text-lg">❌ NOT USING HUGGING FACE AI</p>
+                                <p className="text-sm font-semibold">This is HARDCODED pattern matching, NOT real AI!</p>
+                                <p className="text-xs mt-1">
+                                  {testResult.analysisResult.warning || 
+                                   (testResult.analysisResult.source?.includes('no_api_key')
+                                    ? 'Hugging Face API key not configured - using predefined keyword matching'
+                                    : 'Hugging Face API unavailable - using predefined keyword matching')}
+                                </p>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        <div className="mt-2 p-2 bg-red-100 dark:bg-red-900/30 rounded border border-red-300 dark:border-red-700">
+                          <p className="text-xs font-mono font-bold">Source: {testResult.analysisResult.source || 'unknown'}</p>
+                          {testResult.analysisResult.isHardcoded && (
+                            <p className="text-xs font-bold text-red-600 dark:text-red-400 mt-1">
+                              ⚠️ HARDCODED DATA - NOT AI ANALYSIS
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
                       <div className={`border-2 rounded-lg p-4 ${getThreatLevelColor(testResult.analysisResult.threatLevel)}`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">

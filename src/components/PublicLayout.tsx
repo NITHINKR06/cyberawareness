@@ -19,7 +19,8 @@ import {
   Bell,
   Moon,
   Sun,
-  PartyPopper
+  PartyPopper,
+  TestTube
 } from 'lucide-react';
 
 export default function PublicLayout() {
@@ -41,6 +42,11 @@ export default function PublicLayout() {
     { id: 'modules', name: 'Learning Modules', icon: BookOpen, path: '/modules', color: 'from-emerald-500 to-teal-600' },
     { id: 'community', name: 'Community', icon: MessageSquare, path: '/community', color: 'from-purple-500 to-pink-500' },
     { id: 'timemachine', name: 'Time Machine', icon: Clock, path: '/timemachine', color: 'from-amber-500 to-orange-600' },
+  ] as const;
+
+  // Testing navigation - separate from main navigation
+  const testingNavigation = [
+    { id: 'test', name: '🧪 Testing', icon: TestTube, path: '/test', color: 'from-yellow-500 to-orange-600' },
   ] as const;
 
   const isActiveRoute = (path: string) => {
@@ -102,6 +108,29 @@ export default function PublicLayout() {
                     <span className="text-sm font-semibold">{item.name}</span>
                     {isActive && (
                       <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${item.color} opacity-20 blur-xl`}></div>
+                    )}
+                  </button>
+                );
+              })}
+              {/* Testing Link - Desktop */}
+              {testingNavigation.map((item) => {
+                const Icon = item.icon;
+                const isActive = isActiveRoute(item.path);
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => navigate(item.path)}
+                    className={`group relative flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-300 border-2 ${
+                      isActive 
+                        ? 'bg-gradient-to-r ' + item.color + ' text-white shadow-lg border-yellow-400' 
+                        : 'bg-yellow-500/10 backdrop-blur-xl border-yellow-500/30 text-yellow-400 hover:text-yellow-300 hover:border-yellow-400/50'
+                    }`}
+                    title="Testing & Development Page"
+                  >
+                    <Icon className={`w-4 h-4 ${!isActive && 'group-hover:rotate-12 transition-transform duration-300'}`} />
+                    <span className="text-xs font-semibold">{item.name}</span>
+                    {isActive && (
+                      <div className={`absolute inset-0 rounded-lg bg-gradient-to-r ${item.color} opacity-20 blur-xl`}></div>
                     )}
                   </button>
                 );
@@ -191,6 +220,34 @@ export default function PublicLayout() {
                         <span className="text-xs text-center font-semibold">{item.name}</span>
                         {isActive && (
                           <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.color} opacity-10 blur-xl`}></div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                {/* Testing Link - Mobile */}
+                <div className="pt-2">
+                  {testingNavigation.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = isActiveRoute(item.path);
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          navigate(item.path);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`w-full group relative flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300 border-2 ${
+                          isActive 
+                            ? `bg-gradient-to-r ${item.color} text-white shadow-lg border-yellow-400` 
+                            : 'bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 border-yellow-500/30'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <span className="text-sm font-semibold">{item.name}</span>
+                        {isActive && (
+                          <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${item.color} opacity-20 blur-xl`}></div>
                         )}
                       </button>
                     );
