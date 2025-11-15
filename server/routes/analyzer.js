@@ -59,14 +59,18 @@ router.post('/analyze', async (req, res) => {
       inputType,
       inputContent,
       analysisResult: {
+        threatScore: analysisResult.threatScore,
         threatLevel: analysisResult.threatLevel,
         confidence: analysisResult.confidence,
+        verdict: analysisResult.verdict,
+        reasoning: analysisResult.reasoning,
         indicators: analysisResult.indicators,
         recommendations: analysisResult.recommendations,
         details: {
           summary: analysisResult.summary,
           source: analysisResult.source,
           threats: analysisResult.threats,
+          keywords: analysisResult.keywords,
           analyzedAt: new Date().toISOString()
         }
       },

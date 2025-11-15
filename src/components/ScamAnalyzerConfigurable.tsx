@@ -40,14 +40,18 @@ interface ValidationRules {
 }
 
 interface AnalysisResult {
+  threatScore?: number; // 0-10 threat score
   threatLevel: 'safe' | 'suspicious' | 'dangerous';
   confidence: number;
+  verdict?: string;
+  reasoning?: string;
   indicators: string[];
   recommendations: string[];
   summary?: string;
   ocrConfidence?: number;
   extractedText?: string;
   threatConfig?: ThreatLevelConfig;
+  source?: string;
 }
 
 export default function ScamAnalyzerConfigurable() {
@@ -670,11 +674,19 @@ export default function ScamAnalyzerConfigurable() {
                   </p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-600">
-                  {t('scamAnalyzer.confidence')}
-                </p>
-                <p className="text-2xl font-bold">{result.confidence}%</p>
+              <div className="text-right space-y-2">
+                {result.threatScore !== undefined && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Threat Score</p>
+                    <p className="text-2xl font-bold">{result.threatScore}/10</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    {t('scamAnalyzer.confidence')}
+                  </p>
+                  <p className="text-2xl font-bold">{result.confidence}%</p>
+                </div>
                 {result.ocrConfidence && (
                   <div className="mt-2">
                     <p className="text-xs text-gray-500">OCR Confidence</p>
@@ -686,12 +698,46 @@ export default function ScamAnalyzerConfigurable() {
               </div>
             </div>
             
+            {result.threatScore !== undefined && (
+              <div className="mb-4">
+                <div className="flex justify-between text-xs text-gray-600 mb-1">
+                  <span>Threat Score</span>
+                  <span>{result.threatScore}/10</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      result.threatScore <= 2 ? 'bg-green-500' : 
+                      result.threatScore <= 4 ? 'bg-yellow-500' : 
+                      result.threatScore <= 6 ? 'bg-orange-500' : 
+                      result.threatScore <= 8 ? 'bg-red-500' : 'bg-red-700'
+                    }`} 
+                    style={{ width: `${(result.threatScore / 10) * 100}%` }} 
+                  />
+                </div>
+              </div>
+            )}
+            
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
                 className={`h-full rounded-full transition-all duration-500 ${getProgressBarColor(result.threatLevel, result.threatConfig)}`} 
                 style={{ width: `${result.confidence}%` }} 
               />
             </div>
+            
+            {result.verdict && (
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm font-semibold text-blue-800 dark:text-blue-200">Verdict:</p>
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{result.verdict}</p>
+              </div>
+            )}
+            
+            {result.reasoning && (
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Detailed Reasoning:</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap">{result.reasoning}</p>
+              </div>
+            )}
           </div>
           
           <div className="grid md:grid-cols-2 gap-6">

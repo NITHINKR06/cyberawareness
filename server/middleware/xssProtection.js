@@ -219,7 +219,7 @@ export const setCSPHeaders = (req, res, next) => {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
-    "connect-src 'self' https://api.openai.com https://api.huggingface.co",
+    "connect-src 'self' https://api.openai.com https://generativelanguage.googleapis.com",
     "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",

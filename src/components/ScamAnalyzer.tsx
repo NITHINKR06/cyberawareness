@@ -17,13 +17,17 @@ import { analyzeContent, ocrService } from '../services/backendApi';
 import { toast } from 'react-toastify';
 
 interface AnalysisResult {
+  threatScore?: number; // 0-10 threat score
   threatLevel: 'safe' | 'suspicious' | 'dangerous';
   confidence: number;
+  verdict?: string;
+  reasoning?: string;
   indicators: string[];
   recommendations: string[];
   summary?: string;
   ocrConfidence?: number;
   extractedText?: string;
+  source?: string;
 }
 
 export default function ScamAnalyzer() {
@@ -40,14 +44,14 @@ export default function ScamAnalyzer() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Basic validation only - no pattern matching, let Hugging Face AI do the analysis
+  // Basic validation only - no pattern matching, let Generative LLM AI do the analysis
   const validateBasicInput = (type: 'text' | 'url', content: string): { isValid: boolean; error?: string } => {
     if (!content || !content.trim()) {
       return { isValid: false, error: type === 'url' ? 'Please enter a URL to analyze' : 'Please enter text to analyze' };
     }
 
     if (type === 'url') {
-      // Only validate URL format, no threat detection (Hugging Face will do that)
+      // Only validate URL format, no threat detection (Generative LLM will do that)
       try {
         const urlObj = new URL(content);
         // Check for valid protocol
@@ -88,12 +92,12 @@ export default function ScamAnalyzer() {
     setResult(null);
 
     try {
-      // Send directly to backend - Hugging Face AI will do all threat analysis
+      // Send directly to backend - Generative LLM AI will do all threat analysis
       const response = await analyzeContent(type, content);
       const analysisResult = response.analysisResult;
       setResult(analysisResult);
 
-      // Show results based on Hugging Face AI analysis
+      // Show results based on Generative LLM AI analysis
       if (analysisResult.threatLevel === 'dangerous') {
         toast.error('High threat detected! Please be extremely cautious.');
       } else if (analysisResult.threatLevel === 'suspicious') {
@@ -104,7 +108,7 @@ export default function ScamAnalyzer() {
     } catch (err: any) {
       console.error(`Error analyzing ${type}:`, err);
       setError(`Failed to analyze ${type}. ${err.message || 'Please try again.'}`);
-      toast.error(`Analysis failed: ${err.message || 'Server error. Please check your Hugging Face API key configuration.'}`);
+      toast.error(`Analysis failed: ${err.message || 'Server error. Please check your Generative LLM API key configuration (Gemini or ChatGPT).'}`);
     } finally {
       setIsProcessing(false);
     }
@@ -142,9 +146,9 @@ export default function ScamAnalyzer() {
       // Step 2: Populate the text area and switch to text tab
       setTextInput(extractedText);
       setActiveTab('text');
-      toast.success('Text extracted! Analyzing with Hugging Face AI...');
+      toast.success('Text extracted! Analyzing with Generative LLM AI...');
 
-      // Step 3: Automatically analyze the extracted text using enhanced Hugging Face AI
+      // Step 3: Automatically analyze the extracted text using Generative LLM AI
       // The backend will use enhanced text analysis which works perfectly for image-extracted text
       const analysisResponse = await analyzeContent('text', extractedText);
       const analysisResult = analysisResponse.analysisResult;
@@ -156,7 +160,7 @@ export default function ScamAnalyzer() {
       
       setResult(analysisResult);
       
-      // Show appropriate toast based on threat level from enhanced Hugging Face AI
+      // Show appropriate toast based on threat level from Generative LLM AI
       if (analysisResult.threatLevel === 'dangerous') {
         toast.error('High threat detected in image! Please be extremely cautious.');
       } else if (analysisResult.threatLevel === 'suspicious') {
@@ -199,7 +203,7 @@ export default function ScamAnalyzer() {
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">{t('scamAnalyzer.title')}</h1>
         <p className="text-gray-600 dark:text-gray-400">{t('scamAnalyzer.subtitle')}</p>
         <p className="text-sm text-blue-600 dark:text-blue-400 mt-2 flex items-center gap-2">
-          🤖 Powered by Hugging Face AI - Advanced threat detection using machine learning
+          🤖 Powered by Generative LLM (Gemini/ChatGPT) - Advanced threat detection with detailed scoring (0-10)
         </p>
       </div>
 
@@ -282,9 +286,17 @@ export default function ScamAnalyzer() {
                   <p className="text-2xl font-bold capitalize">{t(`scamAnalyzer.${result.threatLevel}`)}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-600">{t('scamAnalyzer.confidence')}</p>
-                <p className="text-2xl font-bold">{result.confidence}%</p>
+              <div className="text-right space-y-2">
+                {result.threatScore !== undefined && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Threat Score</p>
+                    <p className="text-2xl font-bold">{result.threatScore}/10</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-medium text-gray-600">{t('scamAnalyzer.confidence')}</p>
+                  <p className="text-2xl font-bold">{result.confidence}%</p>
+                </div>
                 {result.ocrConfidence && (
                   <div className="mt-2">
                     <p className="text-xs text-gray-500">OCR Confidence</p>
@@ -293,9 +305,40 @@ export default function ScamAnalyzer() {
                 )}
               </div>
             </div>
+            {result.threatScore !== undefined && (
+              <div className="mb-4">
+                <div className="flex justify-between text-xs text-gray-600 mb-1">
+                  <span>Threat Score</span>
+                  <span>{result.threatScore}/10</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      result.threatScore <= 2 ? 'bg-green-500' : 
+                      result.threatScore <= 4 ? 'bg-yellow-500' : 
+                      result.threatScore <= 6 ? 'bg-orange-500' : 
+                      result.threatScore <= 8 ? 'bg-red-500' : 'bg-red-700'
+                    }`} 
+                    style={{ width: `${(result.threatScore / 10) * 100}%` }} 
+                  />
+                </div>
+              </div>
+            )}
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div className={`h-full rounded-full transition-all duration-500 ${result.threatLevel === 'safe' ? 'bg-green-500' : result.threatLevel === 'suspicious' ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${result.confidence}%` }} />
             </div>
+            {result.verdict && (
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm font-semibold text-blue-800 dark:text-blue-200">Verdict:</p>
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{result.verdict}</p>
+              </div>
+            )}
+            {result.reasoning && (
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Detailed Reasoning:</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap">{result.reasoning}</p>
+              </div>
+            )}
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
@@ -322,12 +365,12 @@ export default function ScamAnalyzer() {
           )}
           
           {result.summary && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800 flex items-center gap-2">
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200 flex items-center gap-2">
                 <Shield className="w-4 h-4" /> 
-                AI Summary (Powered by Hugging Face)
+                AI Summary {result.source && `(Powered by ${result.source.includes('gemini') ? 'Gemini' : result.source.includes('chatgpt') || result.source.includes('openai') ? 'ChatGPT' : 'Generative LLM'})`}
               </p>
-              <p className="text-sm text-blue-900 mt-2 whitespace-pre-wrap">{result.summary}</p>
+              <p className="text-sm text-blue-900 dark:text-blue-300 mt-2 whitespace-pre-wrap">{result.summary}</p>
             </div>
           )}
         </div>

@@ -1,45 +1,45 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import huggingfaceService from './huggingfaceService.js';
+import generativeLLMService from './generativeLLMService.js';
 
 dotenv.config();
 
 class AIAnalyzerService {
   constructor() {
-    this.huggingFaceToken = process.env.HUGGINGFACE_API_KEY;
-    this.geminiApiKey = process.env.GEMINI_API_KEY || 'key';
+    this.llmService = generativeLLMService;
   }
 
-  // Analyze text using Hugging Face API (PRIMARY METHOD)
-  // Falls back to pattern analysis only if Hugging Face is unavailable
-  async analyzeTextWithHuggingFace(text) {
+  // Analyze text using Generative LLM (Gemini or ChatGPT) (PRIMARY METHOD)
+  // Falls back to pattern analysis only if LLM is unavailable
+  async analyzeTextWithLLM(text) {
     try {
-      if (huggingfaceService.isConfigured()) {
-        console.log('🤖 Using Hugging Face AI for text analysis (PRIMARY)');
+      if (this.llmService.isConfigured()) {
+        const providerInfo = this.llmService.getProviderInfo();
+        console.log(`🤖 Using ${providerInfo.provider.toUpperCase()} AI for text analysis (PRIMARY)`);
         console.log('🔍 Checking API configuration...');
-        const result = await huggingfaceService.analyzeText(text);
-        console.log('✅ Hugging Face analysis completed successfully');
-        console.log('📊 Result source:', result.source);
+        const result = await this.llmService.analyzeText(text);
+        console.log(`✅ ${providerInfo.provider.toUpperCase()} analysis completed successfully`);
+        console.log(`📊 Threat Score: ${result.threatScore}/10, Threat Level: ${result.threatLevel}`);
         return result;
       } else {
-        console.error('❌❌❌ HUGGING FACE API NOT CONFIGURED ❌❌❌');
+        console.error('❌❌❌ GENERATIVE LLM API NOT CONFIGURED ❌❌❌');
         console.error('⚠️  Using HARDCODED pattern analysis fallback (NOT AI)');
-        console.error('⚠️  Set HUGGINGFACE_API_KEY environment variable to use REAL AI analysis');
+        console.error('⚠️  Set GEMINI_API_KEY or CHATGPT_API_KEY environment variable to use REAL AI analysis');
         const fallback = this.fallbackTextAnalysis(text);
         fallback.source = 'pattern_analysis_fallback_no_api_key';
-        fallback.warning = '⚠️ WARNING: This is HARDCODED pattern matching, NOT Hugging Face AI. Set HUGGINGFACE_API_KEY to use real AI.';
+        fallback.warning = '⚠️ WARNING: This is HARDCODED pattern matching, NOT AI. Set GEMINI_API_KEY or CHATGPT_API_KEY to use real AI.';
         fallback.isHardcoded = true;
         return fallback;
       }
     } catch (error) {
-      console.error('❌❌❌ HUGGING FACE API CALL FAILED ❌❌❌');
+      console.error('❌❌❌ GENERATIVE LLM API CALL FAILED ❌❌❌');
       console.error('❌ Error:', error.message);
       console.error('❌ Error stack:', error.stack);
       console.error('⚠️  Using HARDCODED pattern analysis fallback (NOT AI)');
       const fallback = this.fallbackTextAnalysis(text);
       fallback.source = 'pattern_analysis_fallback_api_error';
       fallback.error = error.message;
-      fallback.warning = '⚠️ WARNING: Hugging Face API call failed. This is HARDCODED pattern matching, NOT AI.';
+      fallback.warning = '⚠️ WARNING: Generative LLM API call failed. This is HARDCODED pattern matching, NOT AI.';
       fallback.isHardcoded = true;
       return fallback;
     }
@@ -49,7 +49,7 @@ class AIAnalyzerService {
   // THIS IS HARDCODED PATTERN MATCHING - NOT AI!
   fallbackTextAnalysis(text) {
     console.error('⚠️⚠️⚠️  USING HARDCODED PATTERN ANALYSIS (NOT AI) ⚠️⚠️⚠️');
-    console.error('⚠️  This is predefined keyword matching, NOT Hugging Face AI');
+    console.error('⚠️  This is predefined keyword matching, NOT Generative LLM AI');
     const lowerText = text.toLowerCase();
     
     // Enhanced keyword categories with weights
@@ -194,28 +194,51 @@ class AIAnalyzerService {
     const contextBonus = this.analyzeContext(lowerText, detectedKeywords);
     totalScore += contextBonus;
 
-    // Determine threat level and confidence
+    // Determine threat level and threat score (0-10)
     let threatLevel = 'safe';
-    let confidence = 0;
+    let threatScore = 0;
 
-    // Adjusted thresholds to be more sensitive to threats
-    if (totalScore >= 10 || typosquattingDetected) {
-      threatLevel = 'dangerous';
-      confidence = Math.min(85 + Math.floor(totalScore / 3), 99);
-    } else if (totalScore >= 5) {
-      threatLevel = 'suspicious';
-      confidence = Math.min(70 + Math.floor(totalScore / 2), 84);
-    } else if (totalScore >= 2) {
-      threatLevel = 'suspicious';
-      confidence = Math.min(60 + Math.floor(totalScore * 2), 69);
-    } else {
-      threatLevel = 'safe';
-      confidence = Math.max(90 - Math.floor(totalScore * 5), 70);
+    // Convert totalScore to threat score (0-10 scale)
+    // Scale the totalScore to 0-10 range
+    // Assuming totalScore can range from 0 to ~50 based on weights
+    threatScore = Math.min(10, Math.max(0, Math.round((totalScore / 50) * 10)));
+
+    // Extract threats from indicators
+    const detectedThreats = [];
+    if (detectedIndicators.some(ind => ind.toLowerCase().includes('homograph'))) {
+      detectedThreats.push('HOMOGRAPH_ATTACK');
+    }
+    if (detectedIndicators.some(ind => ind.toLowerCase().includes('typosquatting') || ind.toLowerCase().includes('impersonation'))) {
+      detectedThreats.push('TYPOSQUATTING');
     }
 
+    // --- ENHANCED LOGIC FOR CRITICAL THREATS ---
+    // Critical: If Homograph or Typosquatting is detected, it is immediately Dangerous.
+    if (detectedThreats.includes('HOMOGRAPH_ATTACK') || detectedThreats.includes('TYPOSQUATTING') || totalScore >= 10) {
+      threatLevel = 'dangerous';
+      threatScore = Math.max(threatScore, 8); // Minimum 8 for dangerous threats
+    } else if (totalScore >= 5) {
+      // High-weight threats (Phishing Pattern, IP Address)
+      threatLevel = 'suspicious';
+      threatScore = Math.max(threatScore, 5); // Minimum 5 for suspicious
+    } else if (totalScore >= 2) {
+      // Low-weight threats (Shorteners, Suspicious TLD)
+      threatLevel = 'suspicious';
+      threatScore = Math.max(threatScore, 3); // Minimum 3 for low-level suspicious
+    } else {
+      threatLevel = 'safe';
+      threatScore = Math.max(0, Math.min(2, threatScore)); // 0-2 for safe
+    }
+
+    // Calculate confidence based on threat score and indicators
+    const confidence = Math.min(99, Math.max(50, 50 + (threatScore * 5)));
+
     return {
+      threatScore,
       threatLevel,
       confidence: Math.round(confidence),
+      verdict: `${threatLevel === 'dangerous' ? 'High risk detected' : threatLevel === 'suspicious' ? 'Suspicious content' : 'Content appears safe'}`,
+      reasoning: `Pattern analysis detected ${detectedKeywords.length} suspicious keywords and ${detectedIndicators.length} indicators. ${threatLevel === 'dangerous' ? 'Multiple high-risk patterns identified.' : threatLevel === 'suspicious' ? 'Some concerning patterns found.' : 'No significant threat patterns detected.'}`,
       scores: {
         totalScore,
         keywordCount: detectedKeywords.length,
@@ -223,9 +246,10 @@ class AIAnalyzerService {
       },
       keywords: detectedKeywords.slice(0, 10), // Limit to top 10
       indicators: detectedIndicators.slice(0, 5), // Limit to top 5
+      threats: detectedThreats.length > 0 ? detectedThreats : [],
       source: 'hardcoded_pattern_analysis_not_ai',
       isHardcoded: true,
-      warning: '⚠️ WARNING: This analysis uses HARDCODED pattern matching, NOT Hugging Face AI. Results are based on predefined keywords only.'
+      warning: '⚠️ WARNING: This analysis uses HARDCODED pattern matching, NOT Generative LLM AI. Results are based on predefined keywords only.'
     };
   }
 
@@ -255,19 +279,23 @@ class AIAnalyzerService {
     return bonus;
   }
 
-  // Analyze URL using Hugging Face API (PRIMARY METHOD)
-  // Falls back to pattern analysis only if Hugging Face is unavailable
-  async analyzeUrlWithHuggingFace(url) {
+  // Analyze URL using Generative LLM (Gemini or ChatGPT) (PRIMARY METHOD)
+  // Falls back to pattern analysis only if LLM is unavailable
+  async analyzeUrlWithLLM(url) {
     try {
-      if (huggingfaceService.isConfigured()) {
-        console.log('🤖 Using Hugging Face AI for URL analysis (PRIMARY)');
-        return await huggingfaceService.analyzeUrl(url);
+      if (this.llmService.isConfigured()) {
+        const providerInfo = this.llmService.getProviderInfo();
+        console.log(`🤖 Using ${providerInfo.provider.toUpperCase()} AI for URL analysis (PRIMARY)`);
+        const result = await this.llmService.analyzeUrl(url);
+        console.log(`✅ ${providerInfo.provider.toUpperCase()} URL analysis completed`);
+        console.log(`📊 Threat Score: ${result.threatScore}/10, Threat Level: ${result.threatLevel}`);
+        return result;
       } else {
-        console.warn('⚠️  Hugging Face API not configured, using pattern analysis fallback');
+        console.warn('⚠️  Generative LLM API not configured, using pattern analysis fallback');
         return this.fallbackUrlAnalysis(url);
       }
     } catch (error) {
-      console.error('❌ Hugging Face API error, using pattern analysis fallback:', error.message);
+      console.error('❌ Generative LLM API error, using pattern analysis fallback:', error.message);
       return this.fallbackUrlAnalysis(url);
     }
   }
@@ -446,23 +474,30 @@ class AIAnalyzerService {
       indicators.push('Potential redirect chain');
     }
 
-    // Determine threat level based on score
+    // Determine threat level and threat score (0-10) based on score
     let threatLevel = 'safe';
-    let confidence = 0;
+    let threatScore = 0;
+
+    // Convert totalScore to threat score (0-10 scale)
+    // Scale the totalScore to 0-10 range
+    threatScore = Math.min(10, Math.max(0, Math.round((totalScore / 50) * 10)));
 
     if (totalScore >= 10) {
       threatLevel = 'dangerous';
-      confidence = Math.min(85 + Math.floor(totalScore / 2), 99);
+      threatScore = Math.max(threatScore, 8); // Minimum 8 for dangerous
     } else if (totalScore >= 5) {
       threatLevel = 'suspicious';
-      confidence = Math.min(70 + Math.floor(totalScore * 2), 84);
+      threatScore = Math.max(threatScore, 5); // Minimum 5 for suspicious
     } else if (totalScore >= 2) {
       threatLevel = 'suspicious';
-      confidence = Math.min(60 + Math.floor(totalScore * 3), 69);
+      threatScore = Math.max(threatScore, 3); // Minimum 3 for low-level suspicious
     } else {
       threatLevel = 'safe';
-      confidence = Math.max(90 - Math.floor(totalScore * 10), 70);
+      threatScore = Math.max(0, Math.min(2, threatScore)); // 0-2 for safe
     }
+
+    // Calculate confidence based on threat score
+    const confidence = Math.min(99, Math.max(50, 50 + (threatScore * 5)));
 
     // Special case: known safe domains
     const safeDomains = [
@@ -487,8 +522,11 @@ class AIAnalyzerService {
     }
 
     return {
+      threatScore,
       threatLevel,
       confidence: Math.round(confidence),
+      verdict: `${threatLevel === 'dangerous' ? 'High risk URL detected' : threatLevel === 'suspicious' ? 'Suspicious URL' : 'URL appears safe'}`,
+      reasoning: `Pattern analysis detected ${threats.length} threat types and ${indicators.length} indicators. ${threatLevel === 'dangerous' ? 'Multiple high-risk patterns identified in URL structure.' : threatLevel === 'suspicious' ? 'Some concerning URL patterns found.' : 'No significant threat patterns detected in URL.'}`,
       threats: threats.slice(0, 5), // Limit to top 5 threats
       indicators: indicators.slice(0, 5), // Limit to top 5 indicators
       details: {
@@ -499,26 +537,27 @@ class AIAnalyzerService {
     };
   }
 
-  // Generate summary using Hugging Face API (PRIMARY METHOD)
+  // Generate summary using Generative LLM (Gemini or ChatGPT) (PRIMARY METHOD)
   // Enhanced summary generation with better detail and accuracy
-  async generateSummaryWithGemini(analysisData) {
+  async generateSummaryWithLLM(analysisData) {
     try {
-      if (huggingfaceService.isConfigured()) {
-        console.log('🤖 Using Hugging Face AI for enhanced summary generation (PRIMARY)');
-        return await huggingfaceService.generateSummary(analysisData);
+      if (this.llmService.isConfigured()) {
+        const providerInfo = this.llmService.getProviderInfo();
+        console.log(`🤖 Using ${providerInfo.provider.toUpperCase()} AI for enhanced summary generation (PRIMARY)`);
+        return await this.llmService.generateSummary(analysisData);
       } else {
-        console.warn('⚠️  Hugging Face API not configured, using enhanced fallback summary');
+        console.warn('⚠️  Generative LLM API not configured, using enhanced fallback summary');
         return this.generateFallbackSummary(analysisData);
       }
     } catch (error) {
-      console.error('❌ Hugging Face summary generation error, using enhanced fallback:', error.message);
+      console.error('❌ Generative LLM summary generation error, using enhanced fallback:', error.message);
       return this.generateFallbackSummary(analysisData);
     }
   }
 
   // Fallback summary generation - Enhanced with dynamic content analysis
   generateFallbackSummary(analysisData) {
-    const { threatLevel, confidence, indicators = [], threats = [], keywords = [], inputType, scores } = analysisData;
+    const { threatScore, threatLevel, confidence, indicators = [], threats = [], keywords = [], inputType, scores, reasoning = '', verdict = '' } = analysisData;
     
     let summary = '';
     
@@ -528,17 +567,25 @@ class AIAnalyzerService {
     
     if (threatLevel === 'dangerous') {
       if (inputType === 'url') {
-        summary = `CRITICAL SECURITY WARNING: This URL has been identified as highly dangerous with ${confidence}% confidence.\n\n`;
-        summary += `THREAT ANALYSIS:\n`;
+        summary = `CRITICAL SECURITY WARNING: This URL has been identified as highly dangerous.\n\n`;
+        summary += `THREAT SCORE: ${threatScore}/10 (${threatLevel.toUpperCase()})\n`;
+        summary += `CONFIDENCE: ${confidence}%\n`;
+        if (verdict) summary += `VERDICT: ${verdict}\n`;
+        summary += `\nTHREAT ANALYSIS:\n`;
         
-        // Dynamic threat description based on actual detected threats
-        if (specificThreats.length > 0) {
-          specificThreats.forEach(threat => {
-            summary += `• ${threat}\n`;
-          });
+        // Use reasoning if available, otherwise use fallback
+        if (reasoning) {
+          summary += `${reasoning}\n\n`;
         } else {
-          summary += `• Multiple malicious patterns detected in this URL\n`;
-          summary += `• This link may lead to a fraudulent or harmful website\n`;
+          // Dynamic threat description based on actual detected threats
+          if (specificThreats.length > 0) {
+            specificThreats.forEach(threat => {
+              summary += `• ${threat}\n`;
+            });
+          } else {
+            summary += `• Multiple malicious patterns detected in this URL\n`;
+            summary += `• This link may lead to a fraudulent or harmful website\n`;
+          }
         }
         
         summary += `\nIMMEDIATE ACTIONS REQUIRED:\n`;
@@ -550,23 +597,31 @@ class AIAnalyzerService {
         
       } else {
         // Text analysis - dangerous with dynamic scam type identification
-        summary = `HIGH-RISK SCAM DETECTED: This message exhibits multiple characteristics of a ${scamTypes.primary || 'sophisticated scam'} with ${confidence}% confidence.\n\n`;
-        summary += `IDENTIFIED SCAM INDICATORS:\n`;
+        summary = `HIGH-RISK SCAM DETECTED: This message exhibits multiple characteristics of a ${scamTypes.primary || 'sophisticated scam'}.\n\n`;
+        summary += `THREAT SCORE: ${threatScore}/10 (${threatLevel.toUpperCase()})\n`;
+        summary += `CONFIDENCE: ${confidence}%\n`;
+        if (verdict) summary += `VERDICT: ${verdict}\n`;
+        summary += `\nIDENTIFIED SCAM INDICATORS:\n`;
         
-        // Dynamic indicators based on actual detected keywords
-        if (scamTypes.details.length > 0) {
-          scamTypes.details.forEach(detail => {
-            summary += `• ${detail}\n`;
-          });
+        // Use reasoning if available, otherwise use fallback
+        if (reasoning) {
+          summary += `${reasoning}\n\n`;
         } else {
-          summary += `• Multiple scam indicators detected in this message\n`;
-          summary += `• Content designed to manipulate or deceive recipients\n`;
-        }
-        
-        // Add specific keyword warnings if available
-        if (keywords && keywords.length > 0) {
-          const topKeywords = keywords.slice(0, 5).join('", "');
-          summary += `• Detected suspicious terms: "${topKeywords}"\n`;
+          // Dynamic indicators based on actual detected keywords
+          if (scamTypes.details.length > 0) {
+            scamTypes.details.forEach(detail => {
+              summary += `• ${detail}\n`;
+            });
+          } else {
+            summary += `• Multiple scam indicators detected in this message\n`;
+            summary += `• Content designed to manipulate or deceive recipients\n`;
+          }
+          
+          // Add specific keyword warnings if available
+          if (keywords && keywords.length > 0) {
+            const topKeywords = keywords.slice(0, 5).join('", "');
+            summary += `• Detected suspicious terms: "${topKeywords}"\n`;
+          }
         }
         
         summary += `\nPROTECTIVE ACTIONS:\n`;
@@ -579,20 +634,28 @@ class AIAnalyzerService {
       
     } else if (threatLevel === 'suspicious') {
       if (inputType === 'url') {
-        summary = `SUSPICIOUS URL DETECTED: This link shows concerning characteristics that require caution (${confidence}% confidence).\n\n`;
-        summary += `SUSPICIOUS ELEMENTS:\n`;
+        summary = `SUSPICIOUS URL DETECTED: This link shows concerning characteristics that require caution.\n\n`;
+        summary += `THREAT SCORE: ${threatScore}/10 (${threatLevel.toUpperCase()})\n`;
+        summary += `CONFIDENCE: ${confidence}%\n`;
+        if (verdict) summary += `VERDICT: ${verdict}\n`;
+        summary += `\nSUSPICIOUS ELEMENTS:\n`;
         
-        // Dynamic suspicious elements based on actual threats
-        if (specificThreats.length > 0) {
-          specificThreats.forEach(threat => {
-            summary += `• ${threat}\n`;
-          });
-        } else if (indicators.length > 0) {
-          indicators.slice(0, 3).forEach(indicator => {
-            summary += `• ${indicator}\n`;
-          });
+        // Use reasoning if available, otherwise use fallback
+        if (reasoning) {
+          summary += `${reasoning}\n\n`;
         } else {
-          summary += `• Some characteristics of this URL raise concerns\n`;
+          // Dynamic suspicious elements based on actual threats
+          if (specificThreats.length > 0) {
+            specificThreats.forEach(threat => {
+              summary += `• ${threat}\n`;
+            });
+          } else if (indicators.length > 0) {
+            indicators.slice(0, 3).forEach(indicator => {
+              summary += `• ${indicator}\n`;
+            });
+          } else {
+            summary += `• Some characteristics of this URL raise concerns\n`;
+          }
         }
         
         summary += `\nRECOMMENDED PRECAUTIONS:\n`;
@@ -604,20 +667,28 @@ class AIAnalyzerService {
         
       } else {
         // Text analysis - suspicious with dynamic content
-        summary = `POTENTIALLY SUSPICIOUS MESSAGE: This content contains elements commonly found in ${scamTypes.primary || 'scam messages'} (${confidence}% confidence).\n\n`;
-        summary += `WARNING SIGNS DETECTED:\n`;
+        summary = `POTENTIALLY SUSPICIOUS MESSAGE: This content contains elements commonly found in ${scamTypes.primary || 'scam messages'}.\n\n`;
+        summary += `THREAT SCORE: ${threatScore}/10 (${threatLevel.toUpperCase()})\n`;
+        summary += `CONFIDENCE: ${confidence}%\n`;
+        if (verdict) summary += `VERDICT: ${verdict}\n`;
+        summary += `\nWARNING SIGNS DETECTED:\n`;
         
-        // Show actual detected indicators
-        if (scamTypes.details.length > 0) {
-          scamTypes.details.forEach(detail => {
-            summary += `• ${detail}\n`;
-          });
-        } else if (indicators.length > 0) {
-          indicators.slice(0, 3).forEach(indicator => {
-            summary += `• ${indicator}\n`;
-          });
+        // Use reasoning if available, otherwise use fallback
+        if (reasoning) {
+          summary += `${reasoning}\n\n`;
         } else {
-          summary += `• Some elements of this message warrant caution\n`;
+          // Show actual detected indicators
+          if (scamTypes.details.length > 0) {
+            scamTypes.details.forEach(detail => {
+              summary += `• ${detail}\n`;
+            });
+          } else if (indicators.length > 0) {
+            indicators.slice(0, 3).forEach(indicator => {
+              summary += `• ${indicator}\n`;
+            });
+          } else {
+            summary += `• Some elements of this message warrant caution\n`;
+          }
         }
         
         summary += `\nSAFETY RECOMMENDATIONS:\n`;
@@ -631,11 +702,20 @@ class AIAnalyzerService {
     } else {
       // Safe threat level summaries
       if (inputType === 'url') {
-        summary = `URL APPEARS SAFE: Initial analysis shows no immediate threats (${confidence}% confidence).\n\n`;
-        summary += `ANALYSIS RESULTS:\n`;
-        summary += `• No known malicious patterns detected\n`;
-        summary += `• Domain appears legitimate\n`;
-        summary += `• No suspicious URL characteristics found\n\n`;
+        summary = `URL APPEARS SAFE: Initial analysis shows no immediate threats.\n\n`;
+        summary += `THREAT SCORE: ${threatScore}/10 (${threatLevel.toUpperCase()})\n`;
+        summary += `CONFIDENCE: ${confidence}%\n`;
+        if (verdict) summary += `VERDICT: ${verdict}\n`;
+        summary += `\nANALYSIS RESULTS:\n`;
+        
+        if (reasoning) {
+          summary += `${reasoning}\n\n`;
+        } else {
+          summary += `• No known malicious patterns detected\n`;
+          summary += `• Domain appears legitimate\n`;
+          summary += `• No suspicious URL characteristics found\n\n`;
+        }
+        
         summary += `BEST PRACTICES:\n`;
         summary += `• Always verify HTTPS connection (look for padlock icon)\n`;
         summary += `• Check the domain spelling carefully\n`;
@@ -645,11 +725,20 @@ class AIAnalyzerService {
         
       } else {
         // Text analysis - safe
-        summary = `MESSAGE APPEARS LEGITIMATE: No significant scam indicators detected (${confidence}% confidence).\n\n`;
-        summary += `ANALYSIS SUMMARY:\n`;
-        summary += `• No common scam keywords or patterns found\n`;
-        summary += `• Message structure appears normal\n`;
-        summary += `• No urgent threats or pressure tactics detected\n\n`;
+        summary = `MESSAGE APPEARS LEGITIMATE: No significant scam indicators detected.\n\n`;
+        summary += `THREAT SCORE: ${threatScore}/10 (${threatLevel.toUpperCase()})\n`;
+        summary += `CONFIDENCE: ${confidence}%\n`;
+        if (verdict) summary += `VERDICT: ${verdict}\n`;
+        summary += `\nANALYSIS SUMMARY:\n`;
+        
+        if (reasoning) {
+          summary += `${reasoning}\n\n`;
+        } else {
+          summary += `• No common scam keywords or patterns found\n`;
+          summary += `• Message structure appears normal\n`;
+          summary += `• No urgent threats or pressure tactics detected\n\n`;
+        }
+        
         summary += `STAY SAFE ONLINE:\n`;
         summary += `• Continue to verify sender identity for important matters\n`;
         summary += `• Never share passwords or PINs, even with legitimate contacts\n`;
@@ -794,9 +883,9 @@ class AIAnalyzerService {
     let analysisResult;
     // Perform the initial analysis (this part is the same)
     if (inputType === 'url') {
-        analysisResult = await this.analyzeUrlWithHuggingFace(inputContent);
+        analysisResult = await this.analyzeUrlWithLLM(inputContent);
     } else {
-        analysisResult = await this.analyzeTextWithHuggingFace(inputContent);
+        analysisResult = await this.analyzeTextWithLLM(inputContent);
     }
 
     // WEAK PROMPT: Directly includes user input without protection
@@ -804,39 +893,27 @@ class AIAnalyzerService {
       Summarize the following analysis. The user's original text was: "${inputContent}"
       
       Analysis data:
+      - Threat Score: ${analysisResult.threatScore || 0}/10
       - Threat Level: ${analysisResult.threatLevel}
       - Confidence: ${analysisResult.confidence}%
     `;
 
     try {
-        if (!this.geminiApiKey || this.geminiApiKey === 'key') {
+        if (!this.llmService.isConfigured()) {
             analysisResult.summary = "VULNERABLE AI: This is a demonstration of how an unsecured AI system responds to prompt injection attacks. The system directly includes user input in the prompt without protection, making it susceptible to manipulation.";
             return { analysisResult };
         }
 
-        console.log('Calling Gemini API (vulnerable) with key:', this.geminiApiKey.substring(0, 10) + '...');
+        const providerInfo = this.llmService.getProviderInfo();
+        console.log(`Calling ${providerInfo.provider.toUpperCase()} API (vulnerable)...`);
 
-        const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${this.geminiApiKey}`, {
-                contents: [{ parts: [{ text: weakPrompt }] }]
-            },
-            {
-                timeout: 10000,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
+        const response = await this.llmService.generateFromPrompt(weakPrompt);
 
-        console.log('Gemini API response (vulnerable):', response.data);
+        console.log(`${providerInfo.provider.toUpperCase()} API response (vulnerable):`, response.substring(0, 200));
 
-        if (response.data.candidates && response.data.candidates[0] && response.data.candidates[0].content) {
-            analysisResult.summary = response.data.candidates[0].content.parts[0]?.text || "Failed to get vulnerable summary.";
-        } else {
-            analysisResult.summary = "VULNERABLE AI: This demonstrates how an unsecured AI system can be manipulated. The system failed to properly analyze the malicious input.";
-        }
+        analysisResult.summary = response || "VULNERABLE AI: This demonstrates how an unsecured AI system can be manipulated. The system failed to properly analyze the malicious input.";
     } catch (error) {
-        console.log('Gemini API error (vulnerable):', error.response?.data || error.message);
+        console.log('LLM API error (vulnerable):', error.response?.data || error.message);
         analysisResult.summary = "VULNERABLE AI: This is a demonstration of how an unsecured AI system responds to prompt injection attacks. The system directly includes user input in the prompt without protection, making it susceptible to manipulation.";
     }
 
@@ -848,22 +925,25 @@ class AIAnalyzerService {
 // and add this line right before it:
 
   // Main analysis function
-  // Uses Hugging Face AI as PRIMARY method for threat detection
-  // Falls back to pattern analysis only if Hugging Face is unavailable
+  // Uses Generative LLM (Gemini or ChatGPT) as PRIMARY method for threat detection
+  // Falls back to pattern analysis only if LLM is unavailable
   async analyze(inputType, inputContent) {
     let analysisResult = {
       inputType,
+      threatScore: 0,
       threatLevel: 'safe',
       confidence: 0,
+      verdict: '',
+      reasoning: '',
       indicators: [],
       recommendations: [],
       summary: ''
     };
 
     try {
-      // PRIMARY: Use Hugging Face AI for analysis
+      // PRIMARY: Use Generative LLM (Gemini or ChatGPT) for analysis
       if (inputType === 'url') {
-        const urlAnalysis = await this.analyzeUrlWithHuggingFace(inputContent);
+        const urlAnalysis = await this.analyzeUrlWithLLM(inputContent);
         analysisResult = { ...analysisResult, ...urlAnalysis };
         
         // Enhanced, contextual recommendations based on threat level
@@ -894,7 +974,7 @@ class AIAnalyzerService {
         }
       } else {
         // Text or image analysis (image uses OCR then text analysis)
-        const textAnalysis = await this.analyzeTextWithHuggingFace(inputContent);
+        const textAnalysis = await this.analyzeTextWithLLM(inputContent);
         analysisResult = { ...analysisResult, ...textAnalysis };
         
         // Enhanced, contextual recommendations based on threat level
@@ -928,7 +1008,7 @@ class AIAnalyzerService {
         }
       }
 
-      // Enhanced indicators are already provided by Hugging Face AI
+      // Enhanced indicators are already provided by Generative LLM AI
       // Only add generic indicator if indicators array is empty
       if (!analysisResult.indicators || analysisResult.indicators.length === 0) {
         if (analysisResult.threatLevel === 'dangerous') {
@@ -943,10 +1023,16 @@ class AIAnalyzerService {
         }
       }
 
-      // Generate enhanced summary using Hugging Face AI
+      // Ensure threatScore exists (convert from confidence if needed for legacy compatibility)
+      if (analysisResult.threatScore === undefined && analysisResult.confidence !== undefined) {
+        // Convert confidence percentage to threat score (0-10)
+        analysisResult.threatScore = Math.round((analysisResult.confidence / 100) * 10);
+      }
+
+      // Generate enhanced summary using Generative LLM
       // Ensure inputType is passed for context-aware summarization
       analysisResult.inputType = inputType;
-      analysisResult.summary = await this.generateSummaryWithGemini(analysisResult);
+      analysisResult.summary = await this.generateSummaryWithLLM(analysisResult);
 
       // Recommendations are already contextual and enhanced above
       // No need to modify them further as they're tailored to threat level

@@ -20,8 +20,11 @@ import { toast } from 'react-toastify';
 interface TestResult {
   rawResponse?: any;
   analysisResult?: {
+    threatScore?: number; // 0-10 threat score
     threatLevel: 'safe' | 'suspicious' | 'dangerous';
     confidence: number;
+    verdict?: string;
+    reasoning?: string;
     indicators: string[];
     recommendations: string[];
     summary?: string;
@@ -111,22 +114,23 @@ export default function TestingPage() {
         timestamp: new Date().toISOString()
       };
       
-      // Check if response is from Hugging Face or fallback
+      // Check if response is from Generative LLM or fallback
       const source = response.analysisResult?.source || 'unknown';
-      const isFromHuggingFace = source.includes('huggingface') || source.includes('hugging_face');
+      const isFromLLM = source.includes('gemini') || source.includes('chatgpt') || source.includes('openai') || source.includes('_ai');
       const isFallback = source.includes('fallback') || source.includes('pattern_analysis') || source.includes('hardcoded');
       
       console.log('🔍 Analysis source:', source);
-      console.log('🤖 From Hugging Face:', isFromHuggingFace);
+      console.log('🤖 From Generative LLM:', isFromLLM);
       console.log('⚠️  Is Fallback:', isFallback);
       
       setTestResult(result);
       setTestHistory(prev => [result, ...prev].slice(0, 10)); // Keep last 10 tests
       
       if (isFallback) {
-        toast.warning('⚠️ Using fallback analysis - Hugging Face API may not be configured!');
-      } else if (isFromHuggingFace) {
-        toast.success('✅ Analysis completed using Hugging Face AI!');
+        toast.warning('⚠️ Using fallback analysis - Generative LLM API (Gemini/ChatGPT) may not be configured!');
+      } else if (isFromLLM) {
+        const provider = source.includes('gemini') ? 'Gemini' : source.includes('chatgpt') || source.includes('openai') ? 'ChatGPT' : 'Generative LLM';
+        toast.success(`✅ Analysis completed using ${provider} AI!`);
       } else {
         toast.success('Test analysis completed!');
       }
@@ -363,19 +367,19 @@ export default function TestingPage() {
                     <>
                       {/* Source Indicator - Make it VERY obvious */}
                       <div className={`mb-4 p-4 rounded-lg border-2 ${
-                        testResult.analysisResult.source?.includes('huggingface') || testResult.analysisResult.source?.includes('hugging_face')
+                        testResult.analysisResult.source?.includes('gemini') || testResult.analysisResult.source?.includes('chatgpt') || testResult.analysisResult.source?.includes('openai')
                           ? 'bg-green-50 dark:bg-green-900/20 border-green-400 text-green-800 dark:text-green-300'
                           : testResult.analysisResult.isHardcoded || testResult.analysisResult.source?.includes('fallback') || testResult.analysisResult.source?.includes('pattern_analysis') || testResult.analysisResult.source?.includes('hardcoded')
                           ? 'bg-red-50 dark:bg-red-900/20 border-red-500 text-red-800 dark:text-red-300 animate-pulse'
                           : 'bg-gray-50 dark:bg-gray-800 border-gray-400 text-gray-800 dark:text-gray-300'
                       }`}>
                         <div className="flex items-center gap-2">
-                          {(testResult.analysisResult.source?.includes('huggingface') || testResult.analysisResult.source?.includes('hugging_face')) ? (
+                          {(testResult.analysisResult.source?.includes('gemini') || testResult.analysisResult.source?.includes('chatgpt') || testResult.analysisResult.source?.includes('openai')) ? (
                             <>
                               <CheckCircle className="w-6 h-6" />
                               <div>
-                                <p className="font-bold text-lg">✅ Using Hugging Face AI</p>
-                                <p className="text-sm">Real AI analysis from Hugging Face model</p>
+                                <p className="font-bold text-lg">✅ Using Generative LLM AI</p>
+                                <p className="text-sm">Real AI analysis from {testResult.analysisResult.source?.includes('gemini') ? 'Gemini' : 'ChatGPT'} model</p>
                               </div>
                             </>
                           ) : (
@@ -413,9 +417,17 @@ export default function TestingPage() {
                               <p className="text-xl font-bold capitalize">{testResult.analysisResult.threatLevel}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm font-medium">Confidence</p>
-                            <p className="text-xl font-bold">{testResult.analysisResult.confidence}%</p>
+                          <div className="text-right space-y-2">
+                            {testResult.analysisResult.threatScore !== undefined && (
+                              <div>
+                                <p className="text-sm font-medium">Threat Score</p>
+                                <p className="text-xl font-bold">{testResult.analysisResult.threatScore}/10</p>
+                              </div>
+                            )}
+                            <div>
+                              <p className="text-sm font-medium">Confidence</p>
+                              <p className="text-xl font-bold">{testResult.analysisResult.confidence}%</p>
+                            </div>
                           </div>
                         </div>
                       </div>

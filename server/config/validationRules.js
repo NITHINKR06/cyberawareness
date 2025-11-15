@@ -203,14 +203,12 @@ const validationRules = {
 
   // API timeout settings
   apiSettings: {
-    huggingFaceTimeout: 10000,
-    geminiTimeout: 10000
+    llmTimeout: 30000
   },
 
   // Feature flags
   features: {
-    useHuggingFace: true,
-    useGeminiSummary: true,
+    useGenerativeLLM: true,
     useFallbackAnalysis: true,
     enableVulnerableMode: true  // For educational purposes
   }

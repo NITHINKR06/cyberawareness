@@ -93,8 +93,8 @@ Our platform transforms cybersecurity from a technical burden into an engaging, 
 - **PDF Generation**: jsPDF
 
 ### AI & Services
-- **AI Analysis**: Hugging Face Inference API
-- **URL Safety**: Google Safe Browsing API
+- **AI Analysis**: Generative LLM (Gemini API or ChatGPT API)
+- **Threat Scoring**: Detailed threat score (0-10) with comprehensive reasoning
 - **Validation**: Custom regex patterns for Indian context
 
 ## 📦 Installation
@@ -154,9 +154,13 @@ VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
 VITE_FIREBASE_APP_ID=your-app-id
 
-# AI Services (optional)
-HUGGINGFACE_API_KEY=your-huggingface-api-key
-GOOGLE_SAFE_BROWSING_API_KEY=your-google-api-key
+# Generative LLM API (Required for AI analysis)
+# Choose one: Gemini API (free tier available) or ChatGPT API
+GEMINI_API_KEY=your-gemini-api-key
+# OR
+CHATGPT_API_KEY=your-chatgpt-api-key
+# Optional: Set provider explicitly
+LLM_PROVIDER=gemini
 ```
 
 ### Step 4: Firebase Setup

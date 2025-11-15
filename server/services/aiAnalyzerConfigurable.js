@@ -1,6 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import huggingfaceService from './huggingfaceService.js';
+import generativeLLMService from './generativeLLMService.js';
 import { 
   getValidationRules, 
   getThreatLevelByScore, 
@@ -11,8 +11,7 @@ dotenv.config();
 
 class ConfigurableAIAnalyzerService {
   constructor() {
-    this.huggingFaceToken = process.env.HUGGINGFACE_API_KEY;
-    this.geminiApiKey = process.env.GEMINI_API_KEY || 'key';
+    this.llmService = generativeLLMService;
     this.rules = getValidationRules();
   }
 
@@ -21,50 +20,53 @@ class ConfigurableAIAnalyzerService {
     this.rules = getValidationRules();
   }
 
-  // Analyze text using Hugging Face API
-  async analyzeTextWithHuggingFace(text) {
+  // Analyze text using Generative LLM (Gemini or ChatGPT)
+  async analyzeTextWithLLM(text) {
     try {
-      if (huggingfaceService.isConfigured() && this.rules.features.useHuggingFace) {
-        console.log('Using Hugging Face API for text analysis (configurable)');
-        return await huggingfaceService.analyzeText(text);
+      if (this.llmService.isConfigured()) {
+        const providerInfo = this.llmService.getProviderInfo();
+        console.log(`Using ${providerInfo.provider.toUpperCase()} API for text analysis (configurable)`);
+        return await this.llmService.analyzeText(text);
       } else {
-        console.log('Hugging Face API not configured or disabled, using fallback');
+        console.log('Generative LLM API not configured, using fallback');
         return this.fallbackTextAnalysis(text);
       }
     } catch (error) {
-      console.error('Hugging Face API error, using fallback:', error.message);
+      console.error('Generative LLM API error, using fallback:', error.message);
       return this.fallbackTextAnalysis(text);
     }
   }
 
-  // Analyze URL using Hugging Face API
-  async analyzeUrlWithHuggingFace(url) {
+  // Analyze URL using Generative LLM (Gemini or ChatGPT)
+  async analyzeUrlWithLLM(url) {
     try {
-      if (huggingfaceService.isConfigured() && this.rules.features.useHuggingFace) {
-        console.log('Using Hugging Face API for URL analysis (configurable)');
-        return await huggingfaceService.analyzeUrl(url);
+      if (this.llmService.isConfigured()) {
+        const providerInfo = this.llmService.getProviderInfo();
+        console.log(`Using ${providerInfo.provider.toUpperCase()} API for URL analysis (configurable)`);
+        return await this.llmService.analyzeUrl(url);
       } else {
-        console.log('Hugging Face API not configured or disabled, using fallback');
+        console.log('Generative LLM API not configured, using fallback');
         return this.fallbackUrlAnalysis(url);
       }
     } catch (error) {
-      console.error('Hugging Face API error, using fallback:', error.message);
+      console.error('Generative LLM API error, using fallback:', error.message);
       return this.fallbackUrlAnalysis(url);
     }
   }
 
-  // Generate summary using Hugging Face API
-  async generateSummaryWithGemini(analysisData) {
+  // Generate summary using Generative LLM (Gemini or ChatGPT)
+  async generateSummaryWithLLM(analysisData) {
     try {
-      if (huggingfaceService.isConfigured() && this.rules.features.useHuggingFace) {
-        console.log('Using Hugging Face API for summary generation (configurable)');
-        return await huggingfaceService.generateSummary(analysisData);
+      if (this.llmService.isConfigured()) {
+        const providerInfo = this.llmService.getProviderInfo();
+        console.log(`Using ${providerInfo.provider.toUpperCase()} API for summary generation (configurable)`);
+        return await this.llmService.generateSummary(analysisData);
       } else {
-        console.log('Hugging Face API not configured or disabled, using fallback');
+        console.log('Generative LLM API not configured, using fallback');
         return this.generateFallbackSummary(analysisData);
       }
     } catch (error) {
-      console.error('Hugging Face API error, using fallback:', error.message);
+      console.error('Generative LLM API error, using fallback:', error.message);
       return this.generateFallbackSummary(analysisData);
     }
   }
@@ -202,8 +204,11 @@ class ConfigurableAIAnalyzerService {
     
     let analysisResult = {
       inputType,
+      threatScore: 0,
       threatLevel: 'safe',
       confidence: 0,
+      verdict: '',
+      reasoning: '',
       indicators: [],
       recommendations: [],
       summary: ''
@@ -211,7 +216,7 @@ class ConfigurableAIAnalyzerService {
 
     try {
       if (inputType === 'url') {
-        const urlAnalysis = await this.analyzeUrlWithHuggingFace(inputContent);
+        const urlAnalysis = await this.analyzeUrlWithLLM(inputContent);
         analysisResult = { ...analysisResult, ...urlAnalysis };
         
         // Use configurable recommendations
@@ -220,7 +225,7 @@ class ConfigurableAIAnalyzerService {
           ...this.rules.recommendations.url_specific
         ];
       } else {
-        const textAnalysis = await this.analyzeTextWithHuggingFace(inputContent);
+        const textAnalysis = await this.analyzeTextWithLLM(inputContent);
         analysisResult = { ...analysisResult, ...textAnalysis };
         
         // Use configurable recommendations
@@ -249,8 +254,14 @@ class ConfigurableAIAnalyzerService {
         analysisResult.indicators.push('No immediate threats detected');
       }
 
+      // Ensure threatScore exists
+      if (analysisResult.threatScore === undefined && analysisResult.confidence !== undefined) {
+        // Convert confidence percentage to threat score (0-10)
+        analysisResult.threatScore = Math.round((analysisResult.confidence / 100) * 10);
+      }
+
       // Generate summary
-      analysisResult.summary = await this.generateSummaryWithGemini(analysisResult);
+      analysisResult.summary = await this.generateSummaryWithLLM(analysisResult);
 
       // Add threat level configuration to response
       analysisResult.threatConfig = threatConfig;

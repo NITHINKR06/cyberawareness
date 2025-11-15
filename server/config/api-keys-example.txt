@@ -10,17 +10,27 @@ SESSION_SECRET=your-secret-key-change-in-production
 # JWT Secret
 JWT_SECRET=your-jwt-secret-change-in-production
 
-# Hugging Face API Key (for text analysis)
-# Get your API key from: https://huggingface.co/settings/tokens
-HUGGINGFACE_API_KEY=your-huggingface-api-key
+# Generative LLM API Keys (Required for AI analysis)
+# Choose one: Gemini API (free tier available) or ChatGPT API
 
-# Google Safe Browsing API Key (for URL analysis)
-# Get your API key from: https://developers.google.com/safe-browsing/v4/get-started
-GOOGLE_SAFE_BROWSING_API_KEY=your-google-safe-browsing-api-key
-
-# Gemini API Key (for AI summary generation)
+# Gemini API Key (Recommended - has free tier for non-enterprise use)
 # Get your API key from: https://makersuite.google.com/app/apikey
-GEMINI_API_KEY=your-gemini-api-key
+GEMINI_API_KEY=your_gemini_api_key
+
+# OR ChatGPT API Key (Alternative)
+# Get your API key from: https://platform.openai.com/api-keys
+CHATGPT_API_KEY=your_chatgpt_api_key
+# OR OpenAI API Key (alternative name for ChatGPT)
+OPENAI_API_KEY=your_openai_api_key
+
+# LLM Provider Selection (Optional)
+# Set to 'gemini' or 'chatgpt' (defaults to gemini if GEMINI_API_KEY is set)
+LLM_PROVIDER=gemini
+
+# Model Configuration (Optional)
+GEMINI_MODEL=gemini-1.5-flash
+CHATGPT_MODEL=gpt-4o-mini
+LLM_TIMEOUT=30000
 
 # Server Port
 PORT=5000

@@ -26,7 +26,7 @@ export const securityHeaders = helmet ? helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.openai.com", "https://api.huggingface.co"],
+      connectSrc: ["'self'", "https://api.openai.com", "https://generativelanguage.googleapis.com"],
       frameSrc: ["'none'"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
