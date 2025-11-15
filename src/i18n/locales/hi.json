@@ -64,7 +64,17 @@
     "communityActivity": "सामुदायिक स्कैम रिपोर्ट (24 घंटे)",
     "liveThreatFeed": "लाइव खतरा फीड",
     "threatIntelligence": "खतरा खुफिया डैशबोर्ड",
-    "yourAnalytics": "आपका विश्लेषण"
+    "yourAnalytics": "आपका विश्लेषण",
+    "pointsEarned": "अर्जित अंक",
+    "yourSkills": "आपके कौशल",
+    "skills": {
+      "passwordSecurity": "पासवर्ड सुरक्षा",
+      "phishingDetection": "फिशिंग पहचान",
+      "safeBrowsing": "सुरक्षित ब्राउज़िंग",
+      "socialEngineering": "सोशल इंजीनियरिंग",
+      "dataProtection": "डेटा सुरक्षा",
+      "networkSecurity": "नेटवर्क सुरक्षा"
+    }
   },
   "modules": {
     "title": "सीखने के मॉड्यूल",
@@ -165,7 +175,15 @@
       "romanceScam": "रोमांस स्कैम",
       "techSupportScam": "तकनीकी सहायता स्कैम",
       "other": "अन्य"
-    }
+    },
+    "gender": {
+      "male": "पुरुष",
+      "female": "महिला",
+      "other": "अन्य"
+    },
+    "cyberCrimeStation": "साइबर अपराध पुलिस स्टेशन",
+    "localPoliceStation": "स्थानीय पुलिस स्टेशन",
+    "nationalHelpline": "राष्ट्रीय साइबर अपराध हेल्पलाइन"
   },
   "scamAnalyzer": {
     "title": "AI-संचालित स्कैम विश्लेषक",
@@ -187,7 +205,32 @@
     "recommendations": "सिफारिशें",
     "noThreats": "कोई खतरा नहीं मिला",
     "aiPowered": "AI द्वारा संचालित",
-    "urlSafety": "URL सुरक्षा जांच"
+    "urlSafety": "URL सुरक्षा जांच",
+    "urlChecking": "URL जांच",
+    "comingSoon": "जल्द ही आ रहा है",
+    "urlComingSoonDesc": "हम URL खतरा खुफिया जांच जोड़ने पर काम कर रहे हैं। यह सुविधा फ़िशिंग, मैलवेयर और अन्य सुरक्षा खतरों के लिए URL का विश्लेषण करेगी।",
+    "imageAnalysis": "छवि विश्लेषण",
+    "imageComingSoonDesc": "हम OCR और AI-संचालित खतरा पहचान के साथ छवि विश्लेषण जोड़ने पर काम कर रहे हैं। यह सुविधा छवियों से टेक्स्ट निकालेगी और उनका संभावित स्कैम और खतरों के लिए विश्लेषण करेगी।",
+    "highThreatDetected": "उच्च खतरा पाया गया! कृपया अत्यधिक सावधान रहें।",
+    "suspiciousContent": "संदिग्ध सामग्री पाई गई। सावधानी से आगे बढ़ें।",
+    "contentSafe": "सामग्री सुरक्षित प्रतीत होती है, लेकिन हमेशा सतर्क रहें!",
+    "failedToAnalyze": "{{type}} का विश्लेषण करने में विफल। {{message}}",
+    "pleaseTryAgain": "कृपया पुनः प्रयास करें।",
+    "analysisFailed": "विश्लेषण विफल: {{message}}",
+    "serverError": "सर्वर त्रुटि। कृपया अपने Generative LLM API कुंजी कॉन्फ़िगरेशन (Gemini या ChatGPT) जांचें।",
+    "invalidInput": "अमान्य इनपुट",
+    "intelligentAnalysis": "उन्नत AI द्वारा संचालित बुद्धिमान विश्लेषण",
+    "poweredByGemini": "Gemini द्वारा संचालित",
+    "poweredByChatGPT": "ChatGPT द्वारा संचालित",
+    "generativeAi": "Generative AI",
+    "aiSummary": "AI सारांश",
+    "highThreatImage": "छवि में उच्च खतरा पाया गया! कृपया अत्यधिक सावधान रहें।",
+    "suspiciousImage": "छवि में संदिग्ध सामग्री पाई गई। सावधानी से आगे बढ़ें।",
+    "imageSafe": "AI विश्लेषण के आधार पर छवि सामग्री सुरक्षित प्रतीत होती है।",
+    "failedToProcessImage": "छवि प्रसंस्करण करने में विफल। {{message}}",
+    "imageProcessingFailed": "छवि प्रसंस्करण विफल: {{message}}",
+    "textExtracted": "टेक्स्ट निकाला गया! Generative LLM AI के साथ विश्लेषण कर रहे हैं...",
+    "suspiciousImageReview": "छवि में संदिग्ध सामग्री पाई गई। कृपया विश्लेषण की समीक्षा करें।"
   },
   "threatDashboard": {
     "title": "समुदाय खतरा डैशबोर्ड",
@@ -226,7 +269,17 @@
     "tagsPlaceholder": "अल्पविराम से अलग टैग दर्ज करें",
     "submit": "पोस्ट सबमिट करें",
     "cancel": "रद्द करें",
-    "createPost": "पोस्ट बनाएं"
+    "createPost": "पोस्ट बनाएं",
+    "topics": "विषय",
+    "allTopics": "सभी विषय",
+    "justNow": "अभी",
+    "minAgo": "{{mins}} मिनट पहले",
+    "hourAgo": "{{hours}} घंटे पहले",
+    "dayAgo": "{{days}} दिन पहले",
+    "sortBy": "क्रमबद्ध करें",
+    "mostRecent": "सबसे हाल का",
+    "mostPopular": "सबसे लोकप्रिय",
+    "mostViewed": "सबसे अधिक देखा गया"
   },
   "timeMachine": {
     "title": "स्कैम टाइम मशीन",
@@ -328,6 +381,50 @@
     "confirm": "पुष्टि करें",
     "level": "स्तर {{level}}",
     "select": "चुनें",
-    "points": "अंक"
+    "points": "अंक",
+    "processing": "प्रसंस्करण..."
+  },
+  "publicLayout": {
+    "explore": "अन्वेषण करें",
+    "signUpFree": "मुफ्त साइन अप करें",
+    "bannerTitle": "अपनी प्रगति सहेजने और पुरस्कार कमाने के लिए एक मुफ्त खाता बनाएं!",
+    "bannerSubtitle": "अपनी सीखने को ट्रैक करें, समुदाय में भाग लें, और उपलब्धियां अनलॉक करें"
+  },
+  "appLayout": {
+    "main": "मुख्य",
+    "securityTools": "सुरक्षा उपकरण",
+    "premiumMember": "प्रीमियम सदस्य"
+  },
+  "admin": {
+    "dashboard": "डैशबोर्ड",
+    "users": "उपयोगकर्ता",
+    "posts": "पोस्ट",
+    "comments": "टिप्पणियां",
+    "topics": "विषय",
+    "scams": "स्कैम",
+    "reports": "रिपोर्ट",
+    "analytics": "विश्लेषण",
+    "adminTerminal": "एडमिन टर्मिनल",
+    "walrusAdminPanel": "WALRUS एडमिन पैनल",
+    "authorizedAccess": "[अधिकृत पहुंच]",
+    "loggedInAs": "लॉग इन किया गया:",
+    "logout": "लॉग आउट",
+    "walrusSecurityAdmin": "WALRUS सुरक्षा एडमिन",
+    "adminAccess": "एडमिन पहुंच",
+    "firebaseSecurePortal": "FIREBASE सुरक्षित पोर्टल v2.0",
+    "emailAddress": "ईमेल_पता",
+    "passwordHash": "पासवर्ड_हैश",
+    "accessSystem": "सिस्टम एक्सेस करें",
+    "authenticating": "प्रमाणीकरण हो रहा है...",
+    "protocol": "प्रोटोकॉल: FIREBASE",
+    "encryption": "एन्क्रिप्शन: AES-256",
+    "needAdminAccount": "एडमिन खाते की आवश्यकता है? यहां पंजीकरण करें",
+    "returnToMainSite": "← मुख्य साइट पर वापस जाएं",
+    "loginFailed": "लॉगिन विफल। कृपया अपने क्रेडेंशियल जांचें।",
+    "noAccountFound": "इस ईमेल के साथ कोई खाता नहीं मिला। पहले /admin/register पर जाकर या Firebase Console से एक एडमिन खाता बनाएं।",
+    "incorrectPassword": "गलत पासवर्ड।",
+    "invalidEmail": "अमान्य ईमेल पता।",
+    "tooManyRequests": "बहुत सारे असफल लॉगिन प्रयास। कृपया बाद में पुनः प्रयास करें।",
+    "pleaseEnterBoth": "कृपया ईमेल और पासवर्ड दोनों दर्ज करें"
   }
 }

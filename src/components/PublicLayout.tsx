@@ -19,8 +19,7 @@ import {
   Bell,
   Moon,
   Sun,
-  PartyPopper,
-  TestTube
+  PartyPopper
 } from 'lucide-react';
 
 export default function PublicLayout() {
@@ -38,15 +37,10 @@ export default function PublicLayout() {
   }
 
   const publicNavigation = [
-    { id: 'analyzer', name: 'Scam Analyzer', icon: Search, path: '/analyzer', color: 'from-violet-500 to-purple-600' },
-    { id: 'modules', name: 'Learning Modules', icon: BookOpen, path: '/modules', color: 'from-emerald-500 to-teal-600' },
-    { id: 'community', name: 'Community', icon: MessageSquare, path: '/community', color: 'from-purple-500 to-pink-500' },
-    { id: 'timemachine', name: 'Time Machine', icon: Clock, path: '/timemachine', color: 'from-amber-500 to-orange-600' },
-  ] as const;
-
-  // Testing navigation - separate from main navigation
-  const testingNavigation = [
-    { id: 'test', name: '🧪 Testing', icon: TestTube, path: '/test', color: 'from-yellow-500 to-orange-600' },
+    { id: 'analyzer', name: t('nav.scamAnalyzer'), icon: Search, path: '/analyzer', color: 'from-violet-500 to-purple-600' },
+    { id: 'modules', name: t('modules.title'), icon: BookOpen, path: '/modules', color: 'from-emerald-500 to-teal-600' },
+    { id: 'community', name: t('nav.community'), icon: MessageSquare, path: '/community', color: 'from-purple-500 to-pink-500' },
+    { id: 'timemachine', name: t('nav.timeMachine'), icon: Clock, path: '/timemachine', color: 'from-amber-500 to-orange-600' },
   ] as const;
 
   const isActiveRoute = (path: string) => {
@@ -112,29 +106,6 @@ export default function PublicLayout() {
                   </button>
                 );
               })}
-              {/* Testing Link - Desktop */}
-              {testingNavigation.map((item) => {
-                const Icon = item.icon;
-                const isActive = isActiveRoute(item.path);
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => navigate(item.path)}
-                    className={`group relative flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-300 border-2 ${
-                      isActive 
-                        ? 'bg-gradient-to-r ' + item.color + ' text-white shadow-lg border-yellow-400' 
-                        : 'bg-yellow-500/10 backdrop-blur-xl border-yellow-500/30 text-yellow-400 hover:text-yellow-300 hover:border-yellow-400/50'
-                    }`}
-                    title="Testing & Development Page"
-                  >
-                    <Icon className={`w-4 h-4 ${!isActive && 'group-hover:rotate-12 transition-transform duration-300'}`} />
-                    <span className="text-xs font-semibold">{item.name}</span>
-                    {isActive && (
-                      <div className={`absolute inset-0 rounded-lg bg-gradient-to-r ${item.color} opacity-20 blur-xl`}></div>
-                    )}
-                  </button>
-                );
-              })}
             </div>
 
             {/* Right Section - Auth & Controls */}
@@ -159,14 +130,14 @@ export default function PublicLayout() {
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 text-slate-300 hover:text-white hover:border-slate-600 transition-all duration-300"
                 >
                   <LogIn className="w-4 h-4" />
-                  <span className="text-sm">Login</span>
+                  <span className="text-sm">{t('auth.signIn')}</span>
                 </button>
                 <button
                   onClick={() => navigate('/auth')}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium bg-gradient-to-r from-cyan-500 to-indigo-500 text-white shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
                 >
                   <UserPlus className="w-4 h-4" />
-                  <span className="text-sm">Sign Up</span>
+                  <span className="text-sm">{t('auth.signUp')}</span>
                 </button>
               </div>
 
@@ -197,7 +168,7 @@ export default function PublicLayout() {
               {/* Navigation Links */}
               <div className="space-y-3">
                 <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-2">
-                  Explore
+                  {t('publicLayout.explore', 'Explore')}
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   {publicNavigation.map((item) => {
@@ -225,34 +196,6 @@ export default function PublicLayout() {
                     );
                   })}
                 </div>
-                
-                {/* Testing Link - Mobile */}
-                <div className="pt-2">
-                  {testingNavigation.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = isActiveRoute(item.path);
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          navigate(item.path);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`w-full group relative flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300 border-2 ${
-                          isActive 
-                            ? `bg-gradient-to-r ${item.color} text-white shadow-lg border-yellow-400` 
-                            : 'bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 border-yellow-500/30'
-                        }`}
-                      >
-                        <Icon className="w-5 h-5" />
-                        <span className="text-sm font-semibold">{item.name}</span>
-                        {isActive && (
-                          <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${item.color} opacity-20 blur-xl`}></div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
 
               {/* Auth Buttons - Mobile */}
@@ -265,7 +208,7 @@ export default function PublicLayout() {
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 border border-slate-700/50 transition-all duration-300"
                 >
                   <LogIn className="w-4 h-4" />
-                  <span>Login</span>
+                  <span>{t('auth.signIn')}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -275,7 +218,7 @@ export default function PublicLayout() {
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-gradient-to-r from-cyan-500 to-indigo-500 text-white shadow-lg transition-all duration-300"
                 >
                   <UserPlus className="w-4 h-4" />
-                  <span>Sign Up Free</span>
+                  <span>{t('publicLayout.signUpFree', 'Sign Up Free')}</span>
                 </button>
               </div>
             </div>
@@ -294,10 +237,10 @@ export default function PublicLayout() {
               <div>
                 <p className="text-sm font-semibold text-white flex items-center gap-2">
                   <PartyPopper className="w-4 h-4" />
-                  Create a free account to save your progress and earn rewards!
+                  {t('publicLayout.bannerTitle', 'Create a free account to save your progress and earn rewards!')}
                 </p>
                 <p className="text-xs text-slate-400 hidden sm:block">
-                  Track your learning, participate in the community, and unlock achievements
+                  {t('publicLayout.bannerSubtitle', 'Track your learning, participate in the community, and unlock achievements')}
                 </p>
               </div>
             </div>
@@ -305,7 +248,7 @@ export default function PublicLayout() {
               onClick={() => navigate('/auth')}
               className="px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-cyan-500 to-indigo-500 text-white text-sm hover:shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 whitespace-nowrap"
             >
-              Sign Up Free
+              {t('publicLayout.signUpFree', 'Sign Up Free')}
             </button>
           </div>
         </div>

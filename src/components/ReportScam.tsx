@@ -44,12 +44,20 @@ export default function ReportScam() {
   const [formKey, setFormKey] = useState(0);
 
   const scamTypes = [
-    'Phishing Email', 'Fake Website', 'Phone Scam', 'SMS Scam', 'Social Media Scam',
-    'Investment Fraud', 'Romance Scam', 'Tech Support Scam', 'UPI Related Frauds',
-    'Online Financial Fraud', 'Other',
+    t('reportScam.scamTypes.phishingEmail'),
+    t('reportScam.scamTypes.fakeWebsite'),
+    t('reportScam.scamTypes.phoneScam'),
+    t('reportScam.scamTypes.smsScam'),
+    t('reportScam.scamTypes.socialMediaScam'),
+    t('reportScam.scamTypes.investmentFraud'),
+    t('reportScam.scamTypes.romanceScam'),
+    t('reportScam.scamTypes.techSupportScam'),
+    t('reportScam.scamTypes.upiFrauds'),
+    t('reportScam.scamTypes.onlineFinancialFraud'),
+    t('reportScam.scamTypes.other'),
   ];
 
-  const genders = ['Male', 'Female', 'Other'];
+  const genders = [t('reportScam.gender.male', 'Male'), t('reportScam.gender.female', 'Female'), t('reportScam.gender.other', 'Other')];
 
   // Debug: Log form data changes
   useEffect(() => {
@@ -63,9 +71,9 @@ export default function ReportScam() {
   ];
 
   const nearbyStations = [
-    { name: 'Cyber Crime Police Station', phone: '1800-419-3737', type: 'cyber' },
-    { name: 'Local Police Station', phone: '100', type: 'police' },
-    { name: 'National Cyber Crime Helpline', phone: '1930', type: 'helpline' },
+    { name: t('reportScam.cyberCrimeStation', 'Cyber Crime Police Station'), phone: '1800-419-3737', type: 'cyber' },
+    { name: t('reportScam.localPoliceStation', 'Local Police Station'), phone: '100', type: 'police' },
+    { name: t('reportScam.nationalHelpline', 'National Cyber Crime Helpline'), phone: '1930', type: 'helpline' },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {

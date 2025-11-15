@@ -368,7 +368,7 @@ export default function UserProfile() {
                     className="btn-primary flex items-center gap-2"
                   >
                     <Save className="w-4 h-4" />
-                    {isLoading ? 'Saving...' : 'Save Changes'}
+                    {isLoading ? t('common.processing', 'Saving...') : t('profile.saveChanges')}
                   </button>
                   <button
                     onClick={handleCancel}
@@ -376,7 +376,7 @@ export default function UserProfile() {
                     className="btn-secondary flex items-center gap-2"
                   >
                     <ArrowLeft className="w-4 h-4" />
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                 </div>
               )}

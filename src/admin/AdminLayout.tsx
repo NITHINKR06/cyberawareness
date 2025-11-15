@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/FirebaseAuthContext';
+import { useTranslation } from 'react-i18next';
 import { 
   Home, 
   Users, 
@@ -24,6 +25,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
@@ -32,14 +34,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   const navItems = [
-    { path: '/admin', label: 'Dashboard', icon: Home },
-    { path: '/admin/users', label: 'Users', icon: Users },
-    { path: '/admin/posts', label: 'Posts', icon: FileText },
-    { path: '/admin/comments', label: 'Comments', icon: MessageSquare },
-    { path: '/admin/topics', label: 'Topics', icon: Tag },
-    { path: '/admin/scams', label: 'Scams', icon: AlertTriangle },
-    { path: '/admin/reports', label: 'Reports', icon: Flag },
-    { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+    { path: '/admin', label: t('admin.dashboard'), icon: Home },
+    { path: '/admin/users', label: t('admin.users'), icon: Users },
+    { path: '/admin/posts', label: t('admin.posts'), icon: FileText },
+    { path: '/admin/comments', label: t('admin.comments'), icon: MessageSquare },
+    { path: '/admin/topics', label: t('admin.topics'), icon: Tag },
+    { path: '/admin/scams', label: t('admin.scams'), icon: AlertTriangle },
+    { path: '/admin/reports', label: t('admin.reports'), icon: Flag },
+    { path: '/admin/analytics', label: t('admin.analytics'), icon: BarChart3 },
   ];
 
   return (
@@ -67,17 +69,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <Monitor className="w-6 h-6" style={{ color: 'var(--kali-green)' }} />
             <h2 style={{ color: 'var(--kali-green)', fontSize: '1.2rem', margin: 0 }}>
-              ADMIN TERMINAL
+              {t('admin.adminTerminal')}
             </h2>
           </div>
           <div className="ascii-art" style={{ fontSize: '0.6rem' }}>
 {`╔═══════════════════════╗
-║  WALRUS ADMIN PANEL   ║
-║  [AUTHORIZED ACCESS]  ║
+║  ${t('admin.walrusAdminPanel')}   ║
+║  ${t('admin.authorizedAccess')}  ║
 ╚═══════════════════════╝`}
           </div>
           <div style={{ color: 'var(--kali-text-secondary)', fontSize: '0.8rem' }}>
-            Logged in as: <span style={{ color: 'var(--kali-green)' }}>{user?.username}</span>
+            {t('admin.loggedInAs')} <span style={{ color: 'var(--kali-green)' }}>{user?.username}</span>
           </div>
         </div>
 
@@ -111,7 +113,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
           >
             <LogOut className="w-4 h-4" />
-            LOGOUT
+            {t('admin.logout')}
           </button>
         </div>
       </aside>
@@ -119,7 +121,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       {/* Main Content */}
       <main className="admin-content">
         <div className="terminal-header">
-          <span className="terminal-title">WALRUS SECURITY ADMIN</span>
+          <span className="terminal-title">{t('admin.walrusSecurityAdmin')}</span>
           <span style={{ marginLeft: 'auto', color: 'var(--kali-text-secondary)', fontSize: '0.9rem' }}>
             {new Date().toLocaleString()}
           </span>

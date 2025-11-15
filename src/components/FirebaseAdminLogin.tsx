@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Shield, Mail, Lock, AlertCircle, Terminal } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 
 const FirebaseAdminLogin: React.FC = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -49,7 +51,7 @@ const FirebaseAdminLogin: React.FC = () => {
     e.preventDefault();
     
     if (!formData.email || !formData.password) {
-      setError('Please enter both email and password');
+      setError(t('admin.pleaseEnterBoth'));
       return;
     }
     
@@ -124,15 +126,15 @@ const FirebaseAdminLogin: React.FC = () => {
       console.error('Admin login error:', err);
       
       // Provide user-friendly error messages
-      let errorMessage = 'Login failed. Please check your credentials.';
+      let errorMessage = t('admin.loginFailed');
       if (err.code === 'auth/user-not-found') {
-        errorMessage = 'No account found with this email. Create an admin account first by visiting /admin/register or Firebase Console.';
+        errorMessage = t('admin.noAccountFound');
       } else if (err.code === 'auth/wrong-password') {
-        errorMessage = 'Incorrect password.';
+        errorMessage = t('admin.incorrectPassword');
       } else if (err.code === 'auth/invalid-email') {
-        errorMessage = 'Invalid email address.';
+        errorMessage = t('admin.invalidEmail');
       } else if (err.code === 'auth/too-many-requests') {
-        errorMessage = 'Too many failed login attempts. Please try again later.';
+        errorMessage = t('admin.tooManyRequests');
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -157,10 +159,10 @@ const FirebaseAdminLogin: React.FC = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-green-900/50 rounded-full mb-4 animate-pulse">
               <Shield className="w-8 h-8 text-green-400" />
             </div>
-            <h1 className="text-3xl font-bold text-green-400 mb-2 font-mono">ADMIN ACCESS</h1>
+            <h1 className="text-3xl font-bold text-green-400 mb-2 font-mono">{t('admin.adminAccess')}</h1>
             <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
               <Terminal className="w-4 h-4" />
-              <span className="font-mono">FIREBASE SECURE PORTAL v2.0</span>
+              <span className="font-mono">{t('admin.firebaseSecurePortal')}</span>
             </div>
           </div>
 
@@ -169,7 +171,7 @@ const FirebaseAdminLogin: React.FC = () => {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2 font-mono">
-                EMAIL_ADDRESS
+                {t('admin.emailAddress')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-500/50 w-5 h-5" />
@@ -188,7 +190,7 @@ const FirebaseAdminLogin: React.FC = () => {
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2 font-mono">
-                PASSWORD_HASH
+                {t('admin.passwordHash')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-500/50 w-5 h-5" />
@@ -219,10 +221,10 @@ const FirebaseAdminLogin: React.FC = () => {
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="animate-spin">⟳</span> AUTHENTICATING...
+                  <span className="animate-spin">⟳</span> {t('admin.authenticating')}
                 </span>
               ) : (
-                'ACCESS SYSTEM'
+                t('admin.accessSystem')
               )}
             </button>
           </form>
@@ -230,15 +232,15 @@ const FirebaseAdminLogin: React.FC = () => {
           {/* Footer */}
           <div className="mt-8 pt-6 border-t border-gray-700">
             <div className="flex items-center justify-between text-xs text-gray-500 font-mono">
-              <span>PROTOCOL: FIREBASE</span>
-              <span>ENCRYPTION: AES-256</span>
+              <span>{t('admin.protocol')}</span>
+              <span>{t('admin.encryption')}</span>
             </div>
             <div className="mt-4 text-center space-y-2">
               <Link to="/admin/register" className="block text-gray-400 hover:text-green-400 text-sm transition-colors">
-                Need an admin account? Register here
+                {t('admin.needAdminAccount')}
               </Link>
               <Link to="/" className="block text-gray-400 hover:text-green-400 text-sm transition-colors">
-                ← Return to Main Site
+                {t('admin.returnToMainSite')}
               </Link>
             </div>
           </div>

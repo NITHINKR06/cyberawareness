@@ -1,12 +1,14 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import generativeLLMService from './generativeLLMService.js';
+import urlThreatIntelligence from './urlThreatIntelligence.js';
 
 dotenv.config();
 
 class AIAnalyzerService {
   constructor() {
     this.llmService = generativeLLMService;
+    this.threatIntelligence = urlThreatIntelligence;
   }
 
   // Analyze text using Generative LLM (Gemini or ChatGPT) (PRIMARY METHOD)
@@ -279,25 +281,142 @@ class AIAnalyzerService {
     return bonus;
   }
 
-  // Analyze URL using Generative LLM (Gemini or ChatGPT) (PRIMARY METHOD)
-  // Falls back to pattern analysis only if LLM is unavailable
+  // Analyze URL using Hybrid Approach:
+  // 1. Threat Intelligence APIs (PhishTank, VirusTotal, URLVoid) - PRIMARY for security
+  // 2. Generative LLM (Gemini or ChatGPT) - SECONDARY for context
+  // 3. Pattern analysis - FALLBACK if APIs unavailable
   async analyzeUrlWithLLM(url) {
     try {
+      // Step 1: Check Threat Intelligence APIs first (most reliable for security)
+      console.log('🔒 Step 1: Checking threat intelligence APIs...');
+      const threatIntelResult = await this.threatIntelligence.analyzeUrl(url);
+      
+      // If threat intelligence confirms dangerous, return immediately
+      if (threatIntelResult.threatLevel === 'dangerous' && threatIntelResult.confidence >= 85) {
+        console.log('🚨 DANGEROUS URL detected by threat intelligence - returning immediately');
+        return {
+          ...threatIntelResult,
+          source: 'threat_intelligence',
+          analysisMethod: 'threat_intelligence_apis'
+        };
+      }
+
+      // Step 2: Combine with LLM analysis if available (for additional context)
+      let llmResult = null;
       if (this.llmService.isConfigured()) {
-        const providerInfo = this.llmService.getProviderInfo();
-        console.log(`🤖 Using ${providerInfo.provider.toUpperCase()} AI for URL analysis (PRIMARY)`);
-        const result = await this.llmService.analyzeUrl(url);
-        console.log(`✅ ${providerInfo.provider.toUpperCase()} URL analysis completed`);
-        console.log(`📊 Threat Score: ${result.threatScore}/10, Threat Level: ${result.threatLevel}`);
-        return result;
+        try {
+          const providerInfo = this.llmService.getProviderInfo();
+          console.log(`🤖 Step 2: Using ${providerInfo.provider.toUpperCase()} AI for additional context`);
+          llmResult = await this.llmService.analyzeUrl(url);
+          console.log(`✅ ${providerInfo.provider.toUpperCase()} URL analysis completed`);
+        } catch (error) {
+          console.warn('⚠️ LLM analysis failed, continuing with threat intelligence results:', error.message);
+        }
+      }
+
+      // Step 3: Combine results intelligently
+      if (llmResult) {
+        // Combine threat intelligence (more reliable) with LLM context
+        const combinedResult = this.combineUrlAnalysisResults(threatIntelResult, llmResult);
+        console.log(`📊 Combined Analysis - Threat Score: ${combinedResult.threatScore}/10, Threat Level: ${combinedResult.threatLevel}`);
+        return combinedResult;
       } else {
-        console.warn('⚠️  Generative LLM API not configured, using pattern analysis fallback');
-        return this.fallbackUrlAnalysis(url);
+        // Use threat intelligence result, enhanced with pattern analysis if needed
+        if (threatIntelResult.threatLevel === 'safe' && threatIntelResult.confidence < 70) {
+          // If threat intelligence is inconclusive, add pattern analysis
+          console.log('🔍 Step 2: Adding pattern analysis for additional validation');
+          const patternResult = this.fallbackUrlAnalysis(url);
+          return this.combineUrlAnalysisResults(threatIntelResult, patternResult);
+        }
+        
+        console.log(`📊 Threat Intelligence Analysis - Threat Score: ${threatIntelResult.threatScore}/10, Threat Level: ${threatIntelResult.threatLevel}`);
+        return {
+          ...threatIntelResult,
+          source: 'threat_intelligence',
+          analysisMethod: 'threat_intelligence_apis'
+        };
       }
     } catch (error) {
-      console.error('❌ Generative LLM API error, using pattern analysis fallback:', error.message);
+      console.error('❌ URL analysis error, using pattern analysis fallback:', error.message);
       return this.fallbackUrlAnalysis(url);
     }
+  }
+
+  /**
+   * Combine threat intelligence and LLM/pattern analysis results
+   * Threat intelligence takes priority for security decisions
+   */
+  combineUrlAnalysisResults(threatIntelResult, otherResult) {
+    // Threat intelligence is more reliable for security, so it gets higher weight
+    const threatIntelWeight = 0.7;
+    const otherWeight = 0.3;
+
+    // Calculate combined threat score
+    const combinedScore = Math.round(
+      (threatIntelResult.threatScore * threatIntelWeight) + 
+      (otherResult.threatScore * otherWeight)
+    );
+
+    // Threat level: Use the more severe one
+    const threatLevels = ['safe', 'suspicious', 'dangerous'];
+    const threatIntelLevelIndex = threatLevels.indexOf(threatIntelResult.threatLevel);
+    const otherLevelIndex = threatLevels.indexOf(otherResult.threatLevel);
+    const finalThreatLevel = threatLevels[Math.max(threatIntelLevelIndex, otherLevelIndex)];
+
+    // Combine threats and indicators (remove duplicates)
+    const combinedThreats = [...new Set([
+      ...(threatIntelResult.threats || []),
+      ...(otherResult.threats || [])
+    ])];
+    
+    const combinedIndicators = [...new Set([
+      ...(threatIntelResult.indicators || []),
+      ...(otherResult.indicators || [])
+    ])];
+
+    // Confidence: Weighted average, but boost if both agree
+    let combinedConfidence = Math.round(
+      (threatIntelResult.confidence * threatIntelWeight) + 
+      (otherResult.confidence * otherWeight)
+    );
+    
+    // If both methods agree on threat level, increase confidence
+    if (threatIntelResult.threatLevel === otherResult.threatLevel) {
+      combinedConfidence = Math.min(99, combinedConfidence + 10);
+    }
+
+    // Combine reasoning
+    const combinedReasoning = `Threat Intelligence: ${threatIntelResult.reasoning || 'No specific reasoning'}. ` +
+      `AI Analysis: ${otherResult.reasoning || 'No specific reasoning'}`;
+
+    return {
+      threatScore: Math.min(10, Math.max(0, combinedScore)),
+      threatLevel: finalThreatLevel,
+      confidence: combinedConfidence,
+      verdict: finalThreatLevel === 'dangerous' 
+        ? threatIntelResult.verdict || otherResult.verdict
+        : otherResult.verdict || threatIntelResult.verdict,
+      reasoning: combinedReasoning,
+      threats: combinedThreats.slice(0, 10),
+      indicators: combinedIndicators.slice(0, 10),
+      source: 'hybrid_analysis',
+      analysisMethod: 'threat_intelligence_plus_llm',
+      details: {
+        threatIntelligence: {
+          threatScore: threatIntelResult.threatScore,
+          threatLevel: threatIntelResult.threatLevel,
+          confidence: threatIntelResult.confidence,
+          blocklistMatches: threatIntelResult.blocklistMatches,
+          totalEngines: threatIntelResult.totalEngines,
+          sources: threatIntelResult.sources
+        },
+        llmAnalysis: {
+          threatScore: otherResult.threatScore,
+          threatLevel: otherResult.threatLevel,
+          confidence: otherResult.confidence
+        }
+      }
+    };
   }
 
   // Fallback URL analysis (minimal, used only when API unavailable)

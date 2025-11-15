@@ -83,8 +83,8 @@ export default function ScamAnalyzer() {
     // Basic validation only - no pattern matching, let Hugging Face AI do the analysis
     const validation = validateBasicInput(type, content);
     if (!validation.isValid) {
-      setError(validation.error || 'Invalid input');
-      toast.error(validation.error || 'Invalid input');
+      setError(validation.error || t('scamAnalyzer.invalidInput', 'Invalid input'));
+      toast.error(validation.error || t('scamAnalyzer.invalidInput', 'Invalid input'));
       return;
     }
 
@@ -100,16 +100,16 @@ export default function ScamAnalyzer() {
 
       // Show results based on Generative LLM AI analysis
       if (analysisResult.threatLevel === 'dangerous') {
-        toast.error('High threat detected! Please be extremely cautious.');
+        toast.error(t('scamAnalyzer.highThreatDetected', 'High threat detected! Please be extremely cautious.'));
       } else if (analysisResult.threatLevel === 'suspicious') {
-        toast.warning('Suspicious content detected. Proceed with caution.');
+        toast.warning(t('scamAnalyzer.suspiciousContent', 'Suspicious content detected. Proceed with caution.'));
       } else {
-        toast.success('Content appears safe, but always stay vigilant!');
+        toast.success(t('scamAnalyzer.contentSafe', 'Content appears safe, but always stay vigilant!'));
       }
     } catch (err: any) {
       console.error(`Error analyzing ${type}:`, err);
-      setError(`Failed to analyze ${type}. ${err.message || 'Please try again.'}`);
-      toast.error(`Analysis failed: ${err.message || 'Server error. Please check your Generative LLM API key configuration (Gemini or ChatGPT).'}`);
+      setError(t('scamAnalyzer.failedToAnalyze', 'Failed to analyze {{type}}. {{message}}', { type, message: err.message || t('scamAnalyzer.pleaseTryAgain', 'Please try again.') }));
+      toast.error(t('scamAnalyzer.analysisFailed', 'Analysis failed: {{message}}', { message: err.message || t('scamAnalyzer.serverError', 'Server error. Please check your Generative LLM API key configuration (Gemini or ChatGPT).') }));
     } finally {
       setIsProcessing(false);
     }
@@ -147,7 +147,7 @@ export default function ScamAnalyzer() {
       // Step 2: Populate the text area and switch to text tab
       setTextInput(extractedText);
       setActiveTab('text');
-      toast.success('Text extracted! Analyzing with Generative LLM AI...');
+      toast.success(t('scamAnalyzer.textExtracted', 'Text extracted! Analyzing with Generative LLM AI...'));
 
       // Step 3: Automatically analyze the extracted text using Generative LLM AI
       // The backend will use enhanced text analysis which works perfectly for image-extracted text
@@ -163,17 +163,17 @@ export default function ScamAnalyzer() {
       
       // Show appropriate toast based on threat level from Generative LLM AI
       if (analysisResult.threatLevel === 'dangerous') {
-        toast.error('High threat detected in image! Please be extremely cautious.');
+        toast.error(t('scamAnalyzer.highThreatImage', 'High threat detected in image! Please be extremely cautious.'));
       } else if (analysisResult.threatLevel === 'suspicious') {
-        toast.warning('Suspicious content detected in image. Please review the analysis.');
+        toast.warning(t('scamAnalyzer.suspiciousImageReview', 'Suspicious content detected in image. Please review the analysis.'));
       } else {
-        toast.success('Image content appears safe based on AI analysis.');
+        toast.success(t('scamAnalyzer.imageSafe', 'Image content appears safe based on AI analysis.'));
       }
 
     } catch (err: any) {
       console.error('Error processing image:', err);
-      setError(`Failed to process image. ${err.message || 'Please try again.'}`);
-      toast.error(`Image processing failed: ${err.message || 'Server error'}`);
+      setError(t('scamAnalyzer.failedToProcessImage', 'Failed to process image. {{message}}', { message: err.message || t('scamAnalyzer.pleaseTryAgain', 'Please try again.') }));
+      toast.error(t('scamAnalyzer.imageProcessingFailed', 'Image processing failed: {{message}}', { message: err.message || t('scamAnalyzer.serverError', 'Server error') }));
     } finally {
       setIsProcessing(false);
     }
@@ -231,34 +231,28 @@ export default function ScamAnalyzer() {
         )}
         
         {activeTab === 'url' && (
-          <div>
-            <input type="url" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} placeholder={t('scamAnalyzer.urlPlaceholder')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            <button onClick={() => handleAnalysis('url', urlInput || '')} disabled={!(urlInput || '').trim() || isProcessing} className="mt-4 w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-              {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" />{t('scamAnalyzer.analyzing')}</>) : (<><Globe className="w-5 h-5" />{t('scamAnalyzer.checkUrl')}</>)}
-            </button>
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
+              <Globe className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">{t('scamAnalyzer.urlChecking', 'URL Checking')}</h3>
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">{t('scamAnalyzer.comingSoon', 'Coming Soon')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 max-w-md mx-auto">
+              {t('scamAnalyzer.urlComingSoonDesc', "We're working on adding URL threat intelligence checking. This feature will analyze URLs for phishing, malware, and other security threats.")}
+            </p>
           </div>
         )}
 
         {activeTab === 'image' && (
-          <div>
-            <input type="file" accept="image/*" onChange={handleImageChange} ref={fileInputRef} className="hidden" />
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full h-40 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              {imagePreview ? (
-                <img src={imagePreview} alt="Selected preview" className="h-full w-full object-contain rounded-lg" />
-              ) : (
-                <div className="text-center text-gray-500">
-                  <Upload className="w-10 h-10 mx-auto mb-2" />
-                  <p>Click to upload an image</p>
-                  <p className="text-xs">(PNG, JPG, etc.)</p>
-                </div>
-              )}
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
+              <ImageIcon className="w-10 h-10 text-blue-600 dark:text-blue-400" />
             </div>
-            <button onClick={handleImageUpload} disabled={!selectedImage || isProcessing} className="mt-4 w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-              {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" />Processing Image...</>) : (<>Extract & Analyze Image</>)}
-            </button>
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">{t('scamAnalyzer.imageAnalysis', 'Image Analysis')}</h3>
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">{t('scamAnalyzer.comingSoon', 'Coming Soon')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 max-w-md mx-auto">
+              {t('scamAnalyzer.imageComingSoonDesc', "We're working on adding image analysis with OCR and AI-powered threat detection. This feature will extract text from images and analyze them for potential scams and threats.")}
+            </p>
           </div>
         )}
       </div>
@@ -380,10 +374,10 @@ export default function ScamAnalyzer() {
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        AI Summary
+                        {t('scamAnalyzer.aiSummary', 'AI Summary')}
                       </h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        Intelligent analysis powered by advanced AI
+                        {t('scamAnalyzer.intelligentAnalysis', 'Intelligent analysis powered by advanced AI')}
                       </p>
                     </div>
                   </div>
@@ -400,10 +394,10 @@ export default function ScamAnalyzer() {
                       }`}></div>
                       <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                         {result.source.includes('gemini') 
-                          ? 'Powered by Gemini' 
+                          ? t('scamAnalyzer.poweredByGemini', 'Powered by Gemini')
                           : result.source.includes('chatgpt') || result.source.includes('openai')
-                          ? 'Powered by ChatGPT'
-                          : 'Generative AI'}
+                          ? t('scamAnalyzer.poweredByChatGPT', 'Powered by ChatGPT')
+                          : t('scamAnalyzer.generativeAi', 'Generative AI')}
                       </span>
                     </div>
                   )}

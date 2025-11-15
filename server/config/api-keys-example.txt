@@ -32,5 +32,27 @@ GEMINI_MODEL=gemini-1.5-flash
 CHATGPT_MODEL=gpt-4o-mini
 LLM_TIMEOUT=30000
 
+
+
+
+
+
+
+
+# URL Threat Intelligence API Keys (Optional but Recommended)
+# These enhance URL analysis with real-time threat intelligence
+
+# PhishTank API Key (Optional - works without key, but better with registered app)
+# Get from: https://www.phishtank.com/api_register.php
+PHISHTANK_API_KEY=your_phishtank_api_key
+
+# VirusTotal API Key (Recommended - Free tier: 4 requests/minute)
+# Get from: https://www.virustotal.com/gui/join-us
+VIRUSTOTAL_API_KEY=your_virustotal_api_key
+
+# APIVoid/URLVoid API Key (Recommended - Free tier available)
+# Get from: https://www.apivoid.com/signup.php
+APIVOID_API_KEY=your_apivoid_api_key
+
 # Server Port
 PORT=5000

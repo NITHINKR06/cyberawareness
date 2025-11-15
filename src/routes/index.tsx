@@ -18,7 +18,6 @@ import Community from '../components/Community';
 import AdminPanel from '../admin/AdminPanel';
 import FirebaseAdminLogin from '../components/FirebaseAdminLogin';
 import FirebaseAdminRegister from '../components/FirebaseAdminRegister';
-import TestingPage from '../components/TestingPage';
 
 export const router = createBrowserRouter([
   // Public routes - accessible without login
@@ -45,10 +44,6 @@ export const router = createBrowserRouter([
       {
         path: 'timemachine',
         element: <TimeMachine />,
-      },
-      {
-        path: 'test',
-        element: <TestingPage />,
       },
     ],
   },
@@ -155,12 +150,5 @@ export const router = createBrowserRouter([
   {
     path: '/timemachine-standalone',
     element: <ThemeProvider><AuthProvider><TimeMachinePage /></AuthProvider></ThemeProvider>,
-  },
-  
-  // Testing route - separate from production code
-  // Accessible at /test (as child of public layout) or as standalone
-  {
-    path: '/test-standalone',
-    element: <ThemeProvider><AuthProvider><PublicLayout><TestingPage /></PublicLayout></AuthProvider></ThemeProvider>,
   },
 ]);

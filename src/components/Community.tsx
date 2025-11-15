@@ -205,10 +205,10 @@ export default function Community() {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} hour ago`;
-    if (diffDays < 30) return `${diffDays} day ago`;
+    if (diffMins < 1) return t('community.justNow', 'just now');
+    if (diffMins < 60) return t('community.minAgo', '{{mins}} min ago', { mins: diffMins });
+    if (diffHours < 24) return t('community.hourAgo', '{{hours}} hour ago', { hours: diffHours });
+    if (diffDays < 30) return t('community.dayAgo', '{{days}} day ago', { days: diffDays });
     return date.toLocaleDateString();
   };
 
@@ -262,7 +262,7 @@ export default function Community() {
             </div>
 
             <div className="mt-6 pt-6 border-t">
-              <h3 className="text-sm font-semibold mb-3">Sort By</h3>
+              <h3 className="text-sm font-semibold mb-3">{t('community.sortBy', 'Sort By')}</h3>
               <div className="space-y-2">
                 <button
                   onClick={() => setSortBy('recent')}
@@ -270,7 +270,7 @@ export default function Community() {
                     sortBy === 'recent' ? 'bg-gray-100 dark:bg-gray-700' : ''
                   }`}
                 >
-                  Most Recent
+                  {t('community.mostRecent', 'Most Recent')}
                 </button>
                 <button
                   onClick={() => setSortBy('popular')}
@@ -278,7 +278,7 @@ export default function Community() {
                     sortBy === 'popular' ? 'bg-gray-100 dark:bg-gray-700' : ''
                   }`}
                 >
-                  Most Popular
+                  {t('community.mostPopular', 'Most Popular')}
                 </button>
                 <button
                   onClick={() => setSortBy('views')}
@@ -286,7 +286,7 @@ export default function Community() {
                     sortBy === 'views' ? 'bg-gray-100 dark:bg-gray-700' : ''
                   }`}
                 >
-                  Most Viewed
+                  {t('community.mostViewed', 'Most Viewed')}
                 </button>
               </div>
             </div>

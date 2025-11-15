@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Lock, Eye, Heart, Pin } from 'lucide-react';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
@@ -27,6 +28,7 @@ interface Post {
 }
 
 const PostsManager: React.FC = () => {
+  const { t } = useTranslation();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,36 +133,36 @@ const PostsManager: React.FC = () => {
   const columns = [
     {
       key: 'title',
-      label: 'Title',
+      label: t('admin.posts.title', 'Title'),
       render: (value: string, row: Post) => (
         <div>
           <div style={{ fontWeight: 'bold' }}>{value}</div>
           {row.isPinned && <span className="badge badge-warning flex items-center gap-1">
             <Pin className="w-3 h-3" />
-            Pinned
+            {t('admin.posts.pinned', 'Pinned')}
           </span>}
           {row.isLocked && <span className="badge badge-danger flex items-center gap-1" style={{ marginLeft: '0.25rem' }}>
             <Lock className="w-3 h-3" />
-            Locked
+            {t('admin.posts.locked', 'Locked')}
           </span>}
         </div>
       )
     },
     {
       key: 'author',
-      label: 'Author',
-      render: (value: any) => value?.username || 'Unknown'
+      label: t('admin.posts.author', 'Author'),
+      render: (value: any) => value?.username || t('admin.posts.unknown', 'Unknown')
     },
     {
       key: 'topic',
-      label: 'Topic',
+      label: t('admin.posts.topic', 'Topic'),
       render: (value: any) => (
-        <span className="badge badge-info">{value?.name || 'None'}</span>
+        <span className="badge badge-info">{value?.name || t('admin.posts.none', 'None')}</span>
       )
     },
     {
       key: 'views',
-      label: 'Views',
+      label: t('admin.posts.views', 'Views'),
       render: (value: number) => (
         <span style={{ color: 'var(--kali-cyan)' }} className="flex items-center gap-1">
           <Eye className="w-4 h-4" />
@@ -170,7 +172,7 @@ const PostsManager: React.FC = () => {
     },
     {
       key: 'likes',
-      label: 'Likes',
+      label: t('admin.posts.likes', 'Likes'),
       render: (value: string[]) => (
         <span style={{ color: 'var(--kali-yellow)' }} className="flex items-center gap-1">
           <Heart className="w-4 h-4" />
@@ -180,7 +182,7 @@ const PostsManager: React.FC = () => {
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('admin.posts.status', 'Status'),
       render: (value: string) => (
         <span className={`badge badge-${value === 'active' ? 'success' : value === 'hidden' ? 'warning' : 'danger'}`}>
           {value.toUpperCase()}
@@ -189,7 +191,7 @@ const PostsManager: React.FC = () => {
     },
     {
       key: 'createdAt',
-      label: 'Created',
+      label: t('admin.posts.created', 'Created'),
       render: (value: string) => new Date(value).toLocaleDateString()
     }
   ];
@@ -198,9 +200,9 @@ const PostsManager: React.FC = () => {
     <div>
       <div className="terminal-card">
         <div className="terminal-card-header">
-          <h2 className="terminal-card-title">📝 POST MANAGEMENT</h2>
+          <h2 className="terminal-card-title">📝 {t('admin.posts.postManagement', 'POST MANAGEMENT')}</h2>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <span className="badge badge-info">Total: {posts.length}</span>
+            <span className="badge badge-info">{t('admin.posts.total', 'Total')}: {posts.length}</span>
           </div>
         </div>
 

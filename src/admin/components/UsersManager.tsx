@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Star } from 'lucide-react';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
@@ -20,6 +21,7 @@ interface User {
 }
 
 const UsersManager: React.FC = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -153,7 +155,7 @@ const UsersManager: React.FC = () => {
   const columns = [
     {
       key: 'username',
-      label: 'Username',
+      label: t('admin.users.username', 'Username'),
       render: (value: string, row: User) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span>{value}</span>
@@ -163,11 +165,11 @@ const UsersManager: React.FC = () => {
     },
     {
       key: 'email',
-      label: 'Email',
+      label: t('admin.users.email', 'Email'),
     },
     {
       key: 'role',
-      label: 'Role',
+      label: t('admin.users.role', 'Role'),
       render: (value: string) => (
         <span className={`badge badge-${value === 'admin' || value === 'superadmin' ? 'danger' : value === 'moderator' ? 'warning' : 'info'}`}>
           {value}
@@ -176,14 +178,14 @@ const UsersManager: React.FC = () => {
     },
     {
       key: 'level',
-      label: 'Level',
+      label: t('admin.users.level', 'Level'),
       render: (value: number) => (
-        <span style={{ color: 'var(--kali-cyan)' }}>Lvl {value}</span>
+        <span style={{ color: 'var(--kali-cyan)' }}>{t('common.level', 'Level {{level}}').replace('{{level}}', value.toString())}</span>
       )
     },
     {
       key: 'totalPoints',
-      label: 'Points',
+      label: t('admin.users.points', 'Points'),
       render: (value: number) => (
         <span style={{ color: 'var(--kali-yellow)' }} className="flex items-center gap-1">
           <Star className="w-4 h-4" />
@@ -193,31 +195,31 @@ const UsersManager: React.FC = () => {
     },
     {
       key: 'isActive',
-      label: 'Status',
+      label: t('admin.users.status', 'Status'),
       render: (value: boolean, row: User) => {
         if (row.isBanned) {
-          return <span className="badge badge-danger">BANNED</span>;
+          return <span className="badge badge-danger">{t('admin.users.banned', 'BANNED')}</span>;
         }
         return <span className={`badge badge-${value ? 'success' : 'warning'}`}>
-          {value ? 'ACTIVE' : 'INACTIVE'}
+          {value ? t('admin.users.active', 'ACTIVE') : t('admin.users.inactive', 'INACTIVE')}
         </span>;
       }
     },
     {
       key: 'createdAt',
-      label: 'Joined',
+      label: t('admin.users.joined', 'Joined'),
       render: (value: string) => new Date(value).toLocaleDateString()
     },
     {
       key: 'actions',
-      label: 'Quick Actions',
+      label: t('admin.users.quickActions', 'Quick Actions'),
       render: (_: any, row: User) => (
         <button
           onClick={() => handleBanToggle(row)}
           className={`terminal-btn ${row.isBanned ? 'terminal-btn-primary' : 'terminal-btn-danger'}`}
           style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
         >
-          {row.isBanned ? '✓ Unban' : '⛔ Ban'}
+          {row.isBanned ? `✓ ${t('admin.users.unban', 'Unban')}` : `⛔ ${t('admin.users.ban', 'Ban')}`}
         </button>
       )
     }
@@ -227,9 +229,9 @@ const UsersManager: React.FC = () => {
     <div>
       <div className="terminal-card">
         <div className="terminal-card-header">
-          <h2 className="terminal-card-title">👥 USER MANAGEMENT</h2>
+          <h2 className="terminal-card-title">👥 {t('admin.users.userManagement', 'USER MANAGEMENT')}</h2>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <span className="badge badge-info">Total: {users.length}</span>
+            <span className="badge badge-info">{t('admin.users.total', 'Total')}: {users.length}</span>
           </div>
         </div>
 
@@ -256,14 +258,14 @@ const UsersManager: React.FC = () => {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="modal-title">EDIT USER: {editingUser.username}</h3>
+              <h3 className="modal-title">{t('admin.users.editUser', 'EDIT USER')}: {editingUser.username}</h3>
               <button onClick={() => setShowModal(false)} className="terminal-btn">✕</button>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ color: 'var(--kali-text-secondary)', display: 'block', marginBottom: '0.25rem' }}>
-                  Username
+                  {t('admin.users.username', 'Username')}
                 </label>
                 <input
                   type="text"
@@ -275,7 +277,7 @@ const UsersManager: React.FC = () => {
 
               <div>
                 <label style={{ color: 'var(--kali-text-secondary)', display: 'block', marginBottom: '0.25rem' }}>
-                  Email
+                  {t('admin.users.email', 'Email')}
                 </label>
                 <input
                   type="email"
@@ -287,23 +289,23 @@ const UsersManager: React.FC = () => {
 
               <div>
                 <label style={{ color: 'var(--kali-text-secondary)', display: 'block', marginBottom: '0.25rem' }}>
-                  Role
+                  {t('admin.users.role', 'Role')}
                 </label>
                 <select
                   className="terminal-select"
                   value={editingUser.role}
                   onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                 >
-                  <option value="user">User</option>
-                  <option value="moderator">Moderator</option>
-                  <option value="admin">Admin</option>
-                  <option value="superadmin">Super Admin</option>
+                  <option value="user">{t('admin.users.user', 'User')}</option>
+                  <option value="moderator">{t('admin.users.moderator', 'Moderator')}</option>
+                  <option value="admin">{t('admin.users.admin', 'Admin')}</option>
+                  <option value="superadmin">{t('admin.users.superAdmin', 'Super Admin')}</option>
                 </select>
               </div>
 
               <div>
                 <label style={{ color: 'var(--kali-text-secondary)', display: 'block', marginBottom: '0.25rem' }}>
-                  Level
+                  {t('admin.users.level', 'Level')}
                 </label>
                 <input
                   type="number"
@@ -315,7 +317,7 @@ const UsersManager: React.FC = () => {
 
               <div>
                 <label style={{ color: 'var(--kali-text-secondary)', display: 'block', marginBottom: '0.25rem' }}>
-                  Total Points
+                  {t('admin.users.totalPoints', 'Total Points')}
                 </label>
                 <input
                   type="number"
@@ -327,10 +329,10 @@ const UsersManager: React.FC = () => {
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                 <button onClick={handleSaveUser} className="terminal-btn terminal-btn-primary">
-                  💾 Save Changes
+                  💾 {t('admin.users.saveChanges', 'Save Changes')}
                 </button>
                 <button onClick={() => setShowModal(false)} className="terminal-btn">
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>

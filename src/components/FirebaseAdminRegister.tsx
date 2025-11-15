@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Shield, User, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 
 const FirebaseAdminRegister: React.FC = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -38,7 +40,7 @@ const FirebaseAdminRegister: React.FC = () => {
       setCanRegister(adminSnapshot.empty && roleSnapshot.empty);
     } catch (error) {
       console.error('Error checking admin status:', error);
-      setError('Failed to check admin registration status');
+      setError(t('admin.register.failedToCheck', 'Failed to check admin registration status'));
     } finally {
       setCheckingStatus(false);
     }
@@ -54,19 +56,19 @@ const FirebaseAdminRegister: React.FC = () => {
 
   const validateForm = () => {
     if (!formData.username || formData.username.length < 3) {
-      setError('Username must be at least 3 characters long');
+      setError(t('admin.register.usernameMinLength', 'Username must be at least 3 characters long'));
       return false;
     }
     if (!formData.email || !formData.email.includes('@')) {
-      setError('Please enter a valid email address');
+      setError(t('admin.register.validEmail', 'Please enter a valid email address'));
       return false;
     }
     if (!formData.password || formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError(t('admin.register.passwordMinLength', 'Password must be at least 6 characters long'));
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('admin.register.passwordsDontMatch', 'Passwords do not match'));
       return false;
     }
     return true;
@@ -125,13 +127,13 @@ const FirebaseAdminRegister: React.FC = () => {
       console.error('Admin registration error:', err);
       
       // Provide user-friendly error messages
-      let errorMessage = 'Registration failed. Please try again.';
+      let errorMessage = t('admin.register.registrationFailed', 'Registration failed. Please try again.');
       if (err.code === 'auth/email-already-in-use') {
-        errorMessage = 'An account with this email already exists.';
+        errorMessage = t('admin.register.emailExists', 'An account with this email already exists.');
       } else if (err.code === 'auth/weak-password') {
-        errorMessage = 'Password should be at least 6 characters.';
+        errorMessage = t('admin.register.weakPassword', 'Password should be at least 6 characters.');
       } else if (err.code === 'auth/invalid-email') {
-        errorMessage = 'Invalid email address.';
+        errorMessage = t('admin.register.invalidEmail', 'Invalid email address.');
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -145,7 +147,7 @@ const FirebaseAdminRegister: React.FC = () => {
   if (checkingStatus) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-green-400 text-xl">Checking admin registration status...</div>
+        <div className="text-green-400 text-xl">{t('admin.register.checkingStatus', 'Checking admin registration status...')}</div>
       </div>
     );
   }
@@ -158,15 +160,15 @@ const FirebaseAdminRegister: React.FC = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-900/50 rounded-full mb-4">
               <AlertCircle className="w-8 h-8 text-red-400" />
             </div>
-            <h2 className="text-2xl font-bold text-red-400 mb-4">Registration Disabled</h2>
+            <h2 className="text-2xl font-bold text-red-400 mb-4">{t('admin.register.registrationDisabled', 'Registration Disabled')}</h2>
             <p className="text-gray-400 mb-6">
-              Admin registration is no longer available. An administrator account already exists for this system.
+              {t('admin.register.registrationUnavailable', 'Admin registration is no longer available. An administrator account already exists for this system.')}
             </p>
             <Link
               to="/admin/login"
               className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
-              Go to Admin Login
+              {t('admin.register.goToLogin', 'Go to Admin Login')}
             </Link>
           </div>
         </div>
@@ -182,9 +184,9 @@ const FirebaseAdminRegister: React.FC = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-green-900/50 rounded-full mb-4">
               <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
-            <h2 className="text-2xl font-bold text-green-400 mb-4">Admin Account Created!</h2>
+            <h2 className="text-2xl font-bold text-green-400 mb-4">{t('admin.register.accountCreated', 'Admin Account Created!')}</h2>
             <p className="text-gray-400">
-              Your administrator account has been successfully created. Redirecting to admin panel...
+              {t('admin.register.redirecting', 'Your administrator account has been successfully created. Redirecting to admin panel...')}
             </p>
           </div>
         </div>
@@ -201,14 +203,14 @@ const FirebaseAdminRegister: React.FC = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-green-900/50 rounded-full mb-4">
               <Shield className="w-8 h-8 text-green-400" />
             </div>
-            <h1 className="text-3xl font-bold text-green-400 mb-2">Admin Registration</h1>
+            <h1 className="text-3xl font-bold text-green-400 mb-2">{t('admin.register.adminRegistration', 'Admin Registration')}</h1>
             <p className="text-gray-400 text-sm">
-              Create the administrator account for your system
+              {t('admin.register.createAdminAccount', 'Create the administrator account for your system')}
             </p>
             <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg">
               <p className="text-yellow-400 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
-                Only one admin account can be created. After registration, this page will be permanently disabled.
+                {t('admin.register.oneAdminOnly', 'Only one admin account can be created. After registration, this page will be permanently disabled.')}
               </p>
             </div>
           </div>
@@ -218,7 +220,7 @@ const FirebaseAdminRegister: React.FC = () => {
             {/* Username */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Username
+                {t('admin.register.username', 'Username')}
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
@@ -228,7 +230,7 @@ const FirebaseAdminRegister: React.FC = () => {
                   value={formData.username}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                  placeholder="Enter admin username"
+                  placeholder={t('admin.register.usernamePlaceholder', 'Enter admin username')}
                   required
                 />
               </div>
@@ -237,7 +239,7 @@ const FirebaseAdminRegister: React.FC = () => {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Email Address
+                {t('admin.register.emailAddress', 'Email Address')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
@@ -256,7 +258,7 @@ const FirebaseAdminRegister: React.FC = () => {
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Password
+                {t('admin.register.password', 'Password')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
@@ -266,7 +268,7 @@ const FirebaseAdminRegister: React.FC = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                  placeholder="Enter strong password"
+                  placeholder={t('admin.register.passwordPlaceholder', 'Enter strong password')}
                   required
                 />
               </div>
@@ -275,7 +277,7 @@ const FirebaseAdminRegister: React.FC = () => {
             {/* Confirm Password */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Confirm Password
+                {t('admin.register.confirmPassword', 'Confirm Password')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
@@ -285,7 +287,7 @@ const FirebaseAdminRegister: React.FC = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                  placeholder="Re-enter password"
+                  placeholder={t('admin.register.confirmPasswordPlaceholder', 'Re-enter password')}
                   required
                 />
               </div>
@@ -304,16 +306,16 @@ const FirebaseAdminRegister: React.FC = () => {
               disabled={isLoading}
               className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Creating Admin Account...' : 'Create Admin Account'}
+              {isLoading ? t('admin.register.creating', 'Creating Admin Account...') : t('admin.register.createAccount', 'Create Admin Account')}
             </button>
           </form>
 
           {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              Already have an admin account?{' '}
+              {t('admin.register.alreadyHaveAccount', 'Already have an admin account?')}{' '}
               <Link to="/admin/login" className="text-green-400 hover:text-green-300">
-                Login here
+                {t('admin.register.loginHere', 'Login here')}
               </Link>
             </p>
           </div>

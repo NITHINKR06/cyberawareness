@@ -45,9 +45,9 @@ export default function AppLayout() {
   // Navigation structure
   const mainNavigation = [
     { id: 'dashboard', name: t('nav.dashboard'), icon: LayoutDashboard, path: '/app/dashboard', gradient: 'from-cyan-500 to-indigo-500' },
-    { id: 'modules', name: 'Learning Modules', icon: BookOpen, path: '/app/modules', gradient: 'from-emerald-500 to-teal-500' },
+    { id: 'modules', name: t('modules.title'), icon: BookOpen, path: '/app/modules', gradient: 'from-emerald-500 to-teal-500' },
     { id: 'achievements', name: t('nav.achievements'), icon: Award, path: '/app/achievements', gradient: 'from-amber-500 to-orange-500' },
-    { id: 'community', name: 'Community', icon: MessageSquare, path: '/app/community', gradient: 'from-purple-500 to-pink-500' },
+    { id: 'community', name: t('nav.community'), icon: MessageSquare, path: '/app/community', gradient: 'from-purple-500 to-pink-500' },
   ];
 
   const toolsNavigation = [
@@ -132,7 +132,7 @@ export default function AppLayout() {
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-white text-sm truncate">{user.username}</p>
-                <p className="text-xs text-slate-400 truncate">{user.email || 'Premium Member'}</p>
+                <p className="text-xs text-slate-400 truncate">{user.email || t('appLayout.premiumMember', 'Premium Member')}</p>
               </div>
             )}
           </div>
@@ -144,7 +144,7 @@ export default function AppLayout() {
           <div className="space-y-2">
             {sidebarOpen && (
               <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-3">
-                Main
+                {t('appLayout.main', 'Main')}
               </h3>
             )}
             {mainNavigation.map((item) => {
@@ -189,7 +189,7 @@ export default function AppLayout() {
           <div className="space-y-2">
             {sidebarOpen && (
               <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-3">
-                Security Tools
+                {t('appLayout.securityTools', 'Security Tools')}
               </h3>
             )}
             {toolsNavigation.map((item) => {

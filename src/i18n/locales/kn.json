@@ -64,7 +64,17 @@
     "communityActivity": "ಸಮುದಾಯ ವಂಚನೆ ವರದಿಗಳು (24 ಗಂಟೆ)",
     "liveThreatFeed": "ಲೈವ್ ಬೆದರಿಕೆ ಫೀಡ್",
     "threatIntelligence": "ಬೆದರಿಕೆ ಗುಪ್ತಚರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
-    "yourAnalytics": "ನಿಮ್ಮ ವಿಶ್ಲೇಷಣೆ"
+    "yourAnalytics": "ನಿಮ್ಮ ವಿಶ್ಲೇಷಣೆ",
+    "pointsEarned": "ಗಳಿಸಿದ ಅಂಕಗಳು",
+    "yourSkills": "ನಿಮ್ಮ ಕೌಶಲ್ಯಗಳು",
+    "skills": {
+      "passwordSecurity": "ಪಾಸ್‌ವರ್ಡ್ ಭದ್ರತೆ",
+      "phishingDetection": "ಫಿಶಿಂಗ್ ಪತ್ತೆಹಚ್ಚುವಿಕೆ",
+      "safeBrowsing": "ಸುರಕ್ಷಿತ ಬ್ರೌಸಿಂಗ್",
+      "socialEngineering": "ಸಾಮಾಜಿಕ ಎಂಜಿನಿಯರಿಂಗ್",
+      "dataProtection": "ಡೇಟಾ ರಕ್ಷಣೆ",
+      "networkSecurity": "ನೆಟ್‌ವರ್ಕ್ ಭದ್ರತೆ"
+    }
   },
   "modules": {
     "title": "ಕಲಿಕೆಯ ಮಾಡ್ಯೂಲ್‌ಗಳು",
@@ -165,7 +175,15 @@
       "romanceScam": "ಪ್ರಣಯ ವಂಚನೆ",
       "techSupportScam": "ತಾಂತ್ರಿಕ ಬೆಂಬಲ ವಂಚನೆ",
       "other": "ಇತರೆ"
-    }
+    },
+    "gender": {
+      "male": "ಪುರುಷ",
+      "female": "ಮಹಿಳೆ",
+      "other": "ಇತರೆ"
+    },
+    "cyberCrimeStation": "ಸೈಬರ್ ಅಪರಾಧ ಪೊಲೀಸ್ ಸ್ಟೇಷನ್",
+    "localPoliceStation": "ಸ್ಥಳೀಯ ಪೊಲೀಸ್ ಸ್ಟೇಷನ್",
+    "nationalHelpline": "ರಾಷ್ಟ್ರೀಯ ಸೈಬರ್ ಅಪರಾಧ ಹೆಲ್ಪ್‌ಲೈನ್"
   },
   "scamAnalyzer": {
     "title": "AI-ಚಾಲಿತ ವಂಚನೆ ವಿಶ್ಲೇಷಕ",
@@ -187,7 +205,32 @@
     "recommendations": "ಶಿಫಾರಸುಗಳು",
     "noThreats": "ಯಾವುದೇ ಬೆದರಿಕೆಗಳು ಪತ್ತೆಯಾಗಿಲ್ಲ",
     "aiPowered": "AI ಮೂಲಕ ಚಾಲಿತ",
-    "urlSafety": "URL ಸುರಕ್ಷತೆ ಪರಿಶೀಲನೆ"
+    "urlSafety": "URL ಸುರಕ್ಷತೆ ಪರಿಶೀಲನೆ",
+    "urlChecking": "URL ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ",
+    "comingSoon": "ಶೀಘ್ರದಲ್ಲೇ ಬರುತ್ತಿದೆ",
+    "urlComingSoonDesc": "ನಾವು URL ಬೆದರಿಕೆ ಬುದ್ಧಿಮತ್ತೆ ಪರಿಶೀಲನೆ ಸೇರಿಸಲು ಕೆಲಸ ಮಾಡುತ್ತಿದ್ದೇವೆ। ಈ ವೈಶಿಷ್ಟ್ಯವು ಫಿಶಿಂಗ್, ಮಾಲ್ವೇರ್ ಮತ್ತು ಇತರ ಭದ್ರತಾ ಬೆದರಿಕೆಗಳಿಗಾಗಿ URL ಗಳನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತದೆ।",
+    "imageAnalysis": "ಚಿತ್ರ ವಿಶ್ಲೇಷಣೆ",
+    "imageComingSoonDesc": "ನಾವು OCR ಮತ್ತು AI-ಚಾಲಿತ ಬೆದರಿಕೆ ಪತ್ತೆಹಚ್ಚುವಿಕೆಯೊಂದಿಗೆ ಚಿತ್ರ ವಿಶ್ಲೇಷಣೆ ಸೇರಿಸಲು ಕೆಲಸ ಮಾಡುತ್ತಿದ್ದೇವೆ। ಈ ವೈಶಿಷ್ಟ್ಯವು ಚಿತ್ರಗಳಿಂದ ಪಠ್ಯವನ್ನು ಹೊರತೆಗೆಯುತ್ತದೆ ಮತ್ತು ಸಂಭಾವ್ಯ ವಂಚನೆಗಳು ಮತ್ತು ಬೆದರಿಕೆಗಳಿಗಾಗಿ ಅವುಗಳನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತದೆ।",
+    "highThreatDetected": "ಉನ್ನತ ಬೆದರಿಕೆ ಪತ್ತೆಯಾಗಿದೆ! ದಯವಿಟ್ಟು ಅತ್ಯಂತ ಎಚ್ಚರಿಕೆಯಿಂದಿರಿ।",
+    "suspiciousContent": "ಸಂಶಯಾಸ್ಪದ ವಿಷಯವನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ। ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ।",
+    "contentSafe": "ವಿಷಯವು ಸುರಕ್ಷಿತವೆಂದು ತೋರುತ್ತದೆ, ಆದರೆ ಯಾವಾಗಲೂ ಎಚ್ಚರಿಕೆಯಿಂದಿರಿ!",
+    "failedToAnalyze": "{{type}} ವಿಶ್ಲೇಷಿಸಲು ವಿಫಲವಾಗಿದೆ। {{message}}",
+    "pleaseTryAgain": "ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ।",
+    "analysisFailed": "ವಿಶ್ಲೇಷಣೆ ವಿಫಲವಾಗಿದೆ: {{message}}",
+    "serverError": "ಸರ್ವರ್ ದೋಷ. ದಯವಿಟ್ಟು ನಿಮ್ಮ Generative LLM API ಕೀ ಕಾನ್ಫಿಗರೇಶನ್ (Gemini ಅಥವಾ ChatGPT) ಪರಿಶೀಲಿಸಿ।",
+    "invalidInput": "ಅಮಾನ್ಯ ಇನ್‌ಪುಟ್",
+    "intelligentAnalysis": "ಮುಂದುವರಿದ AI ಮೂಲಕ ಚಾಲಿತ ಬುದ್ಧಿವಂತ ವಿಶ್ಲೇಷಣೆ",
+    "poweredByGemini": "Gemini ಮೂಲಕ ಚಾಲಿತ",
+    "poweredByChatGPT": "ChatGPT ಮೂಲಕ ಚಾಲಿತ",
+    "generativeAi": "Generative AI",
+    "aiSummary": "AI ಸಾರಾಂಶ",
+    "highThreatImage": "ಚಿತ್ರದಲ್ಲಿ ಉನ್ನತ ಬೆದರಿಕೆ ಪತ್ತೆಯಾಗಿದೆ! ದಯವಿಟ್ಟು ಅತ್ಯಂತ ಎಚ್ಚರಿಕೆಯಿಂದಿರಿ।",
+    "suspiciousImage": "ಚಿತ್ರದಲ್ಲಿ ಸಂಶಯಾಸ್ಪದ ವಿಷಯವನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ। ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ।",
+    "imageSafe": "AI ವಿಶ್ಲೇಷಣೆಯ ಆಧಾರದ ಮೇಲೆ ಚಿತ್ರ ವಿಷಯವು ಸುರಕ್ಷಿತವೆಂದು ತೋರುತ್ತದೆ।",
+    "failedToProcessImage": "ಚಿತ್ರವನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ವಿಫಲವಾಗಿದೆ। {{message}}",
+    "imageProcessingFailed": "ಚಿತ್ರ ಪ್ರಕ್ರಿಯೆ ವಿಫಲವಾಗಿದೆ: {{message}}",
+    "textExtracted": "ಪಠ್ಯವನ್ನು ಹೊರತೆಗೆಯಲಾಗಿದೆ! Generative LLM AI ನೊಂದಿಗೆ ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",
+    "suspiciousImageReview": "ಚಿತ್ರದಲ್ಲಿ ಸಂಶಯಾಸ್ಪದ ವಿಷಯವನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ। ದಯವಿಟ್ಟು ವಿಶ್ಲೇಷಣೆಯನ್ನು ಪರಿಶೀಲಿಸಿ।"
   },
   "threatDashboard": {
     "title": "ಸಮುದಾಯ ಬೆದರಿಕೆ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
@@ -226,7 +269,17 @@
     "tagsPlaceholder": "ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಟ್ಟ ಟ್ಯಾಗ್ಗಳನ್ನು ನಮೂದಿಸಿ",
     "submit": "ಪೋಸ್ಟ್ ಸಲ್ಲಿಸಿ",
     "cancel": "ರದ್ದುಮಾಡಿ",
-    "createPost": "ಪೋಸ್ಟ್ ರಚಿಸಿ"
+    "createPost": "ಪೋಸ್ಟ್ ರಚಿಸಿ",
+    "topics": "ವಿಷಯಗಳು",
+    "allTopics": "ಎಲ್ಲಾ ವಿಷಯಗಳು",
+    "justNow": "ಇದೀಗ",
+    "minAgo": "{{mins}} ನಿಮಿಷಗಳ ಹಿಂದೆ",
+    "hourAgo": "{{hours}} ಗಂಟೆಗಳ ಹಿಂದೆ",
+    "dayAgo": "{{days}} ದಿನಗಳ ಹಿಂದೆ",
+    "sortBy": "ವಿಂಗಡಿಸಿ",
+    "mostRecent": "ಇತ್ತೀಚಿನ",
+    "mostPopular": "ಜನಪ್ರಿಯ",
+    "mostViewed": "ಹೆಚ್ಚು ವೀಕ್ಷಿಸಲಾಗಿದೆ"
   },
   "timeMachine": {
     "title": "ವಂಚನೆ ಟೈಮ್ ಮೆಷಿನ್",
@@ -328,6 +381,50 @@
     "confirm": "ದೃಢೀಕರಿಸಿ",
     "level": "ಮಟ್ಟ {{level}}",
     "select": "ಆಯ್ಕೆಮಾಡಿ",
-    "points": "ಅಂಕಗಳು"
+    "points": "ಅಂಕಗಳು",
+    "processing": "ಸಂಸ್ಕರಿಸಲಾಗುತ್ತಿದೆ..."
+  },
+  "publicLayout": {
+    "explore": "ಅನ್ವೇಷಿಸಿ",
+    "signUpFree": "ಉಚಿತವಾಗಿ ಸೈನ್ ಅಪ್ ಮಾಡಿ",
+    "bannerTitle": "ನಿಮ್ಮ ಪ್ರಗತಿಯನ್ನು ಉಳಿಸಲು ಮತ್ತು ಬಹುಮಾನಗಳನ್ನು ಗಳಿಸಲು ಉಚಿತ ಖಾತೆಯನ್ನು ರಚಿಸಿ!",
+    "bannerSubtitle": "ನಿಮ್ಮ ಕಲಿಕೆಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ, ಸಮುದಾಯದಲ್ಲಿ ಭಾಗವಹಿಸಿ ಮತ್ತು ಸಾಧನೆಗಳನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"
+  },
+  "appLayout": {
+    "main": "ಮುಖ್ಯ",
+    "securityTools": "ಭದ್ರತಾ ಉಪಕರಣಗಳು",
+    "premiumMember": "ಪ್ರೀಮಿಯಂ ಸದಸ್ಯ"
+  },
+  "admin": {
+    "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "users": "ಬಳಕೆದಾರರು",
+    "posts": "ಪೋಸ್ಟ್‌ಗಳು",
+    "comments": "ಕಾಮೆಂಟ್‌ಗಳು",
+    "topics": "ವಿಷಯಗಳು",
+    "scams": "ವಂಚನೆಗಳು",
+    "reports": "ವರದಿಗಳು",
+    "analytics": "ವಿಶ್ಲೇಷಣೆ",
+    "adminTerminal": "ಆಡ್ಮಿನ್ ಟರ್ಮಿನಲ್",
+    "walrusAdminPanel": "WALRUS ಆಡ್ಮಿನ್ ಪ್ಯಾನೆಲ್",
+    "authorizedAccess": "[ಅಧಿಕೃತ ಪ್ರವೇಶ]",
+    "loggedInAs": "ಲಾಗ್ ಇನ್ ಮಾಡಲಾಗಿದೆ:",
+    "logout": "ಲಾಗ್ ಔಟ್",
+    "walrusSecurityAdmin": "WALRUS ಭದ್ರತಾ ಆಡ್ಮಿನ್",
+    "adminAccess": "ಆಡ್ಮಿನ್ ಪ್ರವೇಶ",
+    "firebaseSecurePortal": "FIREBASE ಸುರಕ್ಷಿತ ಪೋರ್ಟಲ್ v2.0",
+    "emailAddress": "ಇಮೇಲ್_ವಿಳಾಸ",
+    "passwordHash": "ಪಾಸ್‌ವರ್ಡ್_ಹ್ಯಾಶ್",
+    "accessSystem": "ಸಿಸ್ಟಮ್ ಪ್ರವೇಶಿಸಿ",
+    "authenticating": "ದೃಢೀಕರಿಸಲಾಗುತ್ತಿದೆ...",
+    "protocol": "ಪ್ರೋಟೋಕಾಲ್: FIREBASE",
+    "encryption": "ಎನ್ಕ್ರಿಪ್ಶನ್: AES-256",
+    "needAdminAccount": "ಆಡ್ಮಿನ್ ಖಾತೆ ಬೇಕೇ? ಇಲ್ಲಿ ನೋಂದಾಯಿಸಿ",
+    "returnToMainSite": "← ಮುಖ್ಯ ಸೈಟ್‌ಗೆ ಹಿಂತಿರುಗಿ",
+    "loginFailed": "ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ। ದಯವಿಟ್ಟು ನಿಮ್ಮ ರುಜುವಾತುಗಳನ್ನು ಪರಿಶೀಲಿಸಿ.",
+    "noAccountFound": "ಈ ಇಮೇಲ್‌ನೊಂದಿಗೆ ಯಾವುದೇ ಖಾತೆ ಕಂಡುಬಂದಿಲ್ಲ। ಮೊದಲು /admin/register ಗೆ ಭೇಟಿ ನೀಡಿ ಅಥವಾ Firebase Console ನಿಂದ ಆಡ್ಮಿನ್ ಖಾತೆಯನ್ನು ರಚಿಸಿ.",
+    "incorrectPassword": "ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್.",
+    "invalidEmail": "ಅಮಾನ್ಯ ಇಮೇಲ್ ವಿಳಾಸ.",
+    "tooManyRequests": "ಹಲವಾರು ವಿಫಲ ಲಾಗಿನ್ ಪ್ರಯತ್ನಗಳು. ದಯವಿಟ್ಟು ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "pleaseEnterBoth": "ದಯವಿಟ್ಟು ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಎರಡನ್ನೂ ನಮೂದಿಸಿ"
   }
 }

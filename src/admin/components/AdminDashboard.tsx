@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Users, UserCheck, UserX, FileText, MessageSquare, Tag, Shield, Flag, Clock, Activity, Database, BarChart3, AlertTriangle } from 'lucide-react';
 import '../styles/kali-theme.css';
 
@@ -26,6 +27,7 @@ interface DashboardStats {
 }
 
 const AdminDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,14 +48,14 @@ const AdminDashboard: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch stats');
+        throw new Error(t('admin.dashboard.failedToFetchStats', 'Failed to fetch stats'));
       }
 
       const data = await response.json();
       setStats(data);
       setError(null);
     } catch (err) {
-      setError('Failed to load dashboard statistics');
+      setError(t('admin.dashboard.failedToLoad', 'Failed to load dashboard statistics'));
       console.error('Dashboard error:', err);
     } finally {
       setLoading(false);
@@ -91,7 +93,7 @@ const AdminDashboard: React.FC = () => {
 ██║███╗██║██╔══██║██║     ██╔══██╗██║   ██║╚════██║
 ╚███╔███╔╝██║  ██║███████╗██║  ██║╚██████╔╝███████║
  ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
-                ADMIN CONTROL CENTER
+                ${t('admin.dashboard.controlCenter', 'ADMIN CONTROL CENTER')}
 `}
       </div>
 
@@ -102,7 +104,7 @@ const AdminDashboard: React.FC = () => {
             <Users size={24} />
           </div>
           <div className="stat-value">{stats.stats.totalUsers}</div>
-          <div className="stat-label">Total Users</div>
+          <div className="stat-label">{t('admin.dashboard.totalUsers', 'Total Users')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ color: 'var(--kali-green)' }}>
@@ -111,7 +113,7 @@ const AdminDashboard: React.FC = () => {
           <div className="stat-value" style={{ color: 'var(--kali-green)' }}>
             {stats.stats.activeUsers}
           </div>
-          <div className="stat-label">Active Users</div>
+          <div className="stat-label">{t('admin.dashboard.activeUsers', 'Active Users')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ color: 'var(--kali-red)' }}>
@@ -120,35 +122,35 @@ const AdminDashboard: React.FC = () => {
           <div className="stat-value" style={{ color: 'var(--kali-red)' }}>
             {stats.stats.bannedUsers}
           </div>
-          <div className="stat-label">Banned Users</div>
+          <div className="stat-label">{t('admin.dashboard.bannedUsers', 'Banned Users')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ color: 'var(--kali-cyan)' }}>
             <FileText size={24} />
           </div>
           <div className="stat-value">{stats.stats.totalPosts}</div>
-          <div className="stat-label">Total Posts</div>
+          <div className="stat-label">{t('admin.dashboard.totalPosts', 'Total Posts')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ color: 'var(--kali-purple)' }}>
             <MessageSquare size={24} />
           </div>
           <div className="stat-value">{stats.stats.totalComments}</div>
-          <div className="stat-label">Comments</div>
+          <div className="stat-label">{t('admin.dashboard.comments', 'Comments')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ color: 'var(--kali-orange)' }}>
             <Tag size={24} />
           </div>
           <div className="stat-value">{stats.stats.totalTopics}</div>
-          <div className="stat-label">Topics</div>
+          <div className="stat-label">{t('admin.dashboard.topics', 'Topics')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ color: 'var(--kali-red)' }}>
             <Shield size={24} />
           </div>
           <div className="stat-value">{stats.stats.totalScams}</div>
-          <div className="stat-label">Scam Records</div>
+          <div className="stat-label">{t('admin.dashboard.scamRecords', 'Scam Records')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ color: 'var(--kali-yellow)' }}>
@@ -157,7 +159,7 @@ const AdminDashboard: React.FC = () => {
           <div className="stat-value" style={{ color: 'var(--kali-yellow)' }}>
             {stats.stats.pendingReports}
           </div>
-          <div className="stat-label">Pending Reports</div>
+          <div className="stat-label">{t('admin.dashboard.pendingReports', 'Pending Reports')}</div>
         </div>
       </div>
 
@@ -168,17 +170,17 @@ const AdminDashboard: React.FC = () => {
           <div className="terminal-card-header">
             <h3 className="terminal-card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Users size={20} style={{ color: 'var(--kali-blue)' }} />
-              Recent Users
+              {t('admin.dashboard.recentUsers', 'Recent Users')}
             </h3>
           </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Joined</th>
+                  <th>{t('admin.dashboard.username', 'Username')}</th>
+                  <th>{t('admin.dashboard.email', 'Email')}</th>
+                  <th>{t('admin.dashboard.role', 'Role')}</th>
+                  <th>{t('admin.dashboard.joined', 'Joined')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -204,24 +206,24 @@ const AdminDashboard: React.FC = () => {
           <div className="terminal-card-header">
             <h3 className="terminal-card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Flag size={20} style={{ color: 'var(--kali-yellow)' }} />
-              Recent Reports
+              {t('admin.dashboard.recentReports', 'Recent Reports')}
             </h3>
           </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Type</th>
-                  <th>User</th>
-                  <th>Status</th>
-                  <th>Date</th>
+                  <th>{t('admin.dashboard.type', 'Type')}</th>
+                  <th>{t('admin.dashboard.user', 'User')}</th>
+                  <th>{t('admin.dashboard.status', 'Status')}</th>
+                  <th>{t('admin.dashboard.date', 'Date')}</th>
                 </tr>
               </thead>
               <tbody>
                 {stats.recentActivity.reports.map((report: any) => (
                   <tr key={report._id}>
                     <td>{report.scamType}</td>
-                    <td>{report.userId?.username || 'Anonymous'}</td>
+                    <td>{report.userId?.username || t('admin.dashboard.anonymous', 'Anonymous')}</td>
                     <td>
                       <span className={`badge badge-${report.status === 'pending' ? 'warning' : 'success'}`}>
                         {report.status}
@@ -240,17 +242,17 @@ const AdminDashboard: React.FC = () => {
           <div className="terminal-card-header">
             <h3 className="terminal-card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FileText size={20} style={{ color: 'var(--kali-cyan)' }} />
-              Recent Posts
+              {t('admin.dashboard.recentPosts', 'Recent Posts')}
             </h3>
           </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Title</th>
-                  <th>Author</th>
-                  <th>Topic</th>
-                  <th>Date</th>
+                  <th>{t('admin.dashboard.title', 'Title')}</th>
+                  <th>{t('admin.dashboard.author', 'Author')}</th>
+                  <th>{t('admin.dashboard.topic', 'Topic')}</th>
+                  <th>{t('admin.dashboard.date', 'Date')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -276,32 +278,32 @@ const AdminDashboard: React.FC = () => {
           <div className="terminal-card-header">
             <h3 className="terminal-card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Activity size={20} style={{ color: 'var(--kali-green)' }} />
-              System Status
+              {t('admin.dashboard.systemStatus', 'System Status')}
             </h3>
           </div>
           <div style={{ fontFamily: 'var(--terminal-font)', fontSize: '0.9rem' }}>
             <div style={{ marginBottom: '0.5rem' }}>
-              <span style={{ color: 'var(--kali-text-secondary)' }}>Status:</span>{' '}
-              <span style={{ color: 'var(--kali-green)' }}>● ONLINE</span>
+              <span style={{ color: 'var(--kali-text-secondary)' }}>{t('admin.dashboard.status', 'Status')}:</span>{' '}
+              <span style={{ color: 'var(--kali-green)' }}>● {t('admin.dashboard.online', 'ONLINE')}</span>
             </div>
             <div style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Database size={16} style={{ color: 'var(--kali-text-secondary)' }} />
-              <span style={{ color: 'var(--kali-text-secondary)' }}>Database:</span>{' '}
-              <span style={{ color: 'var(--kali-green)' }}>Connected</span>
+              <span style={{ color: 'var(--kali-text-secondary)' }}>{t('admin.dashboard.database', 'Database')}:</span>{' '}
+              <span style={{ color: 'var(--kali-green)' }}>{t('admin.dashboard.connected', 'Connected')}</span>
             </div>
             <div style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Activity size={16} style={{ color: 'var(--kali-text-secondary)' }} />
-              <span style={{ color: 'var(--kali-text-secondary)' }}>Total Analyses:</span>{' '}
+              <span style={{ color: 'var(--kali-text-secondary)' }}>{t('admin.dashboard.totalAnalyses', 'Total Analyses')}:</span>{' '}
               <span style={{ color: 'var(--kali-blue)' }}>{stats.stats.totalAnalyses}</span>
             </div>
             <div style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Flag size={16} style={{ color: 'var(--kali-text-secondary)' }} />
-              <span style={{ color: 'var(--kali-text-secondary)' }}>Total Reports:</span>{' '}
+              <span style={{ color: 'var(--kali-text-secondary)' }}>{t('admin.dashboard.totalReports', 'Total Reports')}:</span>{' '}
               <span style={{ color: 'var(--kali-blue)' }}>{stats.stats.totalReports}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Clock size={16} style={{ color: 'var(--kali-text-secondary)' }} />
-              <span style={{ color: 'var(--kali-text-secondary)' }}>Last Update:</span>{' '}
+              <span style={{ color: 'var(--kali-text-secondary)' }}>{t('admin.dashboard.lastUpdate', 'Last Update')}:</span>{' '}
               <span style={{ color: 'var(--kali-cyan)' }}>{new Date().toLocaleTimeString()}</span>
             </div>
           </div>
@@ -314,7 +316,7 @@ const AdminDashboard: React.FC = () => {
           <div className="terminal-card-header">
             <h3 className="terminal-card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <BarChart3 size={20} style={{ color: 'var(--kali-purple)' }} />
-              User Registrations (Last 30 Days)
+              {t('admin.dashboard.userRegistrations', 'User Registrations (Last 30 Days)')}
             </h3>
           </div>
           <div style={{ padding: '1rem', fontFamily: 'var(--terminal-font)' }}>

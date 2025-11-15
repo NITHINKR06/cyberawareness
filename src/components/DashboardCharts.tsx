@@ -60,15 +60,16 @@ const userProgressData = [
   { month: 'Jun', points: 1100, modules: 7 },
 ];
 
-// Static skill radar until a skills API exists
-const skillRadarData = [
-  { skill: 'Password Security', score: 85 },
-  { skill: 'Phishing Detection', score: 70 },
-  { skill: 'Safe Browsing', score: 90 },
-  { skill: 'Social Engineering', score: 60 },
-  { skill: 'Data Protection', score: 75 },
-  { skill: 'Network Security', score: 65 },
+// Static skill radar until a skills API exists - will be translated in component
+const skillRadarDataKeys = [
+  'passwordSecurity',
+  'phishingDetection',
+  'safeBrowsing',
+  'socialEngineering',
+  'dataProtection',
+  'networkSecurity'
 ];
+const skillRadarScores = [85, 70, 90, 60, 75, 65];
 
 const buildCommunityFromRecent = (recent: any[]) => {
   // Bucket recent verified reports by hour label
@@ -209,7 +210,7 @@ export function UserProgressChart() {
             fill="#3B82F6"
             fillOpacity={0.3}
             strokeWidth={2}
-            name="Points Earned"
+            name={t('dashboard.pointsEarned', 'Points Earned')}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -219,6 +220,11 @@ export function UserProgressChart() {
 
 export function SkillRadarChart() {
   const { t } = useTranslation();
+  
+  const skillRadarData = skillRadarDataKeys.map((key, index) => ({
+    skill: t(`dashboard.skills.${key}`, key),
+    score: skillRadarScores[index]
+  }));
   
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
@@ -236,7 +242,7 @@ export function SkillRadarChart() {
             stroke="#6B7280"
           />
           <Radar 
-            name="Your Skills" 
+            name={t('dashboard.yourSkills', 'Your Skills')} 
             dataKey="score" 
             stroke="#3B82F6" 
             fill="#3B82F6" 
