@@ -13,15 +13,42 @@ class GenerativeLLMService {
     this.provider = process.env.LLM_PROVIDER || (this.geminiApiKey ? 'gemini' : 'chatgpt');
     
     // API endpoints
+    // Use v1beta for newer models like gemini-1.5-pro and gemini-1.5-flash
     this.geminiBaseUrl = 'https://generativelanguage.googleapis.com/v1beta';
     this.chatgptBaseUrl = 'https://api.openai.com/v1/chat/completions';
     
     // Model selection
     // Note: Try 'gemini-pro' if 'gemini-1.5-flash' doesn't work
-    this.geminiModel = process.env.GEMINI_MODEL || 'gemini-pro';
+    // New line: Use a more current, stable model as the default
+    let geminiModelEnv = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+    // Normalize common typos in model names
+    this.geminiModel = geminiModelEnv.replace(/gemiini/g, 'gemini').replace(/geminni/g, 'gemini');
+    if (this.geminiModel !== geminiModelEnv) {
+      console.log(`⚠️  Fixed typo in GEMINI_MODEL: "${geminiModelEnv}" -> "${this.geminiModel}"`);
+    }
+    
+    // Map deprecated/old model names to current equivalents
+    const modelNameMapping = {
+      'gemini-1.5-pro': 'gemini-2.5-pro', // Upgrade to newer version
+      'gemini-1.5-flash': 'gemini-2.5-flash', // Upgrade to newer version
+      'gemini-pro': 'gemini-pro-latest', // Use latest stable
+      'gemini-flash': 'gemini-flash-latest' // Use latest stable
+    };
+    
+    if (modelNameMapping[this.geminiModel]) {
+      const oldModel = this.geminiModel;
+      this.geminiModel = modelNameMapping[this.geminiModel];
+      console.log(`ℹ️  Upgraded deprecated model name: "${oldModel}" -> "${this.geminiModel}"`);
+    }
+    
     this.chatgptModel = process.env.CHATGPT_MODEL || 'gpt-4o-mini';
     
     this.timeout = parseInt(process.env.LLM_TIMEOUT) || 30000;
+    
+    // Cache for available models
+    this.availableModels = null;
+    this.modelsCacheTime = null;
+    this.cacheDuration = 3600000; // 1 hour in milliseconds
   }
 
   /**
@@ -219,6 +246,53 @@ Format the summary with clear sections and bullet points where appropriate.`;
   }
 
   /**
+   * List available Gemini models for this API key
+   */
+  async listAvailableGeminiModels() {
+    // Check cache first
+    const now = Date.now();
+    if (this.availableModels && this.modelsCacheTime && (now - this.modelsCacheTime) < this.cacheDuration) {
+      return this.availableModels;
+    }
+
+    const apiVersions = ['v1beta', 'v1'];
+    let availableModels = {};
+
+    for (const apiVersion of apiVersions) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/${apiVersion}/models?key=${this.geminiApiKey}`;
+        console.log(`🔍 Fetching available models from ${apiVersion} API...`);
+        
+        const response = await axios.get(url, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: this.timeout
+        });
+
+        if (response.data && response.data.models) {
+          const models = response.data.models
+            .filter(model => model.supportedGenerationMethods && 
+                            model.supportedGenerationMethods.includes('generateContent'))
+            .map(model => model.name.replace(`models/`, ''));
+          
+          availableModels[apiVersion] = models;
+          console.log(`✅ Found ${models.length} available models in ${apiVersion}:`, models.join(', '));
+        }
+      } catch (error) {
+        console.log(`⚠️  Could not list models from ${apiVersion}:`, error.response?.status || error.message);
+        // Continue to try next API version
+      }
+    }
+
+    // Cache the results
+    this.availableModels = availableModels;
+    this.modelsCacheTime = now;
+
+    return availableModels;
+  }
+
+  /**
    * Call the appropriate LLM API
    */
   async callLLM(prompt) {
@@ -230,57 +304,209 @@ Format the summary with clear sections and bullet points where appropriate.`;
   }
 
   /**
-   * Call Gemini API
+   * Call Gemini API with automatic fallback to alternative models and API versions
    */
   async callGeminiAPI(prompt) {
-    // Correct Gemini API endpoint format: /v1beta/models/{model}:generateContent
-    const url = `${this.geminiBaseUrl}/models/${this.geminiModel}:generateContent?key=${this.geminiApiKey}`;
-    
-    console.log('🌐 Calling Gemini API');
-    console.log('📝 Model:', this.geminiModel);
-    console.log('🔗 URL (masked):', url.replace(this.geminiApiKey, '***'));
-    console.log('🔑 API Key configured:', !!this.geminiApiKey);
-    
+    // First, try to get available models
+    let availableModels = {};
     try {
-      const response = await axios.post(
-        url,
-        {
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          }
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          timeout: this.timeout
-        }
-      );
-
-      console.log('✅ Gemini API response received');
-      
-      if (response.data.candidates && response.data.candidates[0] && response.data.candidates[0].content) {
-        return response.data.candidates[0].content.parts[0]?.text || '';
-      }
-      
-      console.error('❌ Invalid response structure from Gemini API:', JSON.stringify(response.data).substring(0, 200));
-      throw new Error('Invalid response from Gemini API');
+      availableModels = await this.listAvailableGeminiModels();
     } catch (error) {
-      console.error('❌ Gemini API Error Details:');
-      console.error('   Status:', error.response?.status);
-      console.error('   Status Text:', error.response?.statusText);
-      console.error('   URL:', error.config?.url?.replace(this.geminiApiKey, '***'));
-      console.error('   Response Data:', error.response?.data ? JSON.stringify(error.response.data).substring(0, 300) : 'No response data');
-      throw error;
+      console.log('⚠️  Could not fetch available models, will try common models...');
     }
+
+    // List of models to try in order (most preferred first)
+    const preferredModels = [
+      this.geminiModel, // Try configured model first
+      'gemini-1.5-flash', // Fast and widely available
+      'gemini-pro', // Most compatible, works with v1 and v1beta
+      'gemini-1.5-pro' // If user specifically wants pro version
+    ].filter((model, index, self) => self.indexOf(model) === index); // Remove duplicates
+    
+    // If we have available models from API, prioritize stable models over previews
+    let modelsToTry = preferredModels;
+    if (Object.keys(availableModels).length > 0) {
+      // Combine available models from both API versions
+      const allAvailable = new Set();
+      Object.values(availableModels).forEach(models => {
+        models.forEach(model => allAvailable.add(model));
+      });
+      
+      if (allAvailable.size > 0) {
+        // Separate stable and preview models
+        const stableModels = [];
+        const previewModels = [];
+        
+        allAvailable.forEach(model => {
+          // Identify stable models (no "preview", "exp", "experimental" in name)
+          if (model.includes('preview') || model.includes('exp') || model.includes('experimental')) {
+            previewModels.push(model);
+          } else {
+            stableModels.push(model);
+          }
+        });
+        
+        // Sort stable models: prefer latest, flash, pro in that order
+        stableModels.sort((a, b) => {
+          // Prefer models with "latest" or version numbers
+          if (a.includes('latest') && !b.includes('latest')) return -1;
+          if (!a.includes('latest') && b.includes('latest')) return 1;
+          // Prefer flash over pro (flash is faster)
+          if (a.includes('flash') && !b.includes('flash')) return -1;
+          if (!a.includes('flash') && b.includes('flash')) return 1;
+          // Prefer newer versions (2.5 > 2.0 > older)
+          if (a.includes('2.5') && !b.includes('2.5')) return -1;
+          if (!a.includes('2.5') && b.includes('2.5')) return 1;
+          return 0;
+        });
+        
+        // Build final list: preferred available models first, then stable models, then previews
+        modelsToTry = preferredModels.filter(model => allAvailable.has(model));
+        
+        // Add stable models that aren't already in the list
+        stableModels.forEach(model => {
+          if (!modelsToTry.includes(model)) {
+            modelsToTry.push(model);
+          }
+        });
+        
+        // Add preview models last (as fallback only)
+        previewModels.forEach(model => {
+          if (!modelsToTry.includes(model)) {
+            modelsToTry.push(model);
+          }
+        });
+        
+        console.log(`✅ Using ${modelsToTry.length} available models (${stableModels.length} stable, ${previewModels.length} preview)`);
+        console.log(`   Stable models: ${stableModels.slice(0, 5).join(', ')}${stableModels.length > 5 ? '...' : ''}`);
+      }
+    }
+    
+    // API versions to try (v1beta first for newer models, v1 as fallback for older models)
+    const apiVersions = ['v1beta', 'v1'];
+    
+    let lastError = null;
+    
+    for (const model of modelsToTry) {
+      // Determine which API versions support this model
+      const supportedVersions = [];
+      if (Object.keys(availableModels).length > 0) {
+        // If we have model info, only try versions that support this model
+        Object.entries(availableModels).forEach(([version, models]) => {
+          if (models.includes(model)) {
+            supportedVersions.push(version);
+          }
+        });
+      }
+      // If no info or model not in list, try all versions
+      const versionsToTry = supportedVersions.length > 0 ? supportedVersions : apiVersions;
+      
+      for (const apiVersion of versionsToTry) {
+        const baseUrl = `https://generativelanguage.googleapis.com/${apiVersion}`;
+        const url = `${baseUrl}/models/${model}:generateContent?key=${this.geminiApiKey}`;
+        
+        console.log('🌐 Calling Gemini API');
+        console.log('📝 Model:', model);
+        console.log('🔗 API Version:', apiVersion);
+        console.log('🔗 URL (masked):', url.replace(this.geminiApiKey, '***'));
+        console.log('🔑 API Key configured:', !!this.geminiApiKey);
+        
+        try {
+          const response = await axios.post(
+            url,
+            {
+              contents: [{
+                parts: [{
+                  text: prompt
+                }]
+              }],
+              generationConfig: {
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 2048,
+              }
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              timeout: this.timeout
+            }
+          );
+
+          console.log(`✅ Gemini API response received using model: ${model} (${apiVersion})`);
+          
+          if (response.data.candidates && response.data.candidates[0] && response.data.candidates[0].content) {
+            // Update the base URL if we used a different API version
+            if (apiVersion !== 'v1beta') {
+              this.geminiBaseUrl = baseUrl;
+              console.log(`⚠️  Switched to ${apiVersion} API for compatibility`);
+            }
+            // Update the model name if we used a fallback
+            if (model !== this.geminiModel) {
+              // Check if configured model doesn't exist in available models
+              const configuredModelExists = Object.values(availableModels).some(models => models.includes(this.geminiModel));
+              if (!configuredModelExists) {
+                console.log(`ℹ️  Configured model "${this.geminiModel}" not available, using compatible model "${model}"`);
+              } else {
+                console.log(`⚠️  Using fallback model "${model}" instead of configured "${this.geminiModel}"`);
+              }
+            }
+            return response.data.candidates[0].content.parts[0]?.text || '';
+          }
+          
+          console.error('❌ Invalid response structure from Gemini API:', JSON.stringify(response.data).substring(0, 200));
+          throw new Error('Invalid response from Gemini API');
+        } catch (error) {
+          // If it's a 404 (model not found), try the next model/version
+          if (error.response?.status === 404) {
+            console.log(`⚠️  Model "${model}" not available with ${apiVersion} API, trying next option...`);
+            lastError = error;
+            continue; // Try next API version or model
+          }
+          
+          // If it's a 429 (rate limit), try next model (preview models often have stricter limits)
+          if (error.response?.status === 429) {
+            console.log(`⚠️  Rate limit (429) with model "${model}" (${apiVersion}), trying next model...`);
+            lastError = error;
+            continue; // Try next model
+          }
+          
+          // For other errors (auth, rate limit, etc.), log and try next but don't throw immediately
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            // Authentication errors - don't try more models, throw immediately
+            console.error('❌ Gemini API Authentication Error:');
+            console.error('   Status:', error.response?.status);
+            console.error('   Status Text:', error.response?.statusText);
+            console.error('   Response Data:', error.response?.data ? JSON.stringify(error.response.data).substring(0, 300) : 'No response data');
+            throw error;
+          }
+          
+          // For other non-404/429 errors, try next option but log
+          if (error.response?.status) {
+            console.log(`⚠️  Error ${error.response.status} with model "${model}" (${apiVersion}), trying next option...`);
+            lastError = error;
+            continue;
+          }
+          
+          // Network or other errors - throw immediately
+          console.error('❌ Gemini API Network/Error Details:');
+          console.error('   Error:', error.message);
+          throw error;
+        }
+      }
+    }
+    
+    // If we've tried all models and API versions and all failed
+    console.error('❌ All Gemini models and API versions failed. Available models may be restricted by your API key.');
+    if (lastError) {
+      console.error('❌ Gemini API Error Details:');
+      console.error('   Status:', lastError.response?.status);
+      console.error('   Status Text:', lastError.response?.statusText);
+      console.error('   Response Data:', lastError.response?.data ? JSON.stringify(lastError.response.data).substring(0, 300) : 'No response data');
+    }
+    throw lastError || new Error('All Gemini model attempts failed');
   }
 
   /**

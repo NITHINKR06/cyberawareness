@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { analyzeContent } from '../services/backendApi';
 import { toast } from 'react-toastify';
+import MarkdownRenderer from './MarkdownRenderer';
 
 /**
  * TESTING PAGE - FOR DEVELOPMENT/TESTING ONLY
@@ -451,11 +452,32 @@ export default function TestingPage() {
                       </div>
 
                       {testResult.analysisResult.summary && (
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                          <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">AI Summary</h3>
-                          <p className="text-sm text-blue-900 dark:text-blue-200 whitespace-pre-wrap">
-                            {testResult.analysisResult.summary}
-                          </p>
+                        <div className="mt-4 relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/30 dark:via-indigo-900/30 dark:to-purple-900/30 border-2 border-blue-200 dark:border-blue-700/50 shadow-lg">
+                          {/* Decorative gradient overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+                          
+                          {/* Content */}
+                          <div className="relative p-6">
+                            {/* Header with icon */}
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-blue-500/10 dark:bg-blue-400/20 rounded-lg">
+                                <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                  AI Summary
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                  Intelligent analysis powered by advanced AI
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {/* Summary Content */}
+                            <div className="mt-4 p-6 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-lg border border-blue-100 dark:border-blue-900/50">
+                              <MarkdownRenderer content={testResult.analysisResult.summary} />
+                            </div>
+                          </div>
                         </div>
                       )}
                     </>

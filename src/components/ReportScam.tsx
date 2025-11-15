@@ -1,13 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-// import { useAuth } from '../contexts/AuthContext';
 import { AlertTriangle, CheckCircle, Send, MapPin, Phone, Shield, Download, Map, ExternalLink, Globe } from 'lucide-react';
 import { submitScamReport, reportService } from '../services/backendApi';
 import MapPicker from './MapPicker';
 
 export default function ReportScam() {
   const { t } = useTranslation();
-  // const { user } = useAuth(); // Keep for potential future use
   const [formData, setFormData] = useState({
     scamType: '',
     description: '',
