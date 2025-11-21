@@ -125,7 +125,18 @@ class GenerativeLLMService {
    * Build prompt for text analysis
    */
   buildTextAnalysisPrompt(text) {
+    // Get current date and time for context
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const currentTime = now.toTimeString().split(' ')[0]; // HH:MM:SS format
+    const currentYear = now.getFullYear();
+    const currentDateTime = `${currentDate} ${currentTime} (Year: ${currentYear})`;
+    
     return `You are a cybersecurity expert analyzing a message for potential threats. Analyze the following text and provide a detailed security assessment.
+
+IMPORTANT CONTEXT - CURRENT DATE AND TIME:
+The current date and time is: ${currentDateTime}
+When evaluating dates in the message (such as copyright years like "© 2025"), use this information to determine if dates are in the past, present, or future. For example, if the current year is ${currentYear}, then "© ${currentYear}" is NOT a future date and should not be flagged as suspicious based solely on the year.
 
 TEXT TO ANALYZE:
 "${text.substring(0, 2000)}"
@@ -153,6 +164,7 @@ ANALYSIS CRITERIA:
 - Grammatical errors and suspicious language patterns
 - Brand impersonation attempts
 - Financial scams (requests for money, account verification, etc.)
+- Date validation: Only flag dates as suspicious if they are clearly in the future relative to the current date (${currentDateTime}). Do NOT flag current year dates as "future dates".
 
 SCORING GUIDELINES:
 - 0-2: Completely safe, legitimate content
