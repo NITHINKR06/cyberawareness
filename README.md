@@ -20,11 +20,15 @@
 - [Overview](#-overview)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
 - [Installation](#-installation)
 - [Configuration](#-configuration)
 - [Usage](#-usage)
 - [API Documentation](#-api-documentation)
 - [Deployment](#-deployment)
+- [Testing](#-testing)
+- [Security Features](#️-security-features)
+- [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -38,6 +42,26 @@ WALRUS addresses critical cybersecurity challenges in India:
 - **1.39 lakh** cybercrime complaints filed in 2022
 
 Our platform transforms cybersecurity from a technical burden into an engaging, accessible, and community-driven experience.
+
+### Current Status
+
+✅ **Fully Functional Features:**
+- AI-powered scam analyzer with multi-format support
+- Gamified learning modules with quizzes and achievements
+- Community forums and discussion boards
+- Scam reporting system with PDF generation
+- Time Machine interactive scenarios (3 eras: 2015, 2025, 2035)
+- Admin panel with user management and analytics
+- Multilingual support (English, Hindi, Kannada)
+- Security sandbox for practice
+- Dark/Light theme support
+- Responsive design for mobile and desktop
+
+🚀 **Deployment Ready:**
+- Configured for Vercel serverless deployment
+- MongoDB Atlas integration
+- Firebase authentication
+- Production-ready security middleware
 
 ## ✨ Features
 
@@ -72,6 +96,13 @@ Our platform transforms cybersecurity from a technical burden into an engaging, 
 - Analytics dashboard with insights
 - Scam database management
 
+### ⏰ Time Machine - Interactive Scenarios
+- Explore cybersecurity threats across different eras (2015, 2025, 2035)
+- Interactive storylines with decision-based learning
+- Scenario analysis with timelines, prevention measures, and case studies
+- Immersive UI with time-travel animations
+- Learn from classic scams, modern threats, and future frauds
+
 ## 🚀 Tech Stack
 
 ### Frontend
@@ -96,6 +127,38 @@ Our platform transforms cybersecurity from a technical burden into an engaging, 
 - **AI Analysis**: Generative LLM (Gemini API or ChatGPT API)
 - **Threat Scoring**: Detailed threat score (0-10) with comprehensive reasoning
 - **Validation**: Custom regex patterns for Indian context
+- **URL Threat Intelligence**: Google Safe Browsing API integration
+- **OCR Processing**: Tesseract.js for image text extraction
+
+## 📁 Project Structure
+
+```
+project/
+├── src/                    # Frontend React application
+│   ├── admin/              # Admin panel components
+│   ├── components/         # Reusable UI components
+│   │   ├── timeMachine/   # Time Machine feature components
+│   │   └── ...
+│   ├── contexts/           # React contexts (Auth, Theme)
+│   ├── i18n/              # Internationalization files
+│   ├── pages/             # Page components
+│   ├── routes/            # React Router configuration
+│   ├── services/          # API service layer
+│   └── utils/             # Utility functions
+├── server/                 # Backend Express application
+│   ├── config/            # Configuration files
+│   ├── middleware/        # Express middleware
+│   ├── models/           # MongoDB Mongoose models
+│   ├── routes/           # API route handlers
+│   ├── services/         # Business logic services
+│   └── test/             # Backend tests
+├── api/                   # Vercel serverless functions
+├── public/                # Static assets
+├── dist/                  # Production build output
+├── md/                    # Additional documentation
+├── vercel.json           # Vercel deployment config
+└── package.json          # Dependencies and scripts
+```
 
 ## 📦 Installation
 
@@ -229,6 +292,8 @@ Add new languages:
 - **Scam Analysis**: Input text/URL/email → Get threat assessment → View recommendations
 - **Learning**: Select module → Study content → Take quiz → Earn points
 - **Reporting**: Fill report form → Submit → Generate PDF → Track status
+- **Time Machine**: Select era → Explore scenarios → Interactive storyline → Learn prevention
+- **Security Sandbox**: Practice security concepts in a safe environment
 
 ## 📚 API Documentation
 
@@ -262,6 +327,18 @@ GET  /api/reports                    # Get user reports
 GET  /api/reports/:id                # Get specific report
 ```
 
+### Scenarios (Time Machine)
+```
+GET  /api/scenarios                  # Get all scenarios
+GET  /api/scenarios/:era            # Get scenarios by era (2015, 2025, 2035)
+GET  /api/scenarios/:id             # Get specific scenario details
+```
+
+### OCR
+```
+POST /api/ocr/analyze                # Analyze image with OCR
+```
+
 ### Admin
 ```
 GET  /api/admin/stats                # Get system statistics
@@ -272,7 +349,15 @@ POST /api/admin/users/:id/ban        # Ban user
 
 ## 🚀 Deployment
 
-### Vercel
+### Current Deployment Status
+
+The project is configured for **Vercel serverless deployment** with:
+- Frontend: Static site deployment (Vite build)
+- Backend: Serverless functions via `api/[...path].js`
+- Database: MongoDB Atlas (cloud)
+- Authentication: Firebase Auth
+
+### Vercel Deployment
 
 ```bash
 # Install Vercel CLI
@@ -281,8 +366,19 @@ npm i -g vercel
 # Deploy
 vercel
 
+# For production deployment
+vercel --prod
+
 # Configure environment variables in Vercel dashboard
 ```
+
+**Configuration**: The project includes `vercel.json` with:
+- Serverless function routing for API endpoints
+- Frontend rewrites for SPA routing
+- CORS headers configuration
+- 30-second function timeout
+
+See `md/DEPLOYMENT_README.md` for detailed deployment instructions for multiple platforms.
 
 ### Heroku
 
@@ -331,17 +427,29 @@ npm run test:all
 npm run test:validation        # Input validation tests
 npm run test:validation:debug  # Debug validation tests
 npm run test:security          # Security tests
+npm run test:quick             # Quick security test
+npm run test:server            # Server security test
+npm run test:manual            # Manual testing guide
 ```
+
+### Test Coverage
+- Input validation and sanitization
+- Security middleware (XSS, CSRF, NoSQL injection)
+- API endpoint security
+- Authentication and authorization
 
 ## 🛡️ Security Features
 
 - **Authentication**: JWT tokens + Firebase Auth
 - **Authorization**: Role-based access control
 - **Input Validation**: Server-side validation and sanitization
-- **XSS Protection**: HTML sanitization using DOMPurify
-- **Rate Limiting**: API endpoint protection
-- **Security Headers**: Helmet.js middleware
+- **XSS Protection**: HTML sanitization using DOMPurify (isomorphic-dompurify)
+- **CSRF Protection**: Enhanced CSRF token middleware
+- **NoSQL Injection Prevention**: Custom middleware for MongoDB query sanitization
+- **Rate Limiting**: API endpoint protection with express-rate-limit
+- **Security Headers**: Helmet.js middleware with CSP
 - **Password Hashing**: bcrypt with salt rounds
+- **Session Management**: Express-session with secure configuration
 
 ## 🐛 Troubleshooting
 
