@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/FirebaseAuthContext';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Mail, Lock, User, Check, X, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, Check, X, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { validateUsername, validateEmail, validatePassword } from '../utils/validationTest';
 import MatrixBackground from './MatrixBackground';
 
@@ -81,16 +81,16 @@ export default function Auth() {
       case 3:
         return 'bg-yellow-400';
       case 4:
-        return 'bg-green-400';
+        return 'bg-slate-500';
       case 5:
-        return 'bg-green-600';
+        return 'bg-slate-600';
       default:
         return 'bg-gray-200';
     }
   };
 
   const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
-    <div className={`flex items-center text-xs ${met ? 'text-green-400' : 'text-gray-500'}`}>
+    <div className={`flex items-center text-xs ${met ? 'text-slate-400' : 'text-gray-500'}`}>
       {met ? <Check className="w-3 h-3 mr-1.5" /> : <div className="w-3 h-3 mr-1.5 rounded-full border border-gray-500" />}
       <span>{text}</span>
     </div>
@@ -101,18 +101,18 @@ export default function Auth() {
       <MatrixBackground />
       <div className="w-full max-w-md perspective-1000 z-10">
         <div
-          className="bg-black/70 backdrop-blur-xl rounded-3xl border border-green-400/30 shadow-2xl p-8"
-          style={{ backgroundImage: 'linear-gradient(135deg, rgba(0,30,0,0.4), rgba(0,60,0,0.6))' }}
+          className="bg-black/70 backdrop-blur-xl rounded-3xl border border-slate-500/30 shadow-2xl p-8"
+          style={{ backgroundImage: 'linear-gradient(135deg, rgba(51,65,85,0.4), rgba(71,85,105,0.6))' }}
         >
           <h1
-            className="text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-green-200 font-mono"
-            style={{ textShadow: '0 0 8px #00ff00, 0 0 12px #00ff00' }}
+            className="text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-slate-300 font-mono"
+            style={{ textShadow: '0 0 8px #94a3b8, 0 0 12px #94a3b8' }}
           >
             {t('app.name')}
           </h1>
           <p
-            className="text-center text-green-300 font-mono text-sm mt-2"
-            style={{ textShadow: '0 0 4px #00ff00' }}
+            className="text-center text-slate-400 font-mono text-sm mt-2"
+            style={{ textShadow: '0 0 4px #94a3b8' }}
           >
             {isLogin ? 'ACCESS_GRANTED' : 'INITIATE_SEQUENCE'}
           </p>
@@ -120,9 +120,9 @@ export default function Auth() {
             {/* Username – only for sign‑up */}
             {!isLogin && (
               <div className="space-y-1.5">
-                <label className="block text-xs font-mono text-green-500">{t('auth.username')}</label>
+                <label className="block text-xs font-mono text-slate-300">{t('auth.username')}</label>
                 <div className="relative group">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-700 group-focus-within:text-green-400" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-600 group-focus-within:text-slate-400" />
                   <input
                     type="text"
                     value={username}
@@ -130,7 +130,7 @@ export default function Auth() {
                       setUsername(e.target.value);
                       if (validationErrors.username) setValidationErrors(prev => ({ ...prev, username: [] }));
                     }}
-                    className={`w-full pl-10 pr-4 py-3.5 bg-black/50 border rounded-xl focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none font-mono ${validationErrors.username ? 'border-red-500 text-red-400' : 'border-green-900/50 text-green-400'} placeholder-green-900/50`}
+                    className={`w-full pl-10 pr-4 py-3.5 bg-black/50 border rounded-xl focus:ring-1 focus:ring-slate-400 focus:border-slate-400 outline-none font-mono ${validationErrors.username ? 'border-red-500 text-red-400' : 'border-slate-900/50 text-slate-300'} placeholder-slate-500`}
                     placeholder="USERNAME"
                     required
                   />
@@ -142,9 +142,9 @@ export default function Auth() {
             )}
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-mono text-green-500">{t('auth.email')}</label>
+              <label className="block text-xs font-mono text-slate-300">{t('auth.email')}</label>
               <div className="relative group">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-700 group-focus-within:text-green-400" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-600 group-focus-within:text-slate-400" />
                 <input
                   type="email"
                   value={email}
@@ -152,7 +152,7 @@ export default function Auth() {
                     setEmail(e.target.value);
                     if (validationErrors.email) setValidationErrors(prev => ({ ...prev, email: [] }));
                   }}
-                  className={`w-full pl-10 pr-4 py-3.5 bg-black/50 border rounded-xl focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none font-mono ${validationErrors.email ? 'border-red-500 text-red-400' : 'border-green-900/50 text-green-400'} placeholder-green-900/50`}
+                  className={`w-full pl-10 pr-4 py-3.5 bg-black/50 border rounded-xl focus:ring-1 focus:ring-slate-400 focus:border-slate-400 outline-none font-mono ${validationErrors.email ? 'border-red-500 text-red-400' : 'border-slate-900/50 text-slate-300'} placeholder-slate-500`}
                   placeholder="EMAIL_ADDRESS"
                   required
                 />
@@ -163,9 +163,9 @@ export default function Auth() {
             </div>
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-mono text-green-500">{t('auth.password')}</label>
+              <label className="block text-xs font-mono text-slate-300">{t('auth.password')}</label>
               <div className="relative group">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-700 group-focus-within:text-green-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-600 group-focus-within:text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -173,28 +173,28 @@ export default function Auth() {
                     setPassword(e.target.value);
                     if (validationErrors.password) setValidationErrors(prev => ({ ...prev, password: [] }));
                   }}
-                  className={`w-full pl-10 pr-12 py-3.5 bg-black/50 border rounded-xl focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none font-mono ${validationErrors.password ? 'border-red-500 text-red-400' : 'border-green-900/50 text-green-400'} placeholder-green-900/50`}
+                  className={`w-full pl-10 pr-12 py-3.5 bg-black/50 border rounded-xl focus:ring-1 focus:ring-slate-400 focus:border-slate-400 outline-none font-mono ${validationErrors.password ? 'border-red-500 text-red-400' : 'border-slate-900/50 text-slate-300'} placeholder-slate-500`}
                   placeholder="PASSWORD"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-700 hover:text-green-400 transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               {/* Password strength & requirements – only on sign‑up */}
               {!isLogin && password && (
-                <div className="mt-3 p-3 bg-black/40 rounded-lg border border-green-900/30 space-y-3">
-                  <div className="flex justify-between text-xs font-mono text-green-600">
+                <div className="mt-3 p-3 bg-black/40 rounded-lg border border-slate-900/30 space-y-3">
+                  <div className="flex justify-between text-xs font-mono text-slate-400">
                     <span>STRENGTH_ANALYSIS</span>
-                    <span className={passwordStrength?.level >= 4 ? 'text-green-400' : passwordStrength?.level >= 2 ? 'text-yellow-500' : 'text-red-500'}>
+                    <span className={passwordStrength?.level >= 4 ? 'text-slate-400' : passwordStrength?.level >= 2 ? 'text-yellow-500' : 'text-red-500'}>
                       {passwordStrength?.description.toUpperCase()}
                     </span>
                   </div>
-                  <div className="h-1 w-full bg-green-900/30 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-slate-900/30 rounded-full overflow-hidden">
                     <div
                       className={`h-full transition-all duration-500 ease-out ${getStrengthColor(passwordStrength?.level || 0)}`}
                       style={{ width: `${((passwordStrength?.level || 0) / 5) * 100}%` }}
@@ -224,14 +224,14 @@ export default function Auth() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-black/30 border border-green-400/70 hover:border-green-400/90 hover:bg-black/50 text-green-200 font-bold font-mono py-3.5 rounded-xl shadow-lg shadow-green-400/30 hover:shadow-green-400/60 transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full bg-black/30 border border-slate-500/70 hover:border-slate-400/90 hover:bg-black/50 text-slate-300 font-bold font-mono py-3.5 rounded-xl shadow-lg shadow-slate-500/30 hover:shadow-slate-400/60 transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isLoading ? (
-                <div className="w-6 h-6 border-2 border-green-200/30 border-t-green-200 rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-slate-300/30 border-t-slate-400 rounded-full animate-spin" />
               ) : (
                 <>
                   {isLogin ? 'LOGIN' : 'REGISTER'}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform text-green-200" />
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform text-slate-300" />
                 </>
               )}
             </button>
@@ -245,7 +245,7 @@ export default function Auth() {
                   setValidationErrors({});
                   setPassword('');
                 }}
-                className="text-green-500 hover:text-green-400 font-mono text-sm underline"
+                className="text-slate-300 hover:text-slate-400 font-mono text-sm underline transition-colors"
               >
                 {isLogin ? 'CREATE_ACCOUNT' : 'ACCESS_LOGIN'}
               </button>

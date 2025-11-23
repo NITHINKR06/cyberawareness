@@ -56,35 +56,29 @@ export default function PublicLayout() {
         <div className="absolute -bottom-8 left-20 w-96 h-96 bg-indigo-400/30 dark:bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
-      <nav className="sticky top-0 z-50 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800/50 shadow-sm dark:shadow-2xl transition-colors duration-300">
-        {/* Premium gradient accent line */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"></div>
-
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-[72px] gap-4">
+      <nav className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16 sm:h-20">
             {/* Logo Section */}
-            <div className="flex items-center min-w-fit">
+            <div className="flex items-center flex-shrink-0">
               <button
                 onClick={() => navigate('/analyzer')}
-                className="flex items-center gap-3 group relative"
+                className="flex items-center gap-2 sm:gap-3"
               >
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative bg-gradient-to-br from-cyan-500 to-indigo-600 p-3 rounded-2xl transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                    <Shield className="w-6 h-6 text-white" />
-                  </div>
+                <div className="bg-gradient-to-br from-cyan-500 to-indigo-600 p-2 sm:p-3 rounded-xl">
+                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-2xl font-black bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 dark:from-cyan-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+                  <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400 bg-clip-text text-transparent">
                     WALRUS
                   </h1>
-                  <p className="text-[10px] text-slate-500 font-medium tracking-wider -mt-1">SECURITY SUITE</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">SECURITY SUITE</p>
                 </div>
               </button>
             </div>
 
             {/* Main Navigation - Desktop */}
-            <div className="hidden lg:flex items-center gap-2 flex-1 justify-center max-w-4xl">
+            <div className="hidden lg:flex items-center gap-2 flex-1 justify-center max-w-2xl">
               {publicNavigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = isActiveRoute(item.path);
@@ -92,117 +86,99 @@ export default function PublicLayout() {
                   <button
                     key={item.id}
                     onClick={() => navigate(item.path)}
-                    className={`group relative flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 ${isActive
-                        ? 'bg-gradient-to-r ' + item.color + ' text-white shadow-lg'
-                        : 'bg-slate-100/50 dark:bg-slate-800/30 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600'
-                      }`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                      isActive
+                        ? `bg-gradient-to-r ${item.color} text-white`
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
                   >
-                    <Icon className={`w-4 h-4 ${!isActive && 'group-hover:rotate-12 transition-transform duration-300'}`} />
-                    <span className="text-sm font-semibold">{item.name}</span>
-                    {isActive && (
-                      <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${item.color} opacity-20 blur-xl`}></div>
-                    )}
+                    <Icon className="w-4 h-4" />
+                    <span>{item.name}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Right Section - Auth & Controls */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-fit">
+            {/* Right Section */}
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Utility Controls */}
-              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-slate-100/50 dark:bg-slate-800/30 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50">
+              {/* <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-700 rounded-lg p-1">
                 <LanguageSwitcher />
-
                 <button
                   onClick={toggleTheme}
                   aria-label="Toggle theme"
-                  className="p-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-all duration-200 hover:rotate-12"
+                  className="p-2 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
-                  {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                  {isDark ? <Moon className="w-4 h-4 sm:w-5 sm:h-5" /> : <Sun className="w-4 h-4 sm:w-5 sm:h-5" />}
                 </button>
-              </div>
+              </div> */}
 
               {/* Auth Buttons - Desktop */}
               <div className="hidden md:flex items-center gap-2">
                 <button
                   onClick={() => navigate('/auth')}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
                   <LogIn className="w-4 h-4" />
-                  <span className="text-sm">{t('auth.signIn')}</span>
+                  <span>{t('auth.signIn')}</span>
                 </button>
                 <button
                   onClick={() => navigate('/auth')}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium bg-gradient-to-r from-cyan-500 to-indigo-500 text-white shadow-lg hover:shadow-cyan-500/25 transition-all duration-300"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm bg-gradient-to-r from-cyan-500 to-indigo-500 text-white hover:from-cyan-600 hover:to-indigo-600 transition-all"
                 >
                   <UserPlus className="w-4 h-4" />
-                  <span className="text-sm">{t('auth.signUp')}</span>
+                  <span>{t('auth.signUp')}</span>
                 </button>
               </div>
 
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden relative p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+                className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
-                <div className="relative w-5 h-5">
-                  <span className={`absolute inset-0 transform transition-all duration-300 ${mobileMenuOpen ? 'rotate-180 opacity-0' : ''}`}>
-                    <Menu className="w-5 h-5" />
-                  </span>
-                  <span className={`absolute inset-0 transform transition-all duration-300 ${mobileMenuOpen ? '' : '-rotate-180 opacity-0'}`}>
-                    <X className="w-5 h-5" />
-                  </span>
-                </div>
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        <div className={`lg:hidden absolute inset-x-0 top-full transition-all duration-500 ${mobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
-          }`}>
-          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800/50 shadow-2xl">
-            <div className="px-4 py-6 space-y-6 max-h-[calc(100vh-72px)] overflow-y-auto">
+        {mobileMenuOpen && (
+          <div className="lg:hidden absolute inset-x-0 top-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-lg">
+            <div className="px-4 py-4 space-y-4 max-h-[calc(100vh-80px)] overflow-y-auto">
               {/* Navigation Links */}
-              <div className="space-y-3">
-                <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-2">
-                  {t('publicLayout.explore', 'Explore')}
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {publicNavigation.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = isActiveRoute(item.path);
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          navigate(item.path);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`group relative flex flex-col items-center gap-3 px-3 py-5 rounded-2xl font-medium transition-all duration-300 ${isActive
-                            ? `bg-gradient-to-br ${item.color} text-white shadow-lg`
-                            : 'bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-slate-700/50'
-                          }`}
-                      >
-                        <Icon className="w-6 h-6" />
-                        <span className="text-xs text-center font-semibold">{item.name}</span>
-                        {isActive && (
-                          <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.color} opacity-10 blur-xl`}></div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+              <div className="space-y-2">
+                {publicNavigation.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = isActiveRoute(item.path);
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        navigate(item.path);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-colors ${
+                        isActive
+                          ? `bg-gradient-to-r ${item.color} text-white`
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{item.name}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Auth Buttons - Mobile */}
-              <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800/50">
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
                 <button
                   onClick={() => {
                     navigate('/auth');
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-slate-700/50 transition-all duration-300"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>{t('auth.signIn')}</span>
@@ -212,7 +188,7 @@ export default function PublicLayout() {
                     navigate('/auth');
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-gradient-to-r from-cyan-500 to-indigo-500 text-white shadow-lg transition-all duration-300"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm bg-gradient-to-r from-cyan-500 to-indigo-500 text-white hover:from-cyan-600 hover:to-indigo-600 transition-all"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span>{t('publicLayout.signUpFree', 'Sign Up Free')}</span>
@@ -220,7 +196,7 @@ export default function PublicLayout() {
               </div>
             </div>
           </div>
-        </div>
+        )}
       </nav>
 
       {/* Sign Up Banner */}
