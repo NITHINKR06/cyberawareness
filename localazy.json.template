@@ -1,0 +1,16 @@
+{
+  "writeKey": "YOUR_WRITE_KEY_FROM_LOCALAZY",
+  "readKey": "YOUR_READ_KEY_FROM_LOCALAZY",
+  "upload": {
+    "type": "json",
+    "files": [
+      {
+        "file": "src/i18n/locales/en.json",
+        "path": "en.json"
+      }
+    ]
+  },
+  "download": {
+    "files": "src/i18n/locales/${lang}.json"
+  }
+}

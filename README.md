@@ -52,7 +52,7 @@ Our platform transforms cybersecurity from a technical burden into an engaging, 
 - Scam reporting system with PDF generation
 - Time Machine interactive scenarios (3 eras: 2015, 2025, 2035)
 - Admin panel with user management and analytics
-- Multilingual support (English, Hindi, Kannada)
+- Comprehensive multilingual support (English, Hindi, Kannada) with 32KB+ translations each
 - Security sandbox for practice
 - Dark/Light theme support
 - Responsive design for mobile and desktop
@@ -85,10 +85,13 @@ Our platform transforms cybersecurity from a technical burden into an engaging, 
 - Admin-managed content moderation
 
 ### 🌐 Multilingual Support
-- **English** (Primary)
-- **Hindi (हिंदी)** (Full translation)
-- **Kannada (ಕನ್ನಡ)** (Regional support)
-- Easy language switching
+- **English** (Primary) - Complete translation with 32KB+ content
+- **Hindi (हिंदी)** - Comprehensive translation with 32KB+ content
+- **Kannada (ಕನ್ನಡ)** - Full regional support with 36KB+ content
+- Enhanced language switcher with improved UI/UX
+- Persistent language preference across sessions
+- Real-time language switching without page reload
+- Culturally appropriate translations for Indian context
 
 ### ⚙️ Admin Panel
 - User management and role assignment
@@ -124,10 +127,16 @@ Our platform transforms cybersecurity from a technical burden into an engaging, 
 - **PDF Generation**: jsPDF
 
 ### AI & Services
-- **AI Analysis**: Generative LLM (Gemini API or ChatGPT API)
+- **Primary AI Analysis**: Hugging Face API with customizable models
+  - Text Analysis: facebook/bart-large-mnli (default)
+  - URL Analysis: facebook/bart-large-mnli (default)
+  - Summary Generation: facebook/bart-large-cnn (default)
+- **Fallback Analysis**: Pattern-based detection when AI is unavailable
 - **Threat Scoring**: Detailed threat score (0-10) with comprehensive reasoning
-- **Validation**: Custom regex patterns for Indian context
-- **URL Threat Intelligence**: Google Safe Browsing API integration
+- **Validation**: Custom regex patterns optimized for Indian context
+- **Optional Enhancements**:
+  - Google Safe Browsing API for URL threat intelligence
+  - Gemini API for advanced summary generation
 - **OCR Processing**: Tesseract.js for image text extraction
 
 ## 📁 Project Structure
@@ -168,6 +177,8 @@ project/
 - **npm** or **yarn**
 - **MongoDB** (local or cloud instance)
 - **Firebase Project** (for admin authentication)
+- **Python 3** (optional, for using the server starter script)
+- **Hugging Face API Key** (for AI-powered scam analysis)
 
 ### Step 1: Clone the Repository
 
@@ -217,13 +228,18 @@ VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
 VITE_FIREBASE_APP_ID=your-app-id
 
-# Generative LLM API (Required for AI analysis)
-# Choose one: Gemini API (free tier available) or ChatGPT API
+# AI Analysis (Required for scam detection)
+# Get from: https://huggingface.co/settings/tokens
+HUGGINGFACE_API_KEY=your-huggingface-api-key
+
+# Optional: Customize AI models (defaults provided if not set)
+HUGGINGFACE_TEXT_MODEL=facebook/bart-large-mnli
+HUGGINGFACE_URL_MODEL=facebook/bart-large-mnli
+HUGGINGFACE_SUMMARY_MODEL=facebook/bart-large-cnn
+
+# Optional: Additional AI enhancements
+GOOGLE_SAFE_BROWSING_API_KEY=your-google-safe-browsing-api-key
 GEMINI_API_KEY=your-gemini-api-key
-# OR
-CHATGPT_API_KEY=your-chatgpt-api-key
-# Optional: Set provider explicitly
-LLM_PROVIDER=gemini
 ```
 
 ### Step 4: Firebase Setup
@@ -257,6 +273,38 @@ npm run build
 npm run server
 ```
 
+#### Using Python Server Starter (Recommended)
+
+For convenience, use the included Python script to manage both servers:
+
+```bash
+# Start both frontend and backend
+python start_server.py
+
+# Start only frontend
+python start_server.py start frontend
+
+# Start only backend
+python start_server.py start backend
+
+# Check server status
+python start_server.py status
+
+# Stop a server
+python start_server.py stop frontend
+python start_server.py stop backend
+
+# Show help
+python start_server.py help
+```
+
+**Features:**
+- Automatic port conflict detection (Frontend: 5173, Backend: 5000)
+- Concurrent server management with unified output
+- Graceful shutdown with Ctrl+C
+- Cross-platform support (Windows, Linux, macOS)
+- Process monitoring and automatic cleanup
+
 ## ⚙️ Configuration
 
 ### Validation Rules
@@ -274,10 +322,33 @@ Configure analysis parameters in `server/services/aiAnalyzerConfigurable.js`:
 - Response templates
 
 ### Localization
-Add new languages:
-1. Create locale file in `src/i18n/locales/`
-2. Add language option in `LanguageSwitcher.tsx`
-3. Update `src/i18n/index.ts`
+
+The platform features comprehensive multilingual support with:
+- **3 fully translated languages**: English, Hindi (हिंदी), and Kannada (ಕನ್ನಡ)
+- **32KB+ translation content** per language covering all UI elements, modules, and features
+- **Persistent language preference** stored in localStorage
+- **Real-time switching** without page reload using react-i18next
+- **Culturally appropriate** translations tailored for Indian context
+
+#### Current Language Files:
+- `src/i18n/locales/en.json` - English (32KB+)
+- `src/i18n/locales/hi.json` - Hindi (32KB+)
+- `src/i18n/locales/kn.json` - Kannada (36KB+)
+
+#### Adding New Languages:
+1. Create a new locale file in `src/i18n/locales/` (e.g., `ta.json` for Tamil)
+2. Copy the structure from `en.json` and translate all keys
+3. Update `src/i18n/index.ts` to import and register the new language:
+   ```typescript
+   import ta from './locales/ta.json';
+   
+   i18n.addResourceBundle('ta', 'translation', ta);
+   ```
+4. Add the language option in `src/components/LanguageSwitcher.tsx`:
+   ```typescript
+   { code: 'ta', name: 'தமிழ்', nativeName: 'Tamil' }
+   ```
+5. Test all pages and features with the new language
 
 ## 📖 Usage
 
@@ -505,7 +576,15 @@ We welcome contributions! Please follow these steps:
 - Add tests for new features
 - Update documentation
 
-## 📄 License
+## � Additional Documentation
+
+For more detailed information on specific topics, see the documentation in the `md/` directory:
+
+- **[DEPLOYMENT_README.md](md/DEPLOYMENT_README.md)** - Comprehensive deployment guide for multiple platforms (Vercel, Heroku, Render, AWS, etc.)
+- **[RENDER_DEPLOYMENT.md](md/RENDER_DEPLOYMENT.md)** - Step-by-step guide for deploying to Render
+- **[LOCALAZY_SETUP.md](md/LOCALAZY_SETUP.md)** - Guide for setting up Localazy for translation management
+
+## �📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 

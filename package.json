@@ -39,6 +39,7 @@
     "i18next": "^25.5.3",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
+    "i18next-intervalplural-postprocessor": "^3.0.0",
     "isomorphic-dompurify": "^2.29.0",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.3",

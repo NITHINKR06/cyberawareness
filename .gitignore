@@ -28,3 +28,4 @@ package-lock.json
 .env
 
 server/uploads
+localazy.json
