@@ -243,7 +243,8 @@
     "fileOnGovPortal": "cybercrime.gov.in ನಲ್ಲಿ ದೂರು ದಾಖಲಿಸಿ",
     "opensInNewTab": "ಹೊಸ ಟ್ಯಾಬ್‌ನಲ್ಲಿ ಅಧಿಕೃತ ಸರ್ಕಾರಿ ಪೋರ್ಟಲ್ ತೆರೆಯುತ್ತದೆ",
     "selectFromMap": "ನಕ್ಷೆಯಿಂದ ಆಯ್ಕೆಮಾಡಿ",
-    "findPoliceStations": "ಪೊಲೀಸ್ ಸ್ಟೇಷನ್‌ಗಳನ್ನು ಹುಡುಕಿ"
+    "findPoliceStations": "ಪೊಲೀಸ್ ಸ್ಟೇಷನ್‌ಗಳನ್ನು ಹುಡುಕಿ",
+    "genderLabel": "ಲಿಂಗ"
   },
   "scamAnalyzer": {
     "title": "AI-ಚಾಲಿತ ವಂಚನೆ ವಿಶ್ಲೇಷಕ",

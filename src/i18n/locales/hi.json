@@ -243,7 +243,8 @@
     "fileOnGovPortal": "cybercrime.gov.in पर शिकायत दर्ज करें",
     "opensInNewTab": "नए टैब में आधिकारिक सरकारी पोर्टल खुलता है",
     "selectFromMap": "मानचित्र से चुनें",
-    "findPoliceStations": "पुलिस स्टेशन खोजें"
+    "findPoliceStations": "पुलिस स्टेशन खोजें",
+    "genderLabel": "लिंग"
   },
   "scamAnalyzer": {
     "title": "AI-संचालित स्कैम विश्लेषक",
