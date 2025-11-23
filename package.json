@@ -22,6 +22,7 @@
     "test:manual": "echo 'Run: npm run test:server' && echo 'Then follow: MANUAL_SECURITY_TESTING_GUIDE.md'"
   },
   "dependencies": {
+    "@rive-app/react-canvas": "^4.24.0",
     "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",

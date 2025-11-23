@@ -907,6 +907,18 @@
     redux-thunk "^3.1.0"
     reselect "^5.1.0"
 
+"@rive-app/canvas@2.32.0":
+  version "2.32.0"
+  resolved "https://registry.npmjs.org/@rive-app/canvas/-/canvas-2.32.0.tgz"
+  integrity sha512-RZRZQRWItH7e0NVmHVhffkm02J/9CO/Qdq71Vu1TkExj312Oc22FpBVn8rBnyEeQak75bJy9m/ig84Crcr7qog==
+
+"@rive-app/react-canvas@^4.24.0":
+  version "4.24.0"
+  resolved "https://registry.npmjs.org/@rive-app/react-canvas/-/react-canvas-4.24.0.tgz"
+  integrity sha512-L/a+2Oi+tHoYmDIlj49Zudu75AI00jedFRTUA4na1bnQ2WVSJqKP2/tuK6uJDqUhQ7+9fCqgRkJws7KpFHOBag==
+  dependencies:
+    "@rive-app/canvas" "2.32.0"
+
 "@rollup/rollup-win32-x64-msvc@4.24.0":
   version "4.24.0"
   resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.24.0.tgz"
