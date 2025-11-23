@@ -44,20 +44,24 @@ export default function ReportScam() {
   const [formKey, setFormKey] = useState(0);
 
   const scamTypes = [
-    t('reportScam.scamTypes.phishingEmail'),
-    t('reportScam.scamTypes.fakeWebsite'),
-    t('reportScam.scamTypes.phoneScam'),
-    t('reportScam.scamTypes.smsScam'),
-    t('reportScam.scamTypes.socialMediaScam'),
-    t('reportScam.scamTypes.investmentFraud'),
-    t('reportScam.scamTypes.romanceScam'),
-    t('reportScam.scamTypes.techSupportScam'),
-    t('reportScam.scamTypes.upiFrauds'),
-    t('reportScam.scamTypes.onlineFinancialFraud'),
-    t('reportScam.scamTypes.other'),
+    { key: 'phishingEmail', label: 'reportScam.scamTypes.phishingEmail' },
+    { key: 'fakeWebsite', label: 'reportScam.scamTypes.fakeWebsite' },
+    { key: 'phoneScam', label: 'reportScam.scamTypes.phoneScam' },
+    { key: 'smsScam', label: 'reportScam.scamTypes.smsScam' },
+    { key: 'socialMediaScam', label: 'reportScam.scamTypes.socialMediaScam' },
+    { key: 'investmentFraud', label: 'reportScam.scamTypes.investmentFraud' },
+    { key: 'romanceScam', label: 'reportScam.scamTypes.romanceScam' },
+    { key: 'techSupportScam', label: 'reportScam.scamTypes.techSupportScam' },
+    { key: 'upiFrauds', label: 'reportScam.scamTypes.upiFrauds' },
+    { key: 'onlineFinancialFraud', label: 'reportScam.scamTypes.onlineFinancialFraud' },
+    { key: 'other', label: 'reportScam.scamTypes.other' },
   ];
 
-  const genders = [t('reportScam.gender.male', 'Male'), t('reportScam.gender.female', 'Female'), t('reportScam.gender.other', 'Other')];
+  const genders = [
+    { key: 'male', label: 'reportScam.gender.male' },
+    { key: 'female', label: 'reportScam.gender.female' },
+    { key: 'other', label: 'reportScam.gender.other' },
+  ];
 
   // Debug: Log form data changes
   useEffect(() => {
@@ -423,7 +427,7 @@ export default function ReportScam() {
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">{t('reportScam.selectType')}</option>
-                      {scamTypes.map(type => (<option key={type} value={type}>{type}</option>))}
+                      {scamTypes.map(type => (<option key={type.key} value={type.key}>{t(type.label)}</option>))}
                     </select>
                   </div>
 
@@ -504,7 +508,7 @@ export default function ReportScam() {
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">{t('common.select')}</option>
-                        {genders.map(gender => (<option key={gender} value={gender}>{gender}</option>))}
+                        {genders.map(gender => (<option key={gender.key} value={gender.key}>{t(gender.label)}</option>))}
                       </select>
                     </div>
                     <div>
@@ -631,15 +635,15 @@ export default function ReportScam() {
                             </div>
                           )}
                         </div>
-                        {/* {pincodeSuccess && (
-                          <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded-lg">
-                            <p className="text-sm text-green-800 flex items-center gap-2">
-                              <CheckCircle className="w-4 h-4" />
-                              {pincodeSuccess}
-                            </p>
-                          </div>
-                        )} */}
                       </div>
+                      {pincodeSuccess && (
+                        <div className="mt-2 p-2 bg-green-100 border border-green-300 rounded-lg">
+                          <p className="text-sm text-green-800 flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4" />
+                            {pincodeSuccess}
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.country')}</label>
