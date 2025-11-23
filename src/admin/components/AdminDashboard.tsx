@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users, UserCheck, UserX, FileText, MessageSquare, Tag, Shield, Flag, Clock, Activity, Database, BarChart3, AlertTriangle } from 'lucide-react';
+import { getApiBaseUrl } from '../../services/backendApi';
 import '../styles/kali-theme.css';
 
 interface DashboardStats {
@@ -41,7 +42,7 @@ const AdminDashboard: React.FC = () => {
   const fetchDashboardStats = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/stats', {
+      const response = await fetch(`${getApiBaseUrl()}/admin/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

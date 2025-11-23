@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Lock, Eye, Heart, Pin } from 'lucide-react';
+import { getApiBaseUrl } from '../../services/backendApi';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
 
@@ -50,7 +51,7 @@ const PostsManager: React.FC = () => {
         search: searchQuery,
       });
 
-      const response = await fetch(`http://localhost:5000/api/admin/posts?${params}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/posts?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -76,7 +77,7 @@ const PostsManager: React.FC = () => {
     if (newStatus && ['active', 'hidden', 'deleted'].includes(newStatus)) {
       try {
         const token = localStorage.getItem('adminToken');
-        const response = await fetch(`http://localhost:5000/api/admin/posts/${post._id}`, {
+        const response = await fetch(`${getApiBaseUrl()}/admin/posts/${post._id}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -97,7 +98,7 @@ const PostsManager: React.FC = () => {
   const handleDelete = async (post: Post) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/posts/${post._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/posts/${post._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -115,7 +116,7 @@ const PostsManager: React.FC = () => {
   const handleBulkDelete = async (postIds: string[]) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/bulk/posts/delete', {
+      const response = await fetch(`${getApiBaseUrl()}/admin/bulk/posts/delete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -201,6 +201,7 @@ const FirebaseAdminLogin: React.FC = () => {
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-green-900/50 text-green-400 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-mono placeholder-gray-600"
                   placeholder="••••••••••••"
+                  autoComplete="current-password"
                   required
                 />
               </div>

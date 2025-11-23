@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart3, TrendingUp, Activity, Users, FileText, Flag, Shield } from 'lucide-react';
+import { getApiBaseUrl } from '../../services/backendApi';
 import '../styles/kali-theme.css';
 
 interface AnalyticsData {
@@ -40,7 +41,7 @@ const AnalyticsManager: React.FC = () => {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/stats', {
+      const response = await fetch(`${getApiBaseUrl()}/admin/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

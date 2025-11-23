@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessageSquare } from 'lucide-react';
+import { getApiBaseUrl } from '../../services/backendApi';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
 
@@ -45,7 +46,7 @@ const CommentsManager: React.FC = () => {
         ...(statusFilter && { status: statusFilter })
       });
 
-      const response = await fetch(`http://localhost:5000/api/admin/comments?${params}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/comments?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -70,7 +71,7 @@ const CommentsManager: React.FC = () => {
     if (newStatus && ['active', 'hidden', 'deleted'].includes(newStatus)) {
       try {
         const token = localStorage.getItem('adminToken');
-        const response = await fetch(`http://localhost:5000/api/admin/comments/${comment._id}`, {
+        const response = await fetch(`${getApiBaseUrl()}/admin/comments/${comment._id}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -93,7 +94,7 @@ const CommentsManager: React.FC = () => {
     
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/comments/${comment._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/comments/${comment._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -113,7 +114,7 @@ const CommentsManager: React.FC = () => {
     
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/bulk/comments/delete', {
+      const response = await fetch(`${getApiBaseUrl()}/admin/bulk/comments/delete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

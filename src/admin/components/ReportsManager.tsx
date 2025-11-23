@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '../../services/backendApi';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
 
@@ -45,7 +46,7 @@ const ReportsManager: React.FC = () => {
         ...(statusFilter && { status: statusFilter })
       });
 
-      const response = await fetch(`http://localhost:5000/api/admin/reports?${params}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/reports?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -68,7 +69,7 @@ const ReportsManager: React.FC = () => {
   const handleStatusUpdate = async (report: Report, newStatus: string) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/reports/${report._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/reports/${report._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -88,7 +89,7 @@ const ReportsManager: React.FC = () => {
   const handleBulkStatusUpdate = async (reportIds: string[], status: string) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/bulk/reports/update-status', {
+      const response = await fetch(`${getApiBaseUrl()}/admin/bulk/reports/update-status`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -108,7 +109,7 @@ const ReportsManager: React.FC = () => {
   const handleDelete = async (report: Report) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/reports/${report._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/reports/${report._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

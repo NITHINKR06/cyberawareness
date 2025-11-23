@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Shield } from 'lucide-react';
+import { getApiBaseUrl } from '../../services/backendApi';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
 
@@ -43,7 +44,7 @@ const ScamsManager: React.FC = () => {
         ...(categoryFilter && { category: categoryFilter })
       });
 
-      const response = await fetch(`http://localhost:5000/api/admin/scams?${params}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/scams?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -68,7 +69,7 @@ const ScamsManager: React.FC = () => {
     if (newCategory) {
       try {
         const token = localStorage.getItem('adminToken');
-        const response = await fetch(`http://localhost:5000/api/admin/scams/${scam._id}`, {
+        const response = await fetch(`${getApiBaseUrl()}/admin/scams/${scam._id}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -91,7 +92,7 @@ const ScamsManager: React.FC = () => {
     
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/scams/${scam._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/scams/${scam._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -111,7 +112,7 @@ const ScamsManager: React.FC = () => {
     
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/bulk/scams/delete', {
+      const response = await fetch(`${getApiBaseUrl()}/admin/bulk/scams/delete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -131,7 +132,7 @@ const ScamsManager: React.FC = () => {
   const handleVerifyToggle = async (scam: Scam) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/scams/${scam._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/scams/${scam._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

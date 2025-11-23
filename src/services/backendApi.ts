@@ -4,6 +4,11 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.PROD ? 'https://cyberawareness.onrender.com/api' : 'http://localhost:5000/api');
 
+// Export API base URL for use in components that need direct fetch calls
+export const getApiBaseUrl = () => {
+  return API_BASE_URL;
+};
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,

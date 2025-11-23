@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Star } from 'lucide-react';
+import { getApiBaseUrl } from '../../services/backendApi';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
 
@@ -45,7 +46,7 @@ const UsersManager: React.FC = () => {
         search: searchQuery,
       });
 
-      const response = await fetch(`http://localhost:5000/api/admin/users?${params}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/users?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -74,7 +75,7 @@ const UsersManager: React.FC = () => {
   const handleDelete = async (user: User) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/users/${user._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/users/${user._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -92,7 +93,7 @@ const UsersManager: React.FC = () => {
   const handleBulkDelete = async (userIds: string[]) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/bulk/users/delete', {
+      const response = await fetch(`${getApiBaseUrl()}/admin/bulk/users/delete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -113,7 +114,7 @@ const UsersManager: React.FC = () => {
     try {
       const token = localStorage.getItem('adminToken');
       const endpoint = user.isBanned ? 'unban' : 'ban';
-      const response = await fetch(`http://localhost:5000/api/admin/users/${user._id}/${endpoint}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/users/${user._id}/${endpoint}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -135,7 +136,7 @@ const UsersManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/users/${editingUser._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/users/${editingUser._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

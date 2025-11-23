@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tag } from 'lucide-react';
+import { getApiBaseUrl } from '../../services/backendApi';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';
 
@@ -34,7 +35,7 @@ const TopicsManager: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/topics', {
+      const response = await fetch(`${getApiBaseUrl()}/admin/topics`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -56,7 +57,7 @@ const TopicsManager: React.FC = () => {
   const handleCreate = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/topics', {
+      const response = await fetch('${getApiBaseUrl()}/admin/topics', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -91,7 +92,7 @@ const TopicsManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/topics/${editingTopic._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/topics/${editingTopic._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -114,7 +115,7 @@ const TopicsManager: React.FC = () => {
   const handleDelete = async (topic: Topic) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/topics/${topic._id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/admin/topics/${topic._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
