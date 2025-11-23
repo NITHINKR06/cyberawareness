@@ -79,7 +79,7 @@ export default function ReportScam() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       const payload = {
         scamType: formData.scamType,
@@ -131,7 +131,7 @@ export default function ReportScam() {
 
   const handleDownloadPDF = async () => {
     if (!submittedReport?.reportId) return;
-    
+
     try {
       const blob = await reportService.downloadPDF(submittedReport.reportId);
       const url = window.URL.createObjectURL(blob);
@@ -172,7 +172,7 @@ export default function ReportScam() {
       if (pincodeTimeoutRef.current) {
         clearTimeout(pincodeTimeoutRef.current);
       }
-      
+
       // Set new timeout for debounced auto-fill
       pincodeTimeoutRef.current = setTimeout(() => {
         handlePincodeAutoFill(newValue);
@@ -182,7 +182,7 @@ export default function ReportScam() {
 
   const handlePincodeAutoFill = async (pincode: string) => {
     if (!pincode || pincode.length !== 6 || !/^\d{6}$/.test(pincode)) return;
-    
+
     setIsPincodeLoading(true);
     try {
       console.log('Auto-filling pincode:', pincode);
@@ -191,21 +191,21 @@ export default function ReportScam() {
         `https://api.postalpincode.in/pincode/${pincode}`
       );
       const data = await response.json();
-      
+
       console.log('API Response:', data);
       console.log('Is Array:', Array.isArray(data));
-      
+
       // Handle both single object and array responses
       const responseData = Array.isArray(data) ? data[0] : data;
       console.log('Response Data:', responseData);
-      
+
       if (responseData && responseData.Status === 'Success' && responseData.PostOffice && responseData.PostOffice.length > 0) {
         const postOffice = responseData.PostOffice[0]; // Use first post office data
         console.log('Post Office Data:', postOffice);
         console.log('Post Office Name:', postOffice.Name);
         console.log('Post Office District:', postOffice.District);
         console.log('Post Office State:', postOffice.State);
-        
+
         // Update form with detailed address from postal API
         const newFormData = {
           houseNo: '',
@@ -218,7 +218,7 @@ export default function ReportScam() {
           pincode: pincode, // Keep the entered pincode
         };
         console.log('Updating form with:', newFormData);
-        
+
         setFormData(prev => {
           const updatedData = {
             ...prev,
@@ -227,10 +227,10 @@ export default function ReportScam() {
           console.log('Updated form data:', updatedData);
           return updatedData;
         });
-        
+
         // Force form re-render
         setFormKey(prev => prev + 1);
-        
+
         // Show success message
         setPincodeSuccess(`Location found: ${postOffice.Name}, ${postOffice.District}, ${postOffice.State}`);
         setTimeout(() => setPincodeSuccess(null), 5000); // Clear after 5 seconds
@@ -270,7 +270,7 @@ export default function ReportScam() {
                 ×
               </button>
             </div>
-            
+
             <div className="space-y-4">
               {nearbyStations.map((station, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4">
@@ -286,8 +286,8 @@ export default function ReportScam() {
                       <div>
                         <h3 className="font-semibold text-gray-800">{station.name}</h3>
                         <p className="text-sm text-gray-600 mt-1">
-                          {station.type === 'cyber' ? 'Cyber Crime Specialized' : 
-                           station.type === 'helpline' ? '24/7 Helpline' : 'Local Police Station'}
+                          {station.type === 'cyber' ? 'Cyber Crime Specialized' :
+                            station.type === 'helpline' ? '24/7 Helpline' : 'Local Police Station'}
                         </p>
                       </div>
                     </div>
@@ -332,7 +332,7 @@ export default function ReportScam() {
             Your scam report has been submitted successfully. Our team will review it and take appropriate action.
             You've earned {submittedReport?.pointsAwarded || 25} points for helping protect the community!
           </p>
-          
+
           {submittedReport?.isOfficialComplaint && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
               <h3 className="font-semibold text-green-800 mb-2">Official Complaint Generated</h3>
@@ -348,13 +348,13 @@ export default function ReportScam() {
               </button>
             </div>
           )}
-          
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
               Reports like yours help us identify and stop scammers. Keep up the great work!
             </p>
           </div>
-          
+
           <button
             onClick={() => {
               setSubmitted(false);
@@ -372,7 +372,7 @@ export default function ReportScam() {
   return (
     <div className="max-w-4xl mx-auto">
       {showMap && <MapPicker onLocationSelect={handleLocationSelect} onClose={() => setShowMap(false)} />}
-      
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Report a Scam</h1>
         <p className="text-gray-600">
@@ -392,7 +392,7 @@ export default function ReportScam() {
               </p>
             </div>
           </div>
-          <button 
+          <button
             type="button"
             onClick={() => window.open('https://cybercrime.gov.in/Webform/Accept.aspx', '_blank')}
             className="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors flex items-center justify-center gap-2"
@@ -431,7 +431,7 @@ export default function ReportScam() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       {t('reportScam.description')} *
                     </label>
-                                        <textarea 
+                    <textarea
                       name="description" value={formData.description} onChange={handleChange} required rows={4}
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       placeholder={t('reportScam.descriptionPlaceholder')}
@@ -499,7 +499,7 @@ export default function ReportScam() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.gender')} *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('reportScam.genderLabel')} *</label>
                       <select name="gender" value={formData.gender} onChange={handleChange} required
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
@@ -662,7 +662,7 @@ export default function ReportScam() {
                     <MapPin className="w-5 h-5" />
                     Find Police Stations
                   </button>
-                  
+
                   <button type="submit" disabled={isSubmitting}
                     className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -735,7 +735,7 @@ export default function ReportScam() {
           </div>
         </div>
       </div>
-      
+
       <LocationPopup />
     </div>
   );
