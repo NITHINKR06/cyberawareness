@@ -457,9 +457,15 @@
     "premiumMember": "प्रीमियम सदस्य"
   },
   "admin": {
-    "dashboard": "डैशबोर्ड",
-    "users": "उपयोगकर्ता",
-    "posts": "पोस्ट",
+    "dashboard": {
+      "label": "डैशबोर्ड"
+    },
+    "users": {
+      "label": "उपयोगकर्ता"
+    },
+    "posts": {
+      "label": "पोस्ट"
+    },
     "comments": "टिप्पणियां",
     "topics": "विषय",
     "scams": "स्कैम",

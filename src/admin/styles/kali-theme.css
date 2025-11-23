@@ -1,6 +1,28 @@
 /* Kali Linux Terminal Theme for Admin Panel */
 
+/* Light Theme (default) */
 :root {
+  --kali-bg: #f8f9fa;
+  --kali-bg-secondary: #ffffff;
+  --kali-bg-tertiary: #e9ecef;
+  --kali-border: #dee2e6;
+  --kali-text: #212529;
+  --kali-text-secondary: #6c757d;
+  --kali-green: #28a745;
+  --kali-green-dark: #1e7e34;
+  --kali-red: #dc3545;
+  --kali-red-dark: #c82333;
+  --kali-blue: #007bff;
+  --kali-blue-dark: #0056b3;
+  --kali-yellow: #ffc107;
+  --kali-purple: #6f42c1;
+  --kali-cyan: #17a2b8;
+  --kali-orange: #fd7e14;
+  --terminal-font: 'Fira Code', 'Courier New', monospace;
+}
+
+/* Dark Theme */
+.dark {
   --kali-bg: #0a0e14;
   --kali-bg-secondary: #0d1117;
   --kali-bg-tertiary: #161b22;
@@ -17,7 +39,6 @@
   --kali-purple: #a371f7;
   --kali-cyan: #56d4dd;
   --kali-orange: #db6d28;
-  --terminal-font: 'Fira Code', 'Courier New', monospace;
 }
 
 .admin-panel {
@@ -29,7 +50,7 @@
 
 /* Terminal Header */
 .terminal-header {
-  background: linear-gradient(180deg, #1a1f2e 0%, var(--kali-bg-secondary) 100%);
+  background: linear-gradient(180deg, var(--kali-bg-tertiary) 0%, var(--kali-bg-secondary) 100%);
   border-bottom: 2px solid var(--kali-green);
   padding: 1rem;
   display: flex;

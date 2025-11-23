@@ -26,6 +26,7 @@ const UsersManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -37,7 +38,7 @@ const UsersManager: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: '10',
@@ -57,6 +58,7 @@ const UsersManager: React.FC = () => {
       const data = await response.json();
       setUsers(data.users);
       setTotalPages(data.totalPages);
+      setTotalUsers(data.total || data.users.length);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -71,7 +73,7 @@ const UsersManager: React.FC = () => {
 
   const handleDelete = async (user: User) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`http://localhost:5000/api/admin/users/${user._id}`, {
         method: 'DELETE',
         headers: {
@@ -89,7 +91,7 @@ const UsersManager: React.FC = () => {
 
   const handleBulkDelete = async (userIds: string[]) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch('http://localhost:5000/api/admin/bulk/users/delete', {
         method: 'POST',
         headers: {
@@ -109,7 +111,7 @@ const UsersManager: React.FC = () => {
 
   const handleBanToggle = async (user: User) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const endpoint = user.isBanned ? 'unban' : 'ban';
       const response = await fetch(`http://localhost:5000/api/admin/users/${user._id}/${endpoint}`, {
         method: 'POST',
@@ -132,7 +134,7 @@ const UsersManager: React.FC = () => {
     if (!editingUser) return;
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`http://localhost:5000/api/admin/users/${editingUser._id}`, {
         method: 'PUT',
         headers: {
@@ -231,7 +233,7 @@ const UsersManager: React.FC = () => {
         <div className="terminal-card-header">
           <h2 className="terminal-card-title">👥 {t('admin.users.userManagement', 'USER MANAGEMENT')}</h2>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <span className="badge badge-info">{t('admin.users.total', 'Total')}: {users.length}</span>
+            <span className="badge badge-info">{t('admin.users.total', 'Total')}: {totalUsers}</span>
           </div>
         </div>
 

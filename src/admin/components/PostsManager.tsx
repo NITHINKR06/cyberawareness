@@ -33,6 +33,7 @@ const PostsManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const PostsManager: React.FC = () => {
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: '10',
@@ -62,6 +63,7 @@ const PostsManager: React.FC = () => {
       const data = await response.json();
       setPosts(data.posts);
       setTotalPages(data.totalPages);
+      setTotalPosts(data.total || data.posts.length);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
@@ -73,7 +75,7 @@ const PostsManager: React.FC = () => {
     const newStatus = prompt('Enter new status (active/hidden/deleted):', post.status);
     if (newStatus && ['active', 'hidden', 'deleted'].includes(newStatus)) {
       try {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('adminToken');
         const response = await fetch(`http://localhost:5000/api/admin/posts/${post._id}`, {
           method: 'PUT',
           headers: {
@@ -94,7 +96,7 @@ const PostsManager: React.FC = () => {
 
   const handleDelete = async (post: Post) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`http://localhost:5000/api/admin/posts/${post._id}`, {
         method: 'DELETE',
         headers: {
@@ -112,7 +114,7 @@ const PostsManager: React.FC = () => {
 
   const handleBulkDelete = async (postIds: string[]) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch('http://localhost:5000/api/admin/bulk/posts/delete', {
         method: 'POST',
         headers: {
@@ -202,7 +204,7 @@ const PostsManager: React.FC = () => {
         <div className="terminal-card-header">
           <h2 className="terminal-card-title">📝 {t('admin.posts.postManagement', 'POST MANAGEMENT')}</h2>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <span className="badge badge-info">{t('admin.posts.total', 'Total')}: {posts.length}</span>
+            <span className="badge badge-info">{t('admin.posts.total', 'Total')}: {totalPosts}</span>
           </div>
         </div>
 

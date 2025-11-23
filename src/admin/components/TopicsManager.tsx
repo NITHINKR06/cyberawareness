@@ -33,7 +33,7 @@ const TopicsManager: React.FC = () => {
   const fetchTopics = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch('http://localhost:5000/api/admin/topics', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -55,7 +55,7 @@ const TopicsManager: React.FC = () => {
 
   const handleCreate = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch('http://localhost:5000/api/admin/topics', {
         method: 'POST',
         headers: {
@@ -90,7 +90,7 @@ const TopicsManager: React.FC = () => {
     if (!editingTopic) return;
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`http://localhost:5000/api/admin/topics/${editingTopic._id}`, {
         method: 'PUT',
         headers: {
@@ -113,7 +113,7 @@ const TopicsManager: React.FC = () => {
 
   const handleDelete = async (topic: Topic) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`http://localhost:5000/api/admin/topics/${topic._id}`, {
         method: 'DELETE',
         headers: {

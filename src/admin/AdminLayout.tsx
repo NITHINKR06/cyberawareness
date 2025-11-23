@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/FirebaseAuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { 
   Home, 
@@ -14,7 +15,9 @@ import {
   Monitor, 
   LogOut, 
   Menu, 
-  X 
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -25,6 +28,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -34,9 +38,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   const navItems = [
-    { path: '/admin', label: t('admin.dashboard'), icon: Home },
-    { path: '/admin/users', label: t('admin.users'), icon: Users },
-    { path: '/admin/posts', label: t('admin.posts'), icon: FileText },
+    { path: '/admin', label: t('admin.dashboard.label', 'Dashboard'), icon: Home },
+    { path: '/admin/users', label: t('admin.users.label', 'Users'), icon: Users },
+    { path: '/admin/posts', label: t('admin.posts.label', 'Posts'), icon: FileText },
     { path: '/admin/comments', label: t('admin.comments'), icon: MessageSquare },
     { path: '/admin/topics', label: t('admin.topics'), icon: Tag },
     { path: '/admin/scams', label: t('admin.scams'), icon: AlertTriangle },
@@ -122,9 +126,26 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <main className="admin-content">
         <div className="terminal-header">
           <span className="terminal-title">{t('admin.walrusSecurityAdmin')}</span>
-          <span style={{ marginLeft: 'auto', color: 'var(--kali-text-secondary)', fontSize: '0.9rem' }}>
-            {new Date().toLocaleString()}
-          </span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              className="terminal-btn"
+              style={{ 
+                padding: '0.5rem', 
+                minWidth: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title={isDark ? t('settings.light', 'Light') : t('settings.dark', 'Dark')}
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <span style={{ color: 'var(--kali-text-secondary)', fontSize: '0.9rem' }}>
+              {new Date().toLocaleString()}
+            </span>
+          </div>
         </div>
         
         <div className="command-line">

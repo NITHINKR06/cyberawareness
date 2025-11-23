@@ -621,6 +621,7 @@
   },
   "admin": {
     "dashboard": {
+      "label": "Dashboard",
       "controlCenter": "ADMIN CONTROL CENTER",
       "failedToFetchStats": "Failed to fetch stats",
       "failedToLoad": "Failed to load dashboard statistics",
@@ -657,6 +658,7 @@
       "userRegistrations": "User Registrations (Last 30 Days)"
     },
     "users": {
+      "label": "Users",
       "userManagement": "USER MANAGEMENT",
       "total": "Total",
       "username": "Username",
@@ -681,6 +683,7 @@
       "saveChanges": "Save Changes"
     },
     "posts": {
+      "label": "Posts",
       "postManagement": "POST MANAGEMENT",
       "total": "Total",
       "title": "Title",

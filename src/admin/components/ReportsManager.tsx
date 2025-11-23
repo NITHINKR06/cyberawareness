@@ -37,7 +37,7 @@ const ReportsManager: React.FC = () => {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: '10',
@@ -67,7 +67,7 @@ const ReportsManager: React.FC = () => {
 
   const handleStatusUpdate = async (report: Report, newStatus: string) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`http://localhost:5000/api/admin/reports/${report._id}`, {
         method: 'PUT',
         headers: {
@@ -87,7 +87,7 @@ const ReportsManager: React.FC = () => {
 
   const handleBulkStatusUpdate = async (reportIds: string[], status: string) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch('http://localhost:5000/api/admin/bulk/reports/update-status', {
         method: 'POST',
         headers: {
@@ -107,7 +107,7 @@ const ReportsManager: React.FC = () => {
 
   const handleDelete = async (report: Report) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`http://localhost:5000/api/admin/reports/${report._id}`, {
         method: 'DELETE',
         headers: {
