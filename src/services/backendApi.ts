@@ -324,5 +324,24 @@ export const isAuthenticated = () => {
   return !!localStorage.getItem('authToken');
 };
 
+// Keep-alive service to prevent Render server from sleeping
+export const keepAliveService = {
+  ping: async () => {
+    try {
+      const response = await fetch('https://wlarus.onrender.com', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('Keep-alive ping sent: hy server dont sleep');
+      return response;
+    } catch (error) {
+      console.warn('Keep-alive ping failed:', error);
+      return null;
+    }
+  }
+};
+
 // Export the api instance for custom requests
 export default api;
