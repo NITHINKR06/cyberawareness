@@ -89,7 +89,7 @@ const ScamsManager: React.FC = () => {
 
   const handleDelete = async (scam: Scam) => {
     if (!window.confirm('Are you sure you want to delete this scam record?')) return;
-    
+
     try {
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${getApiBaseUrl()}/admin/scams/${scam._id}`, {
@@ -109,7 +109,7 @@ const ScamsManager: React.FC = () => {
 
   const handleBulkDelete = async (scamIds: string[]) => {
     if (!window.confirm(`Are you sure you want to delete ${scamIds.length} scam records?`)) return;
-    
+
     try {
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${getApiBaseUrl()}/admin/bulk/scams/delete`, {
@@ -169,7 +169,7 @@ const ScamsManager: React.FC = () => {
       label: t('admin.scams.severity', 'Severity'),
       render: (value: string) => (
         <span className={`badge badge-${value === 'high' ? 'danger' : value === 'medium' ? 'warning' : 'success'}`}>
-          {value.toUpperCase()}
+          {value ? value.toUpperCase() : 'N/A'}
         </span>
       )
     },

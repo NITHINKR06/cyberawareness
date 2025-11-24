@@ -228,18 +228,70 @@ class URLThreatIntelligenceService {
       return results;
 
     } catch (error) {
-      console.error('❌ Deep Analysis Error:', error);
+      console.error('❌ Deep Analysis Error:', error.message);
+
+      // Determine threat level based on error type
+      let threatLevel = 'suspicious';
+      let threatScore = 5;
+      let verdict = 'Analysis Failed';
+      let indicators = ['Scan Failed or Timed Out'];
+      let recommendations = ['Try scanning again later', 'Check URL accessibility'];
+
+      // DNS Resolution Failure - Very suspicious
+      if (error.message.includes('ERR_NAME_NOT_RESOLVED') || error.message.includes('net::ERR_NAME_NOT_RESOLVED')) {
+        threatLevel = 'dangerous';
+        threatScore = 9;
+        verdict = 'Domain Does Not Resolve';
+        indicators = [
+          'Domain name does not resolve to any IP address',
+          'Possible typosquatting or phishing attempt',
+          'Domain may be recently taken down or never existed',
+          'Suspicious domain pattern detected'
+        ];
+        recommendations = [
+          'DO NOT enter any personal information',
+          'This appears to be a fake or malicious domain',
+          'Verify the legitimate website URL from official sources',
+          'Report this URL if received via email or message'
+        ];
+      }
+      // Connection Refused - Site may be down or blocking
+      else if (error.message.includes('ERR_CONNECTION_REFUSED')) {
+        threatLevel = 'suspicious';
+        threatScore = 6;
+        verdict = 'Connection Refused';
+        indicators = [
+          'Server refused connection',
+          'Site may be temporarily down or blocking automated access'
+        ];
+        recommendations = [
+          'Proceed with caution',
+          'Verify URL from trusted source',
+          'Try again later if legitimate'
+        ];
+      }
+      // Timeout - Could be slow server or blocking
+      else if (error.message.includes('Timeout') || error.message.includes('timeout')) {
+        threatLevel = 'suspicious';
+        threatScore = 4;
+        verdict = 'Connection Timeout';
+        indicators = [
+          'Page took too long to load',
+          'Server may be overloaded or intentionally slow'
+        ];
+      }
+
       return {
         url: url,
         finalUrl: url,
         scanDate: new Date().toISOString(),
         error: error.message,
-        threatLevel: 'suspicious', // Default to suspicious on error
-        threatScore: 5,
-        verdict: 'Analysis Failed',
-        confidence: 0,
-        indicators: ['Scan Failed or Timed Out'],
-        recommendations: ['Try scanning again later', 'Check URL accessibility'],
+        threatLevel: threatLevel,
+        threatScore: threatScore,
+        verdict: verdict,
+        confidence: 100, // High confidence in error detection
+        indicators: indicators,
+        recommendations: recommendations,
         domain: { name: url },
         security: { ssl: { valid: false }, headers: {}, score: 0 },
         network: { requests: 0, bytes: 0, types: {}, domains: [] },

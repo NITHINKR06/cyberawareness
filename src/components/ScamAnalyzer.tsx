@@ -63,6 +63,10 @@ interface AnalysisResult {
   indicators: string[];
   recommendations?: string[];
 
+  // Text analysis fields
+  confidence?: number;
+  reasoning?: string;
+
   // Legacy fields support
   summary?: string;
   ocrConfidence?: number;
@@ -78,6 +82,7 @@ export default function ScamAnalyzer() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [analysisType, setAnalysisType] = useState<'text' | 'url' | null>(null); // Track analysis type
 
   // For image upload (Coming Soon)
   // const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -130,12 +135,14 @@ export default function ScamAnalyzer() {
     setIsProcessing(true);
     setError(null);
     setResult(null);
+    setAnalysisType(null);
 
     try {
       // Send directly to backend - Generative LLM AI will do all threat analysis
       const response = await analyzeContent(type, content);
       const analysisResult = response.analysisResult;
       setResult(analysisResult);
+      setAnalysisType(type); // Track what type of analysis was performed
 
       // Show results based on Generative LLM AI analysis
       if (analysisResult.threatLevel === 'dangerous') {
@@ -249,8 +256,8 @@ export default function ScamAnalyzer() {
           <button
             onClick={() => setActiveTab('text')}
             className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold transition-all duration-300 ${activeTab === 'text'
-                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 scale-105'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50 hover:scale-102'
+              ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 scale-105'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50 hover:scale-102'
               }`}
           >
             <MessageSquare className="w-5 h-5" />
@@ -259,8 +266,8 @@ export default function ScamAnalyzer() {
           <button
             onClick={() => setActiveTab('url')}
             className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold transition-all duration-300 ${activeTab === 'url'
-                ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/50 scale-105'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50 hover:scale-102'
+              ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/50 scale-105'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50 hover:scale-102'
               }`}
           >
             <Globe className="w-5 h-5" />
@@ -269,8 +276,8 @@ export default function ScamAnalyzer() {
           <button
             onClick={() => setActiveTab('image')}
             className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold transition-all duration-300 ${activeTab === 'image'
-                ? 'bg-gradient-to-r from-pink-600 to-pink-500 text-white shadow-lg shadow-pink-500/50 scale-105'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50 hover:scale-102'
+              ? 'bg-gradient-to-r from-pink-600 to-pink-500 text-white shadow-lg shadow-pink-500/50 scale-105'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50 hover:scale-102'
               }`}
           >
             <ImageIcon className="w-5 h-5" />
@@ -375,7 +382,114 @@ export default function ScamAnalyzer() {
         </div>
       )}
 
-      {result && (
+      {result && analysisType === 'text' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 border border-gray-100 dark:border-gray-700">
+          {/* Old-style Text Analysis Display */}
+          <div className={`flex items-center gap-6 mb-8 pb-8 border-b-2 ${result.threatLevel === 'safe' ? 'border-green-200 dark:border-green-800' :
+              result.threatLevel === 'suspicious' ? 'border-yellow-200 dark:border-yellow-800' :
+                'border-red-200 dark:border-red-800'
+            }`}>
+            <div className={`p-5 rounded-2xl ${result.threatLevel === 'safe' ? 'bg-green-100 dark:bg-green-900/30' :
+                result.threatLevel === 'suspicious' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                  'bg-red-100 dark:bg-red-900/30'
+              }`}>
+              {result.threatLevel === 'safe' ? <CheckCircle className="w-14 h-14 text-green-600 dark:text-green-400" /> :
+                result.threatLevel === 'suspicious' ? <AlertCircle className="w-14 h-14 text-yellow-600 dark:text-yellow-400" /> :
+                  <XCircle className="w-14 h-14 text-red-600 dark:text-red-400" />}
+            </div>
+            <div className="flex-1">
+              <h3 className={`text-3xl font-bold mb-2 ${result.threatLevel === 'safe' ? 'text-green-700 dark:text-green-300' :
+                  result.threatLevel === 'suspicious' ? 'text-yellow-700 dark:text-yellow-300' :
+                    'text-red-700 dark:text-red-300'
+                }`}>
+                {result.verdict || (result.threatLevel === 'safe' ? 'Content Appears Safe' :
+                  result.threatLevel === 'suspicious' ? 'Suspicious Content Detected' :
+                    'Dangerous Content Detected')}
+              </h3>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                Threat Score: <span className="font-bold text-xl">{result.threatScore || 0}/10</span>
+                {result.confidence !== undefined && <span className="ml-3">• Confidence: <span className="font-bold">{result.confidence}%</span></span>}
+              </p>
+            </div>
+          </div>
+
+          {/* AI Reasoning */}
+          {result.reasoning && (
+            <div className="mb-8">
+              <h4 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
+                <MessageSquare className="w-6 h-6" /> AI Analysis
+              </h4>
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-8 border border-gray-200 dark:border-gray-700">
+                <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{result.reasoning}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Summary */}
+          {result.summary && (
+            <div className="mb-8">
+              <h4 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">Summary</h4>
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-8 border border-blue-200 dark:border-blue-800">
+                <div className="prose prose-base dark:prose-invert max-w-none">
+                  {result.summary.split(/(?:###|####|\*\*\*\*)/g).filter(Boolean).map((section, idx) => {
+                    const cleanText = section.replace(/\*\*/g, '').trim();
+                    if (!cleanText) return null;
+
+                    // Check if this looks like a header (short and ends with **)
+                    const isHeader = section.includes('**') && cleanText.length < 100;
+
+                    return isHeader ? (
+                      <h5 key={idx} className="text-lg font-bold text-gray-900 dark:text-gray-100 mt-5 mb-3 first:mt-0">
+                        {cleanText}
+                      </h5>
+                    ) : (
+                      <p key={idx} className="text-base text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                        {cleanText}
+                      </p>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Threat Indicators */}
+          {result.indicators && result.indicators.length > 0 && (
+            <div className="mb-8">
+              <h4 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
+                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" /> Threat Indicators
+              </h4>
+              <ul className="space-y-3">
+                {result.indicators.map((indicator, index) => (
+                  <li key={index} className="flex items-start gap-4 p-5 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 mt-2 flex-shrink-0"></div>
+                    <span className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">{indicator}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Recommendations */}
+          {result.recommendations && result.recommendations.length > 0 && (
+            <div>
+              <h4 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
+                <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" /> Recommendations
+              </h4>
+              <ul className="space-y-3">
+                {result.recommendations.map((rec, index) => (
+                  <li key={index} className="flex items-start gap-4 p-5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <CheckCircle className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {result && analysisType === 'url' && (
         <div className="space-y-8">
           {/* Hero Header Section - Ultra Premium */}
           <div className={`relative overflow-hidden rounded-3xl shadow-2xl p-8 md:p-12 text-white animate-fade-in-up ${result.threatLevel === 'safe' ? 'bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 animate-gradient' :
