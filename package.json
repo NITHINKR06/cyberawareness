@@ -11,6 +11,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "server": "node server/server.js",
     "server:dev": "nodemon server/server.js",
+    "start:prod": "NODE_ENV=production node server/server.js",
+    "build:server": "echo 'Validating server configuration...' && node -c server/server.js && echo 'Server validation passed!'",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
     "install:all": "npm install && npm install -D nodemon concurrently",
     "test:validation": "node test-validation.js",

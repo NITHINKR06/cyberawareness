@@ -23,6 +23,7 @@ const PORT = process.env.PORT || 5000;
 // Check if we're in a cloud environment (detect early for logging)
 const isServerless = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
 const isRender = process.env.RENDER === 'true' || process.env.RENDER_SERVICE_NAME;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Log environment information (helpful for debugging)
 console.log('🚀 Starting server...');
@@ -31,6 +32,7 @@ console.log(`   Port: ${PORT}`);
 console.log(`   Platform: ${isRender ? 'Render' : isServerless ? 'Vercel/Serverless' : 'Local/Other'}`);
 if (isRender) {
   console.log(`   Render Service: ${process.env.RENDER_SERVICE_NAME || 'unknown'}`);
+  console.log(`   Render Region: ${process.env.RENDER_REGION || 'unknown'}`);
 }
 console.log(`   MongoDB URI: ${process.env.MONGODB_URI ? '✅ Set' : '❌ Not set (using default)'}`);
 if (process.env.MONGODB_URI && !process.env.MONGODB_URI.includes('localhost')) {
@@ -58,31 +60,38 @@ const allowedOrigins = [
   'http://localhost:5000',
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
   process.env.FRONTEND_URL,
-  'https://cyberawareness-iota.vercel.app',
-  'https://cyberawareness-iota.vercel.app/',
+  'https://cyberawareness-iota.vercel.app', // Production frontend
 ].filter(Boolean);
 
+console.log(`   Allowed CORS Origins: ${allowedOrigins.join(', ')}`);
+
 app.use(cors({
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+
     // Allow any localhost port for development
     if (origin.startsWith('http://localhost:')) {
       return callback(null, true);
     }
-    
+
     // Check if origin is in allowed list
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    
+
     // Allow all origins in development, or if explicitly configured
     if (process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
       return callback(null, true);
     }
-    
-    // In production, log and allow (Vercel handles CORS via headers)
+
+    // In production, be strict about CORS
+    if (isProduction && !isServerless) {
+      console.warn(`⚠️  CORS: Blocked origin ${origin}`);
+      return callback(new Error('Not allowed by CORS'));
+    }
+
+    // Fallback: log and allow (for serverless environments)
     console.log(`CORS: Allowing origin ${origin}`);
     callback(null, true);
   },
@@ -101,7 +110,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false, // Changed to false for security
   name: 'sessionId', // Custom session name
-  cookie: { 
+  cookie: {
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
     httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
@@ -194,7 +203,7 @@ const connectDB = async () => {
   } catch (err) {
     retryCount++;
     console.error(`❌ MongoDB connection error (attempt ${retryCount}/${MAX_RETRIES}):`, err.message);
-    
+
     // Provide helpful error messages
     if (err.message.includes('authentication failed') || err.code === 8000) {
       console.error('   💡 Authentication failed. Please check:');
@@ -217,7 +226,7 @@ const connectDB = async () => {
       // Already handled above, but ensure we don't retry
       return;
     }
-    
+
     // Retry logic for non-serverless environments
     if (retryCount < MAX_RETRIES && !isServerless) {
       console.log(`   ⏳ Retrying in ${RETRY_DELAY / 1000} seconds...`);
@@ -291,20 +300,72 @@ app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
+  res.json({
     status: 'OK',
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString()
   });
 });
 
 // Export app for Vercel serverless functions
 export default app;
 
+// Graceful shutdown handler
+const gracefulShutdown = (signal) => {
+  console.log(`\n${signal} received. Starting graceful shutdown...`);
+
+  // Close MongoDB connection
+  mongoose.connection.close(false, () => {
+    console.log('✅ MongoDB connection closed');
+    process.exit(0);
+  });
+
+  // Force exit after 10 seconds
+  setTimeout(() => {
+    console.error('⚠️  Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000);
+};
+
+// Register shutdown handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  if (isProduction) {
+    gracefulShutdown('UNCAUGHT_EXCEPTION');
+  }
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  if (isProduction) {
+    gracefulShutdown('UNHANDLED_REJECTION');
+  }
+});
+
 // Only start server if not in serverless environment (Vercel)
 if (process.env.VERCEL !== '1' && !process.env.VERCEL_ENV) {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  const server = app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`   Health check: http://localhost:${PORT}/api/health`);
+    if (isProduction) {
+      console.log('   🔒 Production mode: Enhanced security enabled');
+    }
+  });
+
+  // Handle server errors
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use`);
+      process.exit(1);
+    } else {
+      console.error('❌ Server error:', error);
+      process.exit(1);
+    }
   });
 } else {
-  console.log('Server running in serverless mode');
+  console.log('✅ Server running in serverless mode');
 }

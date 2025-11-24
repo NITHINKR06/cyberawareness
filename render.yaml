@@ -1,0 +1,69 @@
+services:
+  - type: web
+    name: cyberawareness-backend
+    env: node
+    region: oregon  # Choose region closest to your users
+    plan: starter  # Free tier, upgrade to standard for production
+    
+    # Build configuration
+    buildCommand: |
+      npm install &&
+      npm install -g puppeteer &&
+      apt-get update &&
+      apt-get install -y chromium chromium-sandbox libx11-xcb1 libxcomposite1 libxcursor1 libxdamage1 libxi6 libxtst6 libnss3 libcups2 libxss1 libxrandr2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 || true
+    
+    # Start command
+    startCommand: npm run server
+    
+    # Health check
+    healthCheckPath: /api/health
+    
+    # Auto-deploy
+    autoDeploy: true
+    
+    # Environment variables (set these in Render Dashboard)
+    envVars:
+      - key: NODE_ENV
+        value: production
+      
+      - key: PORT
+        value: 5000
+      
+      # REQUIRED: MongoDB Connection
+      - key: MONGODB_URI
+        sync: false  # Set manually in dashboard
+      
+      # REQUIRED: Security Secrets
+      - key: JWT_SECRET
+        generateValue: true  # Render will auto-generate
+      
+      - key: SESSION_SECRET
+        generateValue: true  # Render will auto-generate
+      
+      # REQUIRED: Frontend URL for CORS
+      - key: FRONTEND_URL
+        sync: false  # Set to your Vercel frontend URL
+      
+      # OPTIONAL: AI Services
+      - key: GEMINI_API_KEY
+        sync: false
+      
+      - key: HUGGINGFACE_API_KEY
+        sync: false
+      
+      - key: GOOGLE_SAFE_BROWSING_API_KEY
+        sync: false
+      
+      # OPTIONAL: Threat Intelligence
+      - key: VIRUSTOTAL_API_KEY
+        sync: false
+      
+      - key: PHISHTANK_API_KEY
+        sync: false
+      
+      # Puppeteer Configuration
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: true
+      
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: /usr/bin/chromium
