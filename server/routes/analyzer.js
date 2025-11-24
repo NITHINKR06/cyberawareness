@@ -6,6 +6,8 @@ import { authenticateToken } from './auth.js';
 import aiAnalyzer from '../services/aiAnalyzer.js';
 import configurableAnalyzer from '../services/aiAnalyzerConfigurable.js';
 
+import urlThreatIntelligenceService from '../services/urlThreatIntelligence.js';
+
 const router = express.Router();
 
 // Flag to switch between original and configurable analyzer
@@ -18,16 +20,16 @@ router.post('/analyze', async (req, res) => {
 
     // Validate input
     if (!inputType || !inputContent) {
-      return res.status(400).json({ 
-        error: 'Input type and content are required' 
+      return res.status(400).json({
+        error: 'Input type and content are required'
       });
     }
 
     // Validate input type
     const validTypes = ['text', 'url', 'email', 'phone'];
     if (!validTypes.includes(inputType)) {
-      return res.status(400).json({ 
-        error: 'Invalid input type. Must be one of: text, url, email, phone' 
+      return res.status(400).json({
+        error: 'Invalid input type. Must be one of: text, url, email, phone'
       });
     }
 
@@ -35,7 +37,7 @@ router.post('/analyze', async (req, res) => {
     let userId = null;
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    
+
     if (token) {
       const JWT_SECRET = process.env.JWT_SECRET;
       try {
@@ -48,9 +50,18 @@ router.post('/analyze', async (req, res) => {
 
     // Use configurable analyzer if enabled
     const analyzer = USE_CONFIGURABLE_ANALYZER ? configurableAnalyzer : aiAnalyzer;
-    
-    // Perform AI-powered analysis
-    const analysisResult = await analyzer.analyze(inputType, inputContent);
+
+    // Perform analysis based on type
+    let analysisResult;
+
+    if (inputType === 'url') {
+      // Use specialized URL threat intelligence service
+      console.log(`🔍 Analyzing URL: ${inputContent}`);
+      analysisResult = await urlThreatIntelligenceService.analyzeUrl(inputContent);
+    } else {
+      // Use AI analyzer for text, email, phone
+      analysisResult = await analyzer.analyze(inputType, inputContent);
+    }
 
     // Save to history
     const history = new AnalyzerHistory({
@@ -104,18 +115,18 @@ router.post('/analyze', async (req, res) => {
 // Vulnerable endpoint for the Security Sandbox demonstration
 router.post('/analyze-vulnerable', async (req, res) => {
   try {
-      const { inputType, inputContent } = req.body;
-      if (!inputType || !inputContent) {
-          return res.status(400).json({ error: 'Input type and content are required' });
-      }
+    const { inputType, inputContent } = req.body;
+    if (!inputType || !inputContent) {
+      return res.status(400).json({ error: 'Input type and content are required' });
+    }
 
-      // Call the new weak prompt function
-      const result = await aiAnalyzer.analyzeWithWeakPrompt(inputType, inputContent);
+    // Call the new weak prompt function
+    const result = await aiAnalyzer.analyzeWithWeakPrompt(inputType, inputContent);
 
-      res.json(result);
+    res.json(result);
   } catch (error) {
-      console.log('Error in vulnerable analysis:', error);
-      res.status(500).json({ error: 'Server error during vulnerable analysis' });
+    console.log('Error in vulnerable analysis:', error);
+    res.status(500).json({ error: 'Server error during vulnerable analysis' });
   }
 });
 
@@ -137,7 +148,7 @@ router.get('/history', authenticateToken, async (req, res) => {
 router.get('/session/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
-    
+
     if (sessionId !== req.session.sessionId) {
       return res.status(403).json({ error: 'Access denied' });
     }
@@ -164,7 +175,7 @@ router.get('/configuration', async (req, res) => {
         error: 'Configuration endpoint not available in original analyzer mode'
       });
     }
-    
+
     const configuration = configurableAnalyzer.getConfiguration();
     res.json({
       success: true,

@@ -45,94 +45,94 @@ export default function TimeMachinePage() {
     setIsLoading(true);
     setError(null);
     setSelectedEra(year);
-    
+
     try {
       // Mock data for demonstration - replace with actual API call
       const mockScenarios: Scenario[] = [
         {
           id: 1,
-          name: year === 2015 ? 'Classic Phishing Emails' : year === 2025 ? 'AI-Powered Social Engineering' : 'Quantum Cryptography Attacks',
+          name: year === 2015 ? 'Operation BlackEnergy' : year === 2025 ? 'Casino Royale Ransomware' : 'The Deepfake Heist',
           year,
-          description: year === 2015 
-            ? 'Traditional email-based phishing attacks targeting unsuspecting users with fake bank notifications and lottery scams.'
-            : year === 2025 
-            ? 'Advanced AI-generated personalized attacks using deep learning to create convincing fake personas and messages.'
-            : 'Future threats leveraging quantum computing to break traditional encryption and create new attack vectors.',
-          red_flags: year === 2015 
-            ? ['Poor grammar and spelling', 'Generic greetings', 'Urgent action required', 'Suspicious sender addresses']
-            : year === 2025 
-            ? ['Perfect grammar and personalization', 'AI-generated images', 'Realistic voice cloning', 'Behavioral pattern analysis']
-            : ['Quantum signature verification failures', 'Unusual encryption patterns', 'Temporal attack signatures', 'Quantum entanglement anomalies'],
+          description: year === 2015
+            ? 'The 2015 Ukraine power grid hack, where cyberattackers used BlackEnergy malware to remotely switch off power for 230,000 people.'
+            : year === 2025
+              ? 'A massive social engineering attack on a major casino resort, paralyzing operations for 10 days and costing over $100 million.'
+              : 'A futuristic scenario where AI-driven deepfakes and quantum decryption are used to bypass biometric security and steal corporate funds.',
+          red_flags: year === 2015
+            ? ['Unexpected cursor movement', 'Files disappearing (KillDisk)', 'Phone lines jammed', 'Unusual VPN connections']
+            : year === 2025
+              ? ['Urgent help desk calls', 'MFA bypass requests', 'Unusual Okta activity', 'Privilege escalation']
+              : ['Perfect video/audio sync', 'Biometric scanner glitches', 'Quantum decryption alerts', 'Signature verification failures'],
           impact: {
-            summary: year === 2015 
-              ? 'Financial losses, identity theft, and compromised personal information through traditional social engineering.'
-              : year === 2025 
-              ? 'Massive data breaches, advanced persistent threats, and AI-assisted identity theft.'
-              : 'Complete cryptographic system compromise, quantum-level data breaches, and fundamental security paradigm shifts.'
+            summary: year === 2015
+              ? 'First known successful cyberattack on a power grid. 230,000 people lost power for 1-6 hours.'
+              : year === 2025
+                ? '$100M+ financial loss, 10 days of operational downtime, and theft of customer data.'
+                : 'Potential bankruptcy due to massive fund theft and loss of trust in biometric security.'
           },
           timeline: year === 2015 ? [
-            { date: 'Day 1', event: 'Phishing email sent', description: 'Scammer sends fake bank notification to thousands of users' },
-            { date: 'Day 2', event: 'Users click links', description: 'Victims click malicious links in the phishing emails' },
-            { date: 'Day 3', event: 'Credentials stolen', description: 'Fake login pages capture user credentials' },
-            { date: 'Day 4', event: 'Account compromise', description: 'Scammers access victim accounts and steal funds' }
+            { date: 'March 2015', event: 'Initial Compromise', description: 'Attackers gain access via spear-phishing emails.' },
+            { date: 'Dec 23, 3:35 PM', event: 'Remote Access', description: 'Attackers remotely control SCADA systems.' },
+            { date: 'Dec 23, 3:45 PM', event: 'Breakers Opened', description: 'Power is cut to 30 substations.' },
+            { date: 'Dec 23, 4:00 PM', event: 'KillDisk Deployed', description: 'Wiper malware destroys system data.' }
           ] : year === 2025 ? [
-            { date: 'Week 1', event: 'AI reconnaissance', description: 'AI analyzes target social media and public information' },
-            { date: 'Week 2', event: 'Persona creation', description: 'AI generates realistic fake personas and backstories' },
-            { date: 'Week 3', event: 'Relationship building', description: 'AI establishes trust with targets through social engineering' },
-            { date: 'Week 4', event: 'Advanced attack', description: 'AI executes sophisticated multi-vector attack campaign' }
+            { date: 'Day 1', event: 'Vishing Attack', description: 'Attacker impersonates employee to IT help desk.' },
+            { date: 'Day 1', event: 'Initial Access', description: 'MFA reset grants attacker entry.' },
+            { date: 'Day 2', event: 'Lateral Movement', description: 'Attackers escalate to Domain Admin.' },
+            { date: 'Day 5', event: 'Ransomware', description: 'Systems encrypted; ransom demand issued.' }
           ] : [
-            { date: 'Month 1', event: 'Quantum surveillance', description: 'Quantum computers monitor encrypted communications' },
-            { date: 'Month 2', event: 'Pattern analysis', description: 'Quantum algorithms identify encryption weaknesses' },
-            { date: 'Month 3', event: 'Key extraction', description: 'Quantum attacks extract private keys from quantum systems' },
-            { date: 'Month 4', event: 'System compromise', description: 'Complete cryptographic infrastructure compromised' }
+            { date: '2035', event: 'Reconnaissance', description: 'AI analyzes public CEO footage.' },
+            { date: '2035', event: 'Deepfake Generation', description: 'Real-time video/audio clone created.' },
+            { date: '2035', event: 'Biometric Bypass', description: 'MasterPrint AI spoofs retina scanner.' },
+            { date: '2035', event: 'Fund Transfer', description: 'Quantum decryption authorizes transaction.' }
           ],
           prevention: {
-            technical: year === 2015 
-              ? ['Email filtering systems', 'Two-factor authentication', 'SSL certificates', 'Anti-virus software']
-              : year === 2025 
-              ? ['AI detection systems', 'Behavioral analytics', 'Quantum-resistant encryption', 'Deepfake detection']
-              : ['Post-quantum cryptography', 'Quantum key distribution', 'Quantum authentication', 'Quantum intrusion detection'],
-            awareness: year === 2015 
-              ? ['Email security training', 'Phishing awareness programs', 'Suspicious link education', 'Password security']
-              : year === 2025 
-              ? ['AI literacy training', 'Deepfake recognition', 'Advanced social engineering awareness', 'Digital identity protection']
-              : ['Quantum security education', 'Post-quantum awareness', 'Quantum threat modeling', 'Future security paradigms'],
-            policy: year === 2015 
-              ? ['Email security policies', 'Incident response procedures', 'User training requirements', 'Security audits']
-              : year === 2025 
-              ? ['AI governance frameworks', 'Deepfake regulations', 'Advanced threat response', 'Quantum security standards']
-              : ['Quantum security frameworks', 'Post-quantum migration plans', 'Quantum threat intelligence', 'Future security regulations']
+            technical: year === 2015
+              ? ['Two-Factor Authentication (2FA)', 'Network Segmentation', 'Endpoint Detection & Response (EDR)', 'Offline Backups']
+              : year === 2025
+                ? ['FIDO2 Hardware Keys', 'Visual Verification Policy', 'Just-In-Time Access', 'Identity Threat Detection']
+                : ['Content Provenance (C2PA)', 'Liveness Detection', 'Quantum-Resistant Crypto', 'Multi-Person Authorization'],
+            awareness: year === 2015
+              ? ['Phishing Simulation', 'Incident Response Drills', 'Operational Technology (OT) Training', 'Reporting Procedures']
+              : year === 2025
+                ? ['Social Engineering Defense', 'Help Desk Verification Protocols', 'Insider Threat Awareness', 'Data Handling']
+                : ['Deepfake Recognition', 'Zero Trust Mindset', 'Biometric Security Limits', 'Quantum Threat Awareness'],
+            policy: year === 2015
+              ? ['Manual Override Procedures', 'Vendor Risk Management', 'Critical Infrastructure Standards', 'Disaster Recovery Plan']
+              : year === 2025
+                ? ['Identity Verification Standards', 'Ransomware Payment Policy', 'Privileged Access Management', 'Audit Logging']
+                : ['AI Governance Framework', 'Post-Quantum Migration', 'Biometric Data Privacy', 'Digital Signature Mandates']
           },
           case_study: {
-            victim: year === 2015 ? 'Small business owner' : year === 2025 ? 'Tech executive' : 'Government agency',
-            loss: year === 2015 ? '$50,000 in fraudulent transactions' : year === 2025 ? '$2M in intellectual property theft' : 'Complete system compromise',
-            method: year === 2015 ? 'Fake bank notification email' : year === 2025 ? 'AI-generated video call impersonation' : 'Quantum algorithm exploitation'
+            victim: year === 2015 ? 'Kyivoblenergo (Ukraine)' : year === 2025 ? 'MGM Resorts International' : 'Global Tech Corp (Fictional)',
+            loss: year === 2015 ? 'Power outage for 230k people' : year === 2025 ? '$100 Million USD' : '$250 Million USD (Projected)',
+            method: year === 2015 ? 'Spear-phishing + BlackEnergy' : year === 2025 ? 'Vishing + ALPHV/BlackCat' : 'Deepfake + Quantum Decryption'
           }
         },
         {
           id: 2,
-          name: year === 2015 ? 'Nigerian Prince Scams' : year === 2025 ? 'Deepfake Video Calls' : 'Quantum Entanglement Hacking',
+          name: year === 2015 ? 'The OPM Data Breach' : year === 2025 ? 'Supply Chain Injection' : 'Neural Link Hijacking',
           year,
-          description: year === 2015 
-            ? 'Classic advance fee fraud promising large sums of money in exchange for small upfront payments.'
-            : year === 2025 
-            ? 'Realistic video calls using deepfake technology to impersonate trusted contacts and request money transfers.'
-            : 'Quantum entanglement manipulation to create undetectable communication channels for espionage.',
-          red_flags: year === 2015 
-            ? ['Promises of large money', 'Requests for upfront fees', 'Urgent secrecy', 'Poor English']
-            : year === 2025 
-            ? ['Slightly delayed responses', 'Unusual background details', 'Perfect video quality', 'Behavioral inconsistencies']
-            : ['Quantum signature mismatches', 'Entanglement pattern anomalies', 'Temporal inconsistencies', 'Quantum decoherence'],
+          description: year === 2015
+            ? 'The theft of 21.5 million personnel records from the US Office of Personnel Management.'
+            : year === 2025
+              ? 'Attackers compromise a widely used software library, infecting thousands of downstream companies.'
+              : 'Hackers intercept brain-computer interface (BCI) signals to manipulate user thoughts and actions.',
+          red_flags: year === 2015
+            ? ['Unusual outbound traffic', 'Unknown admin accounts', 'Database export logs', 'Credential dumping']
+            : year === 2025
+              ? ['Unexpected code changes', 'Unverified binary updates', 'Abnormal build times', 'Signature mismatches']
+              : ['Involuntary motor movements', 'Memory gaps', 'Unexplained emotions', 'Interface lag'],
           impact: {
-            summary: year === 2015 
-              ? 'Financial losses from advance fee payments and compromised bank accounts.'
-              : year === 2025 
-              ? 'Massive financial fraud, corporate espionage, and trust erosion in digital communications.'
-              : 'Undetectable data exfiltration, quantum-level surveillance, and fundamental communication security breakdown.'
+            summary: year === 2015
+              ? 'Compromise of sensitive background check data for millions of government employees.'
+              : year === 2025
+                ? 'Global operational disruption across multiple industries relying on the compromised software.'
+                : 'Loss of bodily autonomy and privacy of thought.'
           }
         }
       ];
-      
+
       setScenarios(mockScenarios);
       setCurrentView('scenarios');
     } catch (err: any) {
@@ -181,16 +181,16 @@ export default function TimeMachinePage() {
   switch (currentView) {
     case 'interface':
       return <TimeMachineInterface onEraSelect={fetchScenarios} selectedEra={selectedEra} />;
-    
+
     case 'scenarios':
       return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                {selectedEra === 2015 ? t('timeMachine.classicScams') : 
-                 selectedEra === 2025 ? t('timeMachine.modernThreats') : 
-                 t('timeMachine.futureFrauds')}
+                {selectedEra === 2015 ? t('timeMachine.classicScams') :
+                  selectedEra === 2025 ? t('timeMachine.modernThreats') :
+                    t('timeMachine.futureFrauds')}
               </h1>
               <p className="text-lg text-gray-600 dark:text-gray-400">
                 {t('timeMachine.selectScenario')}
@@ -226,9 +226,9 @@ export default function TimeMachinePage() {
                         </h3>
                       </div>
                       <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full">
-                        {selectedEra === 2015 ? t('timeMachine.classic') : 
-                         selectedEra === 2025 ? t('timeMachine.modern') : 
-                         t('timeMachine.future')}
+                        {selectedEra === 2015 ? t('timeMachine.classic') :
+                          selectedEra === 2025 ? t('timeMachine.modern') :
+                            t('timeMachine.future')}
                       </div>
                     </div>
                     <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">

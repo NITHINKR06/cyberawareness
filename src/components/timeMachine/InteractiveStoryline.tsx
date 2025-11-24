@@ -32,95 +32,97 @@ export default function InteractiveStoryline({ scenario, onBack, onComplete }: I
   const [showResult, setShowResult] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Mock storyline data - in real app, this would come from the backend
+  // Dynamic storyline data based on scenario year
+  const year = scenario.year || 2015; // Default to 2015 if not specified
+  
   const storylineSteps: StoryStep[] = [
     {
       id: 1,
-      title: t('timeMachine.storyline.step1.title'),
-      description: t('timeMachine.storyline.step1.description'),
-      situation: t('timeMachine.storyline.step1.situation'),
-      question: t('timeMachine.storyline.step1.question'),
+      title: t(`timeMachine.storyline.${year}.step1.title`),
+      description: t(`timeMachine.storyline.${year}.step1.description`),
+      situation: t(`timeMachine.storyline.${year}.step1.situation`),
+      question: t(`timeMachine.storyline.${year}.step1.question`),
       options: [
         {
           id: 'a',
-          text: t('timeMachine.storyline.step1.optionA'),
-          isCorrect: true,
-          explanation: t('timeMachine.storyline.step1.explanationA'),
-          consequence: t('timeMachine.storyline.step1.consequenceA')
+          text: t(`timeMachine.storyline.${year}.step1.optionA`),
+          isCorrect: year === 2015 ? false : year === 2025 ? false : false, // 2015: B is correct, 2025: C is correct, 2035: C is correct
+          explanation: t(`timeMachine.storyline.${year}.step1.explanationA`),
+          consequence: t(`timeMachine.storyline.${year}.step1.consequenceA`)
         },
         {
           id: 'b',
-          text: t('timeMachine.storyline.step1.optionB'),
-          isCorrect: false,
-          explanation: t('timeMachine.storyline.step1.explanationB'),
-          consequence: t('timeMachine.storyline.step1.consequenceB')
+          text: t(`timeMachine.storyline.${year}.step1.optionB`),
+          isCorrect: year === 2015 ? true : year === 2025 ? false : false,
+          explanation: t(`timeMachine.storyline.${year}.step1.explanationB`),
+          consequence: t(`timeMachine.storyline.${year}.step1.consequenceB`)
         },
         {
           id: 'c',
-          text: t('timeMachine.storyline.step1.optionC'),
-          isCorrect: false,
-          explanation: t('timeMachine.storyline.step1.explanationC'),
-          consequence: t('timeMachine.storyline.step1.consequenceC')
+          text: t(`timeMachine.storyline.${year}.step1.optionC`),
+          isCorrect: year === 2015 ? false : year === 2025 ? true : true,
+          explanation: t(`timeMachine.storyline.${year}.step1.explanationC`),
+          consequence: t(`timeMachine.storyline.${year}.step1.consequenceC`)
         }
       ]
     },
     {
       id: 2,
-      title: t('timeMachine.storyline.step2.title'),
-      description: t('timeMachine.storyline.step2.description'),
-      situation: t('timeMachine.storyline.step2.situation'),
-      question: t('timeMachine.storyline.step2.question'),
+      title: t(`timeMachine.storyline.${year}.step2.title`),
+      description: t(`timeMachine.storyline.${year}.step2.description`),
+      situation: t(`timeMachine.storyline.${year}.step2.situation`),
+      question: t(`timeMachine.storyline.${year}.step2.question`),
       options: [
         {
           id: 'a',
-          text: t('timeMachine.storyline.step2.optionA'),
-          isCorrect: false,
-          explanation: t('timeMachine.storyline.step2.explanationA'),
-          consequence: t('timeMachine.storyline.step2.consequenceA')
+          text: t(`timeMachine.storyline.${year}.step2.optionA`),
+          isCorrect: year === 2015 ? false : year === 2025 ? false : true, // 2015: B is correct, 2025: B is correct, 2035: A is correct
+          explanation: t(`timeMachine.storyline.${year}.step2.explanationA`),
+          consequence: t(`timeMachine.storyline.${year}.step2.consequenceA`)
         },
         {
           id: 'b',
-          text: t('timeMachine.storyline.step2.optionB'),
-          isCorrect: true,
-          explanation: t('timeMachine.storyline.step2.explanationB'),
-          consequence: t('timeMachine.storyline.step2.consequenceB')
+          text: t(`timeMachine.storyline.${year}.step2.optionB`),
+          isCorrect: year === 2015 ? true : year === 2025 ? true : false,
+          explanation: t(`timeMachine.storyline.${year}.step2.explanationB`),
+          consequence: t(`timeMachine.storyline.${year}.step2.consequenceB`)
         },
         {
           id: 'c',
-          text: t('timeMachine.storyline.step2.optionC'),
-          isCorrect: false,
-          explanation: t('timeMachine.storyline.step2.explanationC'),
-          consequence: t('timeMachine.storyline.step2.consequenceC')
+          text: t(`timeMachine.storyline.${year}.step2.optionC`),
+          isCorrect: year === 2015 ? false : year === 2025 ? false : false,
+          explanation: t(`timeMachine.storyline.${year}.step2.explanationC`),
+          consequence: t(`timeMachine.storyline.${year}.step2.consequenceC`)
         }
       ]
     },
     {
       id: 3,
-      title: t('timeMachine.storyline.step3.title'),
-      description: t('timeMachine.storyline.step3.description'),
-      situation: t('timeMachine.storyline.step3.situation'),
-      question: t('timeMachine.storyline.step3.question'),
+      title: t(`timeMachine.storyline.${year}.step3.title`),
+      description: t(`timeMachine.storyline.${year}.step3.description`),
+      situation: t(`timeMachine.storyline.${year}.step3.situation`),
+      question: t(`timeMachine.storyline.${year}.step3.question`),
       options: [
         {
           id: 'a',
-          text: t('timeMachine.storyline.step3.optionA'),
-          isCorrect: false,
-          explanation: t('timeMachine.storyline.step3.explanationA'),
-          consequence: t('timeMachine.storyline.step3.consequenceA')
+          text: t(`timeMachine.storyline.${year}.step3.optionA`),
+          isCorrect: false, // 2015: C is correct, 2025: B is correct, 2035: B is correct
+          explanation: t(`timeMachine.storyline.${year}.step3.explanationA`),
+          consequence: t(`timeMachine.storyline.${year}.step3.consequenceA`)
         },
         {
           id: 'b',
-          text: t('timeMachine.storyline.step3.optionB'),
-          isCorrect: false,
-          explanation: t('timeMachine.storyline.step3.explanationB'),
-          consequence: t('timeMachine.storyline.step3.consequenceB')
+          text: t(`timeMachine.storyline.${year}.step3.optionB`),
+          isCorrect: year === 2015 ? false : true,
+          explanation: t(`timeMachine.storyline.${year}.step3.explanationB`),
+          consequence: t(`timeMachine.storyline.${year}.step3.consequenceB`)
         },
         {
           id: 'c',
-          text: t('timeMachine.storyline.step3.optionC'),
-          isCorrect: true,
-          explanation: t('timeMachine.storyline.step3.explanationC'),
-          consequence: t('timeMachine.storyline.step3.consequenceC')
+          text: t(`timeMachine.storyline.${year}.step3.optionC`),
+          isCorrect: year === 2015 ? true : false,
+          explanation: t(`timeMachine.storyline.${year}.step3.explanationC`),
+          consequence: t(`timeMachine.storyline.${year}.step3.consequenceC`)
         }
       ]
     }
