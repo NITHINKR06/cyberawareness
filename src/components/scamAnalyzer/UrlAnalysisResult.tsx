@@ -1,498 +1,353 @@
-import {
-  Shield,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Globe,
-  TrendingUp,
-  AlertCircle,
-  Image as ImageIcon,
-  Lock,
-  Unlock,
-  Network,
-  Cookie,
-  FileWarning,
-  ExternalLink,
-  Code,
-  Layout
-} from 'lucide-react';
+import { ReactNode } from 'react';
 import { AnalysisResult } from './types';
 
 interface UrlAnalysisResultProps {
   result: AnalysisResult;
 }
 
+interface InfoRowProps {
+  label: string;
+  value?: ReactNode;
+  mono?: boolean;
+}
+
+const InfoRow = ({ label, value, mono = false }: InfoRowProps) => (
+  <div className="space-y-1">
+    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</p>
+    <p className={`text-sm text-gray-900 dark:text-gray-100 ${mono ? 'font-mono' : ''}`}>
+      {value ?? <span className="text-gray-500 dark:text-gray-400">Not available</span>}
+    </p>
+  </div>
+);
+
+const StatCard = ({ label, value }: { label: string; value: ReactNode }) => (
+  <div className="rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4">
+    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</p>
+    <p className="mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">{value}</p>
+  </div>
+);
+
 export default function UrlAnalysisResult({ result }: UrlAnalysisResultProps) {
+  const threatStyles = {
+    safe: {
+      container: 'border-l-4 border-green-500 bg-white dark:bg-gray-900/40',
+      badge: 'text-green-700 dark:text-green-200'
+    },
+    suspicious: {
+      container: 'border-l-4 border-yellow-500 bg-white dark:bg-gray-900/40',
+      badge: 'text-yellow-700 dark:text-yellow-200'
+    },
+    dangerous: {
+      container: 'border-l-4 border-red-500 bg-white dark:bg-gray-900/40',
+      badge: 'text-red-700 dark:text-red-200'
+    }
+  } as const;
+
+  const threatCopy = {
+    safe: 'No immediate threats were detected. Continue to monitor the domain for changes.',
+    suspicious: 'We noticed unusual signals. Review the breakdown below before trusting the site.',
+    dangerous: 'Multiple indicators point to a high-risk destination. Avoid interacting with this URL.'
+  } as const;
+
+  const level = (result.threatLevel as keyof typeof threatStyles) || 'dangerous';
+  const selectedStyles = threatStyles[level] || threatStyles.dangerous;
+  const selectedCopy = threatCopy[level] || threatCopy.dangerous;
+
+  const networkTypes = result.network?.types
+    ? Object.entries(result.network.types)
+        .sort((a, b) => Number(b[1]) - Number(a[1]))
+        .slice(0, 5)
+    : [];
+
+  const vulnerabilities = result.security?.vulnerabilities ?? [];
+  const indicators = result.indicators ?? [];
+  const cookieDetails = result.page?.cookieDetails ?? [];
+  const consoleLogs = result.page?.consoleLogDetails ?? [];
+  const externalLinks = result.page?.externalLinks ?? [];
+  const technologies = result.technologies ?? [];
+  const portData = result.security?.ports;
+
   return (
     <div className="space-y-6">
-      {/* Header Section - Simplified */}
-      <div className={`border-l-4 p-6 rounded-lg ${
-        result.threatLevel === 'safe' ? 'bg-green-50 dark:bg-green-900/20 border-green-500' :
-        result.threatLevel === 'suspicious' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500' :
-        'bg-red-50 dark:bg-red-900/20 border-red-500'
-      }`}>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className={`px-3 py-1 rounded text-sm font-semibold ${
-                result.threatLevel === 'safe' ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200' :
-                result.threatLevel === 'suspicious' ? 'bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200' :
-                'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200'
-              }`}>
-                {result.verdict}
-              </span>
-              <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                <Globe className="w-4 h-4" /> {result.domain?.ip || 'IP Hidden'}
-              </span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 break-all">
+      <section className={`rounded-md border border-gray-200 dark:border-gray-700 p-5 ${selectedStyles.container}`}>
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className={`text-sm font-semibold uppercase tracking-wide ${selectedStyles.badge}`}>
+              {result.verdict}
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-gray-900 dark:text-gray-100 break-all">
               {result.domain?.name || result.url}
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              <span className="font-medium">Scanned URL:</span> {result.finalUrl}
-            </p>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 break-all">{result.finalUrl}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-right">
-              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{result.security?.score || 0}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 uppercase">Security Score</div>
-            </div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="uppercase tracking-wide font-semibold">Security score</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{result.security?.score ?? '—'}</p>
           </div>
         </div>
-      </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <InfoRow label="IP address" value={result.domain?.ip || 'Hidden'} mono />
+          <InfoRow label="Registrar" value={result.domain?.registrar || 'Unknown'} />
+          <InfoRow label="Server country" value={result.domain?.country || 'Unknown'} />
+          <InfoRow label="Last scan" value={result.scannedAt ? new Date(result.scannedAt).toLocaleString() : 'Unknown'} />
+        </div>
+        <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">{selectedCopy}</p>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column - Visuals & Quick Stats (4 cols) */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Screenshot Card - Simplified */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="bg-gray-50 dark:bg-gray-900 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-              <p className="text-xs text-gray-600 dark:text-gray-400 font-mono truncate">{result.finalUrl}</p>
-            </div>
-            <div className="relative aspect-[4/3] bg-gray-50 dark:bg-gray-900">
-              {result.screenshot ? (
-                <img src={result.screenshot} alt="Site Preview" className="w-full h-full object-cover object-top" />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                  <ImageIcon className="w-12 h-12 mb-2 opacity-30" />
-                  <span className="text-sm">Preview Unavailable</span>
-                </div>
-              )}
-            </div>
-            <div className="p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Cookies</p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{result.page?.cookies || 0}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Console Logs</p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{result.page?.consoleLogs || 0}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Requests</p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{result.network?.requests || 0}</p>
-                </div>
-              </div>
-            </div>
+      <section className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-5">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Key findings</h3>
+        <div className="mt-4 space-y-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+              Threat indicators
+            </p>
+            {indicators.length > 0 ? (
+              <ul className="space-y-1 text-sm text-gray-800 dark:text-gray-200">
+                {indicators.map((item, idx) => (
+                  <li key={idx} className="rounded border border-gray-200 dark:border-gray-700 px-3 py-2">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-600 dark:text-gray-400">No explicit indicators were recorded for this scan.</p>
+            )}
           </div>
 
-          {/* Technologies Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              Tech Stack
-            </h3>
-            <div className="space-y-2">
-              {result.technologies && result.technologies.length > 0 ? (
-                result.technologies.map((tech, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded border border-gray-200 dark:border-gray-600">
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{tech.name}</span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
-                      {tech.type}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+              Reported vulnerabilities
+            </p>
+            {vulnerabilities.length > 0 ? (
+              <div className="space-y-2">
+                {vulnerabilities.map((vuln, idx) => (
+                  <div key={idx} className="rounded border border-gray-200 dark:border-gray-700 p-3">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{vuln.title}</p>
+                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{vuln.description}</p>
+                    <span className="mt-2 inline-block rounded bg-gray-200 dark:bg-gray-700 px-2 py-0.5 text-xs font-semibold uppercase text-gray-700 dark:text-gray-200">
+                      {vuln.severity}
                     </span>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-400 text-sm">
-                  No technologies detected
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-600 dark:text-gray-400">No vulnerabilities were reported.</p>
+            )}
           </div>
         </div>
+      </section>
 
-        {/* Right Column - Deep Data (8 cols) */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* Domain & Security Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Domain Info */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                Domain Information
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 block mb-1">Registrar</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100" title={result.domain?.registrar || 'Unknown'}>
-                    {result.domain?.registrar || 'Unknown'}
-                  </span>
-                </div>
-                <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 block mb-1">IP Address</span>
-                  <span className="font-mono text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {result.domain?.ip || 'Unknown'}
-                  </span>
-                </div>
-                <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 block mb-1">Page Title</span>
-                  <p className="text-sm text-gray-900 dark:text-gray-100 line-clamp-2">
-                    {result.page?.title || 'No Title Detected'}
-                  </p>
-                </div>
-              </div>
-            </div>
+      <section className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-5 space-y-4">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Domain & hosting</h3>
+          <InfoRow label="Domain Age" value={result.domain?.age ? `${result.domain.age} days` : 'Unknown'} />
+          <InfoRow label="Registrar" value={result.domain?.registrar || 'Unknown'} />
+          <InfoRow label="Nameservers" value={result.domain?.nameServers?.join(', ') || 'Unknown'} />
+          <InfoRow label="Page Title" value={result.page?.title || 'No title detected'} />
+        </div>
 
-            {/* Security Info */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                Security Status
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 block mb-2">SSL Certificate</span>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {result.security?.ssl?.issuer || 'Unknown Issuer'}
-                      </span>
-                      {result.security?.ssl?.valid ? (
-                        <span className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs font-medium">
-                          <CheckCircle className="w-4 h-4" /> Valid
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded text-xs font-medium">
-                          <XCircle className="w-4 h-4" /> Invalid
-                        </span>
-                      )}
-                    </div>
-                    {result.security?.ssl?.daysRemaining !== undefined && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Expires in {result.security.ssl.daysRemaining} days
-                        {result.security.ssl.validTo && ` • Valid until ${new Date(result.security.ssl.validTo).toLocaleDateString()}`}
-                      </p>
-                    )}
-                    {result.security?.ssl?.protocol && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Protocol: {result.security.ssl.protocol} • Cipher: {result.security.ssl.cipher || 'Unknown'}
-                      </p>
-                    )}
+        <div className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-5 space-y-4">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Security & encryption</h3>
+          <InfoRow label="SSL Issuer" value={result.security?.ssl?.issuer || 'Unknown issuer'} />
+          <InfoRow label="Validity" value={result.security?.ssl?.valid ? 'Certificate looks valid' : 'Invalid or missing certificate'} />
+          {result.security?.ssl?.daysRemaining !== undefined && (
+            <InfoRow label="Days until expiry" value={result.security.ssl.daysRemaining} />
+          )}
+          {result.security?.headersAnalysis && (
+            <InfoRow
+              label="Security headers"
+              value={
+                <>
+                  Present: {result.security.headersAnalysis.present?.length ?? 0} • Missing: {result.security.headersAnalysis.missing?.length ?? 0} • Weak: {result.security.headersAnalysis.weak?.length ?? 0}
+                </>
+              }
+            />
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-5 space-y-6">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Network & page activity</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard label="Requests" value={result.network?.requests ?? 0} />
+          <StatCard
+            label="Transfer size (MB)"
+            value={result.network?.bytes ? (result.network.bytes / 1024 / 1024).toFixed(2) : '0.00'}
+          />
+          <StatCard label="Cookies set" value={result.page?.cookies ?? 0} />
+          <StatCard label="Console logs" value={result.page?.consoleLogs ?? 0} />
+        </div>
+
+        {networkTypes.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+              Top resource types
+            </p>
+            <div className="space-y-2">
+              {networkTypes.map(([type, count]) => (
+                <div key={type} className="flex items-center gap-3 text-sm">
+                  <span className="w-24 text-gray-600 dark:text-gray-400">{type}</span>
+                  <div className="h-1.5 flex-1 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500"
+                      style={{
+                        width: `${Math.min(100, (Number(count) / (result.network?.requests || 1)) * 100)}%`
+                      }}
+                    />
                   </div>
+                  <span className="w-10 text-right text-gray-900 dark:text-gray-100">{count}</span>
                 </div>
-                <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Security Headers</span>
-                  <div className="space-y-2">
-                    {result.security?.headersAnalysis?.present && result.security.headersAnalysis.present.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {result.security.headersAnalysis.present.map((header, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-xs rounded border border-green-200 dark:border-green-800" title={header.value}>
-                            <CheckCircle className="w-3 h-3 inline mr-1" /> {header.name}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    {result.security?.headersAnalysis?.missing && result.security.headersAnalysis.missing.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {result.security.headersAnalysis.missing.map((header, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-xs rounded border border-red-200 dark:border-red-800">
-                            <XCircle className="w-3 h-3 inline mr-1" /> {header}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {result.security?.headersAnalysis?.weak && result.security.headersAnalysis.weak.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {result.security.headersAnalysis.weak.map((header, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 text-xs rounded border border-yellow-200 dark:border-yellow-800" title={header.issue}>
-                            <AlertTriangle className="w-3 h-3 inline mr-1" /> {header.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {(!result.security?.headersAnalysis && (!result.security?.headers || Object.values(result.security.headers).every(v => !v))) && (
-                      <span className="text-sm text-gray-400 italic flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" /> No security headers found
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
+        )}
 
-          {/* Network Stats */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <Globe className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              Network Activity
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded border border-gray-200 dark:border-gray-600">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{result.network?.requests || 0}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Total Requests</p>
-              </div>
-              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded border border-gray-200 dark:border-gray-600">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {result.network?.bytes ? (result.network.bytes / 1024 / 1024).toFixed(2) : 0}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Size (MB)</p>
-              </div>
-              <div className="col-span-2 p-4 bg-gray-50 dark:bg-gray-700/50 rounded border border-gray-200 dark:border-gray-600">
-                <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 font-medium">Resource Breakdown</p>
-                <div className="space-y-2">
-                  {result.network?.types && Object.entries(result.network.types).slice(0, 4).map(([type, count]) => (
-                    <div key={type} className="flex items-center gap-2">
-                      <span className="w-16 text-xs text-gray-600 dark:text-gray-400 truncate">{type}</span>
-                      <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-500 rounded-full"
-                          style={{ width: `${Math.min(100, (count / (result.network?.requests || 1)) * 100)}%` }}
-                        ></div>
-                      </div>
-                      <span className="w-8 text-right text-xs font-medium text-gray-900 dark:text-gray-100">{count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <StatCard label="Forms detected" value={result.page?.forms ?? 0} />
+          <StatCard label="Iframes detected" value={result.page?.iframes ?? 0} />
+          <StatCard label="Scripts" value={result.page?.scripts?.length ?? 0} />
+          <StatCard label="External links" value={result.page?.externalLinks?.length ?? 0} />
+        </div>
+      </section>
+
+      <section className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-5">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Cookie security</h3>
+          {result.security?.cookies ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <StatCard label="Total cookies" value={result.security.cookies.total} />
+              <StatCard label="Secure flag" value={result.security.cookies.secure} />
+              <StatCard label="HttpOnly flag" value={result.security.cookies.httpOnly} />
+              <StatCard label="SameSite" value={result.security.cookies.sameSite} />
             </div>
-          </div>
+          ) : (
+            <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">No cookie data recorded.</p>
+          )}
+          {cookieDetails.length > 0 && (
+            <div className="mt-4 space-y-2 max-h-48 overflow-y-auto">
+              {cookieDetails.map((cookie, idx) => (
+                <div key={idx} className="rounded border border-gray-200 dark:border-gray-700 p-3 text-xs">
+                  <p className="font-mono text-sm text-gray-900 dark:text-gray-100">{cookie.name}</p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-gray-600 dark:text-gray-400">
+                    {cookie.secure && <span>Secure</span>}
+                    {cookie.httpOnly && <span>HttpOnly</span>}
+                    {cookie.sameSite && <span>SameSite: {cookie.sameSite}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-          {/* Vulnerabilities Section */}
-          {result.security?.vulnerabilities && result.security.vulnerabilities.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-red-900 dark:text-red-200 mb-4 flex items-center gap-2">
-                <FileWarning className="w-5 h-5" /> Security Vulnerabilities
-              </h3>
-              <div className="space-y-3">
-                {result.security.vulnerabilities.map((vuln, index) => (
-                  <div key={index} className={`p-4 rounded-lg border ${
-                    vuln.severity === 'high' ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700' :
-                    vuln.severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700' :
-                    'bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700'
-                  }`}>
-                    <div className="flex items-start gap-2">
-                      <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-                        vuln.severity === 'high' ? 'bg-red-500' :
-                        vuln.severity === 'medium' ? 'bg-yellow-500' :
-                        'bg-orange-500'
-                      }`}></div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-1">{vuln.title}</h4>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">{vuln.description}</p>
-                        <span className={`inline-block mt-2 px-2 py-0.5 rounded text-xs font-medium ${
-                          vuln.severity === 'high' ? 'bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200' :
-                          vuln.severity === 'medium' ? 'bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200' :
-                          'bg-orange-200 dark:bg-orange-800 text-orange-800 dark:text-orange-200'
-                        }`}>
-                          {vuln.severity.toUpperCase()}
-                        </span>
-                      </div>
-                    </div>
+        <div className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-5">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Mixed content & ports</h3>
+          {result.security?.mixedContent && result.security.mixedContent.count > 0 ? (
+            <div className="mt-4 space-y-2">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {result.security.mixedContent.count} HTTP resource(s) loaded on an HTTPS page.
+              </p>
+              <div className="max-h-32 overflow-y-auto text-xs space-y-1">
+                {result.security.mixedContent.resources.map((resource, idx) => (
+                  <div key={idx} className="rounded border border-gray-200 dark:border-gray-700 px-2 py-1 font-mono break-all">
+                    {resource}
                   </div>
                 ))}
               </div>
             </div>
+          ) : (
+            <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">No mixed content detected.</p>
           )}
 
-          {/* Port Scanning Results */}
-          {result.security?.ports && (result.security.ports.open.length > 0 || result.security.ports.weak.length > 0) && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                <Network className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                Port Scan Results
-              </h3>
-              <div className="space-y-4">
-                {result.security.ports.weak.length > 0 && (
-                  <div>
-                    <span className="text-sm font-medium text-red-600 dark:text-red-400 block mb-2 flex items-center gap-1">
-                      <Unlock className="w-4 h-4" /> Weak Ports ({result.security.ports.weak.length})
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {result.security.ports.weak.map((port, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded text-sm border border-red-200 dark:border-red-800">
-                          {port.name} ({port.port})
-                        </span>
-                      ))}
-                    </div>
+          {portData && (portData.secure.length > 0 || portData.weak.length > 0) && (
+            <div className="mt-4 space-y-3 text-sm">
+              {portData.weak.length > 0 && (
+                <div>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">Weak ports</p>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {portData.weak.map((port, idx) => (
+                      <span key={idx} className="rounded border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-3 py-1">
+                        {port.name} ({port.port})
+                      </span>
+                    ))}
                   </div>
-                )}
-                {result.security.ports.secure.length > 0 && (
-                  <div>
-                    <span className="text-sm font-medium text-green-600 dark:text-green-400 block mb-2 flex items-center gap-1">
-                      <Lock className="w-4 h-4" /> Secure Ports ({result.security.ports.secure.length})
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {result.security.ports.secure.map((port, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded text-sm border border-green-200 dark:border-green-800">
-                          {port.name} ({port.port})
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Cookie Security */}
-          {result.security?.cookies && result.security.cookies.total > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                <Cookie className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                Cookie Security
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Cookies</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{result.security.cookies.total}</p>
                 </div>
-                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Secure</p>
-                  <p className="text-xl font-bold text-green-700 dark:text-green-300">{result.security.cookies.secure}</p>
-                </div>
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">HttpOnly</p>
-                  <p className="text-xl font-bold text-blue-700 dark:text-blue-300">{result.security.cookies.httpOnly}</p>
-                </div>
-                <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">SameSite</p>
-                  <p className="text-xl font-bold text-purple-700 dark:text-purple-300">{result.security.cookies.sameSite}</p>
-                </div>
-              </div>
-              {result.page?.cookieDetails && result.page.cookieDetails.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cookie Details:</p>
-                  <div className="space-y-1 max-h-40 overflow-y-auto">
-                    {result.page.cookieDetails.map((cookie, idx) => (
-                      <div key={idx} className="text-xs p-2 bg-gray-50 dark:bg-gray-700/50 rounded border border-gray-200 dark:border-gray-600">
-                        <span className="font-mono font-medium">{cookie.name}</span>
-                        <div className="flex gap-2 mt-1">
-                          {cookie.secure && <span className="text-green-600 dark:text-green-400">Secure</span>}
-                          {cookie.httpOnly && <span className="text-blue-600 dark:text-blue-400">HttpOnly</span>}
-                          {cookie.sameSite && <span className="text-purple-600 dark:text-purple-400">SameSite: {cookie.sameSite}</span>}
-                        </div>
-                      </div>
+              )}
+              {portData.secure.length > 0 && (
+                <div>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">Secure ports</p>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {portData.secure.map((port, idx) => (
+                      <span key={idx} className="rounded border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-3 py-1">
+                        {port.name} ({port.port})
+                      </span>
                     ))}
                   </div>
                 </div>
               )}
             </div>
           )}
-
-          {/* Mixed Content */}
-          {result.security?.mixedContent && result.security.mixedContent.count > 0 && (
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-yellow-900 dark:text-yellow-200 mb-4 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5" /> Mixed Content Detected
-              </h3>
-              <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                Found {result.security.mixedContent.count} HTTP resource(s) loaded on HTTPS page
-              </p>
-              <div className="space-y-1 max-h-32 overflow-y-auto">
-                {result.security.mixedContent.resources.map((resource, idx) => (
-                  <div key={idx} className="text-xs p-2 bg-white dark:bg-gray-800 rounded border border-yellow-200 dark:border-yellow-800 font-mono break-all">
-                    {resource}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Enhanced Page Information */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <Layout className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              Page Analysis
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Forms</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{result.page?.forms || 0}</p>
-              </div>
-              <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">iFrames</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{result.page?.iframes || 0}</p>
-              </div>
-              <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Scripts</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{result.page?.scripts?.length || 0}</p>
-              </div>
-              <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">External Links</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{result.page?.externalLinks?.length || 0}</p>
-              </div>
-            </div>
-            {result.page?.externalLinks && result.page.externalLinks.length > 0 && (
-              <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <ExternalLink className="w-4 h-4" /> External Links:
-                </p>
-                <div className="space-y-1 max-h-32 overflow-y-auto">
-                  {result.page.externalLinks.slice(0, 10).map((link, idx) => (
-                    <div key={idx} className="text-xs p-2 bg-gray-50 dark:bg-gray-700/50 rounded border border-gray-200 dark:border-gray-600">
-                      <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline break-all">
-                        {link.url}
-                      </a>
-                      {link.text && <p className="text-gray-500 dark:text-gray-400 mt-1 truncate">{link.text}</p>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {result.page?.consoleLogDetails && result.page.consoleLogDetails.length > 0 && (
-              <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <Code className="w-4 h-4" /> Console Logs:
-                </p>
-                <div className="space-y-1 max-h-32 overflow-y-auto">
-                  {result.page.consoleLogDetails.map((log, idx) => (
-                    <div key={idx} className={`text-xs p-2 rounded border ${
-                      log.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
-                      log.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
-                      'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'
-                    }`}>
-                      <span className="font-medium">{log.type}:</span> {log.text}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Indicators Section */}
-          {result.indicators && result.indicators.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-red-900 dark:text-red-200 mb-4 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5" /> Threat Indicators
-              </h3>
-              <div className="space-y-2">
-                {result.indicators.map((indicator, index) => (
-                  <div key={index} className="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded border border-red-200 dark:border-red-800">
-                    <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"></div>
-                    <span className="text-sm text-gray-900 dark:text-gray-100">{indicator}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-      </div>
+      </section>
+
+      <section className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-5">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Technologies & content</h3>
+        {technologies.length > 0 ? (
+          <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+            {technologies.map((tech, idx) => (
+              <li key={idx} className="rounded border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
+                <span className="font-semibold">{tech.name}</span>
+                {tech.type && <span className="text-gray-500 dark:text-gray-400"> • {tech.type}</span>}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">No identifiable technologies were detected.</p>
+        )}
+
+        {externalLinks.length > 0 && (
+          <div className="mt-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+              Sample external links
+            </p>
+            <div className="space-y-2 max-h-40 overflow-y-auto text-xs">
+              {externalLinks.slice(0, 8).map((link, idx) => (
+                <div key={idx} className="rounded border border-gray-200 dark:border-gray-700 p-2">
+                  <p className="break-all text-blue-600 dark:text-blue-400">{link.url}</p>
+                  {link.text && <p className="mt-1 text-gray-600 dark:text-gray-400 truncate">{link.text}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {consoleLogs.length > 0 && (
+          <div className="mt-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+              Console log excerpts
+            </p>
+            <div className="max-h-40 overflow-y-auto space-y-2 text-xs">
+              {consoleLogs.map((log, idx) => (
+                <div
+                  key={idx}
+                  className="rounded border border-gray-200 dark:border-gray-700 p-2"
+                >
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">{log.type}:</span> {log.text}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {result.screenshot && (
+        <section className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40">
+          <div className="border-b border-gray-200 dark:border-gray-700 px-5 py-3">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Captured screenshot</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 break-all">{result.finalUrl}</p>
+          </div>
+          <img src={result.screenshot} alt="Scanned page preview" className="w-full rounded-b-lg object-cover" />
+        </section>
+      )}
     </div>
   );
 }
-
