@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, AlertTriangle, ShieldCheck, Clock, MapPin, Users, Brain, MessageSquare } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, ShieldCheck, Clock, Users, Brain, MessageSquare } from 'lucide-react';
 
 interface Scenario {
   id: number;

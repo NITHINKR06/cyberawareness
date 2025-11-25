@@ -65,7 +65,7 @@ const AnalyticsManager: React.FC = () => {
           totalAnalyses: data.stats.totalAnalyses
         },
         trends: {
-          userGrowth: data.stats.activeUsers > 0 ? ((data.stats.activeUsers / data.stats.totalUsers) * 100).toFixed(1) : 0,
+          userGrowth: data.stats.activeUsers > 0 ? Number(((data.stats.activeUsers / data.stats.totalUsers) * 100).toFixed(1)) : 0,
           postGrowth: data.stats.totalPosts > 0 ? 100 : 0,
           reportGrowth: data.stats.totalReports > 0 ? 100 : 0
         },

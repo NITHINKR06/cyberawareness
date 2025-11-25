@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/FirebaseAuthContext';
 import { 
   MessageSquare, 
   Plus, 
   Search, 
-  TrendingUp, 
-  Clock, 
   Eye,
   Heart,
   MessageCircle,
   X,
-  Send,
   ChevronLeft
 } from 'lucide-react';
 import { toast } from 'react-toastify';

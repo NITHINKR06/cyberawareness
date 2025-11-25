@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Shield, Loader2, MessageSquare } from 'lucide-react';
+import { Shield, Loader2 } from 'lucide-react';
 import { analyzeContent } from '../../services/backendApi';
 import { toast } from 'react-toastify';
 import { AnalysisResult } from './types';
 import { validateBasicInput } from './utils';
+import { useAuth } from '../../contexts/FirebaseAuthContext';
+import { updateDoc, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 interface TextAnalyzerProps {
   onAnalysisComplete: (result: AnalysisResult) => void;
@@ -13,6 +16,7 @@ interface TextAnalyzerProps {
 
 export default function TextAnalyzer({ onAnalysisComplete, onError }: TextAnalyzerProps) {
   const { t } = useTranslation();
+  const { user, refreshUser } = useAuth();
   const [textInput, setTextInput] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -31,7 +35,35 @@ export default function TextAnalyzer({ onAnalysisComplete, onError }: TextAnalyz
     try {
       const response = await analyzeContent('text', textInput);
       const analysisResult = response.analysisResult;
+      const pointsAwarded = response.pointsAwarded || 0;
       onAnalysisComplete(analysisResult);
+
+      // Update Firestore if points were awarded (for Firebase users)
+      if (pointsAwarded > 0 && user?.id) {
+        try {
+          const userRef = doc(db, 'users', user.id);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const currentPoints = userData.totalPoints || 0;
+            const newTotalPoints = currentPoints + pointsAwarded;
+            const newLevel = Math.floor(newTotalPoints / 500) + 1;
+
+            await updateDoc(userRef, {
+              totalPoints: newTotalPoints,
+              level: Math.max(newLevel, userData.level || 1),
+              lastActivity: new Date()
+            });
+
+            // Refresh user data in context
+            await refreshUser();
+            toast.success(t('scamAnalyzer.pointsAwarded', `+${pointsAwarded} points awarded for detecting dangerous content!`));
+          }
+        } catch (firestoreError) {
+          console.error('Error updating Firestore points:', firestoreError);
+        }
+      }
 
       // Show results based on Generative LLM AI analysis
       if (analysisResult.threatLevel === 'dangerous') {

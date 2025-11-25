@@ -73,6 +73,9 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  completedModules: [{
+    type: String
+  }],
   createdAt: {
     type: Date,
     default: Date.now

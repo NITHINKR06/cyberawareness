@@ -17,7 +17,6 @@ import {
   getDoc, 
   updateDoc,
   serverTimestamp,
-  Timestamp 
 } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import type { User } from '../types';
@@ -27,6 +26,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   updateUser: (updateData: { username?: string; email?: string; currentPassword?: string; newPassword?: string }) => Promise<void>;
+  refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
   isAdmin: boolean;
@@ -281,6 +281,13 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Refresh user data from Firestore
+  const refreshUser = async () => {
+    if (firebaseUser) {
+      await loadUserData(firebaseUser.uid);
+    }
+  };
+
   const isAdmin = user?.isAdmin || user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'moderator' || false;
 
   return (
@@ -289,6 +296,7 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       login, 
       register, 
       updateUser, 
+      refreshUser,
       logout, 
       isLoading, 
       isAdmin 

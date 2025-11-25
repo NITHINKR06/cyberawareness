@@ -1,8 +1,9 @@
 import { useAuth } from '../contexts/FirebaseAuthContext';
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
-import { Trophy, Target, Flame, Award, TrendingUp, Shield, Activity } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Trophy, Target, Flame, Award, TrendingUp, Shield, Activity, FileText, Search, Clock } from 'lucide-react';
 import { badges, achievements } from '../data/mockData';
+import { userService } from '../services/backendApi';
 import { 
   ThreatTrendsChart, 
   ThreatDistributionChart, 
@@ -15,6 +16,40 @@ import {
 export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const [activityHistory, setActivityHistory] = useState<any[]>([]);
+  const [activityStats, setActivityStats] = useState({
+    totalReports: 0,
+    totalAnalyses: 0,
+    totalActivities: 0
+  });
+  const [loadingActivities, setLoadingActivities] = useState(true);
+
+  // Load activity history
+  useEffect(() => {
+    const loadActivities = async () => {
+      if (!user) return;
+      try {
+        setLoadingActivities(true);
+        const history = await userService.getHistory();
+        setActivityHistory(history.history || []);
+        setActivityStats({
+          totalReports: history.reports || 0,
+          totalAnalyses: history.analyses || 0,
+          totalActivities: history.totalActivities || 0
+        });
+      } catch (error) {
+        console.error('Error loading activity history:', error);
+      } finally {
+        setLoadingActivities(false);
+      }
+    };
+
+    loadActivities();
+    // Refresh every 30 seconds
+    const interval = setInterval(loadActivities, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
   // Subtle entrance animations
   useEffect(() => {
     let isMounted = true;
@@ -233,6 +268,111 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card"><UserProgressChart /></div>
           <div className="card"><SkillRadarChart /></div>
+        </div>
+      </div>
+
+      {/* Activity History Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Activity className="w-6 h-6 text-indigo-400" />
+            <h2 className="text-2xl font-bold text-[rgb(var(--text-primary))]">
+              {t('dashboard.recentActivity', 'Recent Activity')}
+            </h2>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-[rgb(var(--text-secondary))]">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              <span>{activityStats.totalReports} {t('dashboard.reports', 'Reports')}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Search className="w-4 h-4" />
+              <span>{activityStats.totalAnalyses} {t('dashboard.analyses', 'Analyses')}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          {loadingActivities ? (
+            <div className="p-8 text-center text-[rgb(var(--text-secondary))]">
+              {t('dashboard.loadingActivities', 'Loading activities...')}
+            </div>
+          ) : activityHistory.length === 0 ? (
+            <div className="p-8 text-center text-[rgb(var(--text-secondary))]">
+              <Activity className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <p>{t('dashboard.noActivities', 'No activities yet. Start by analyzing scams or reporting suspicious content!')}</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {activityHistory.slice(0, 10).map((activity, index) => {
+                const date = new Date(activity.createdAt);
+                const isReport = activity.type === 'report';
+                const isAnalysis = activity.type === 'analysis';
+                const data = activity.data;
+
+                return (
+                  <div
+                    key={index}
+                    className="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-white/15 bg-white/60 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 transition-all"
+                  >
+                    <div className={`p-2 rounded-lg ${
+                      isReport ? 'bg-blue-100 dark:bg-blue-500/20' : 'bg-purple-100 dark:bg-purple-500/20'
+                    }`}>
+                      {isReport ? (
+                        <FileText className={`w-5 h-5 ${
+                          isReport ? 'text-blue-600 dark:text-blue-400' : 'text-purple-600 dark:text-purple-400'
+                        }`} />
+                      ) : (
+                        <Search className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-[rgb(var(--text-primary))]">
+                          {isReport 
+                            ? t('dashboard.scamReport', 'Scam Report')
+                            : t('dashboard.scamAnalysis', 'Scam Analysis')
+                          }
+                        </h3>
+                        {isAnalysis && data?.analysisResult?.threatLevel && (
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            data.analysisResult.threatLevel === 'dangerous'
+                              ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300'
+                              : data.analysisResult.threatLevel === 'suspicious'
+                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300'
+                              : 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300'
+                          }`}>
+                            {data.analysisResult.threatLevel}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-[rgb(var(--text-secondary))] truncate">
+                        {isReport 
+                          ? `${t('dashboard.scamType', 'Type')}: ${data?.scamType || 'N/A'} - ${data?.description?.substring(0, 60) || ''}...`
+                          : `${t('dashboard.analyzed', 'Analyzed')}: ${data?.inputContent?.substring(0, 60) || ''}...`
+                        }
+                      </p>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-[rgb(var(--text-secondary))]">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{date.toLocaleDateString()} {date.toLocaleTimeString()}</span>
+                        </div>
+                        {isReport && data?.status && (
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            data.status === 'verified'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300'
+                              : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
+                          }`}>
+                            {data.status}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

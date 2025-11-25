@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { timeMachineService } from '../services/backendApi';
 import TimeMachineInterface from './timeMachine/TimeMachineInterface';
 import ScenarioDetail from './timeMachine/ScenarioDetail';
 import InteractiveStoryline from './timeMachine/InteractiveStoryline';

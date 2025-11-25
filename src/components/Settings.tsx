@@ -76,13 +76,19 @@ export default function Settings() {
   }, [theme]);
 
   const handleSettingChange = (category: keyof SettingsData, key: string, value: any) => {
-    setSettings(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category],
-        [key]: value,
-      },
-    }));
+    setSettings(prev => {
+      const categoryValue = prev[category];
+      if (typeof categoryValue === 'object' && categoryValue !== null) {
+        return {
+          ...prev,
+          [category]: {
+            ...categoryValue,
+            [key]: value,
+          },
+        };
+      }
+      return prev;
+    });
   };
 
   const handleLanguageChange = (language: string) => {
@@ -255,7 +261,7 @@ export default function Settings() {
                   { code: 'en', name: 'English', nativeName: 'English' },
                   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी' },
                   { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
-                ].map(({ code, name, nativeName }) => (
+                ].map(({ code, nativeName }) => (
                   <button
                     key={code}
                     onClick={() => handleLanguageChange(code)}

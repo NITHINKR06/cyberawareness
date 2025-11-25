@@ -195,4 +195,91 @@ router.post('/points', authenticateToken, async (req, res) => {
   }
 });
 
+// Complete learning module
+router.post('/modules/complete', authenticateToken, async (req, res) => {
+  try {
+    const { moduleId, score, totalQuestions } = req.body;
+
+    if (!moduleId || score === undefined) {
+      return res.status(400).json({ error: 'Module ID and score are required' });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Calculate points based on performance (score out of total questions)
+    const performanceRatio = totalQuestions > 0 ? score / totalQuestions : 0;
+    const basePoints = 50; // Base points for completing a module
+    const bonusPoints = Math.floor(basePoints * performanceRatio);
+    const totalPointsEarned = basePoints + bonusPoints;
+
+    // Update user points
+    user.totalPoints += totalPointsEarned;
+    
+    // Update level based on points
+    const newLevel = Math.floor(user.totalPoints / 500) + 1;
+    if (newLevel > user.level) {
+      user.level = newLevel;
+    }
+
+    // Track completed modules (store in completedModules array)
+    if (!user.completedModules) {
+      user.completedModules = [];
+    }
+    if (!user.completedModules.includes(moduleId)) {
+      user.completedModules.push(moduleId);
+    }
+
+    await user.save();
+
+    res.json({
+      message: 'Module completed successfully',
+      totalPoints: user.totalPoints,
+      level: user.level,
+      pointsEarned: totalPointsEarned,
+      moduleId,
+      completedModules: user.completedModules
+    });
+  } catch (error) {
+    console.error('Error completing module:', error);
+    res.status(500).json({ error: 'Server error while completing module' });
+  }
+});
+
+// Get leaderboard
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 100;
+    
+    // Get top users by total points
+    const topUsers = await User.find({
+      isActive: true,
+      isBanned: false
+    })
+      .select('username totalPoints level currentStreak')
+      .sort({ totalPoints: -1, level: -1 })
+      .limit(limit);
+
+    // Add rank to each user
+    const leaderboard = topUsers.map((user, index) => ({
+      userId: user._id.toString(),
+      username: user.username,
+      totalPoints: user.totalPoints,
+      level: user.level,
+      currentStreak: user.currentStreak,
+      rank: index + 1
+    }));
+
+    res.json({
+      leaderboard,
+      totalUsers: await User.countDocuments({ isActive: true, isBanned: false })
+    });
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({ error: 'Server error while fetching leaderboard' });
+  }
+});
+
 export default router;

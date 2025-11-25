@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/FirebaseAuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import LanguageSwitcher from './LanguageSwitcher';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
@@ -17,15 +16,13 @@ import {
   LogIn,
   UserPlus,
   Bell,
-  Moon,
-  Sun,
   PartyPopper
 } from 'lucide-react';
 
 export default function PublicLayout() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

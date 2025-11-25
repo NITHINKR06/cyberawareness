@@ -23,7 +23,7 @@ import {
 import { AlertTriangle, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
-import api, { reportService } from '../services/backendApi';
+import { reportService } from '../services/backendApi';
 
 // Derived chart data built from real backend stats
 const buildThreatTrendsFromStats = (stats: any) => {

@@ -1,6 +1,8 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import AnalyzerHistory from '../models/AnalyzerHistory.js';
+import User from '../models/User.js';
 import { authenticateToken } from './auth.js';
 import { verifyFirebaseAuth } from '../middleware/firebaseAdminAuth.js';
 import { analyzerRateLimit } from '../middleware/security.js';
@@ -124,9 +126,30 @@ router.post('/analyze', analyzerRateLimit, async (req, res) => {
       analysisResult = await analyzer.analyze(inputType, inputContent);
     }
 
+    // Resolve userId to MongoDB ObjectId if it's a Firebase UID
+    let mongoUserId = null;
+    if (userId) {
+      // Check if userId is a valid MongoDB ObjectId
+      if (mongoose.Types.ObjectId.isValid(userId) && userId.length === 24) {
+        mongoUserId = userId;
+      } else {
+        // It's likely a Firebase UID - try to find the MongoDB user
+        try {
+          const user = await User.findOne({ firebaseUid: userId });
+          if (user) {
+            mongoUserId = user._id;
+          }
+          // If user not found, mongoUserId remains null (anonymous user)
+        } catch (userError) {
+          console.warn('Error finding user by Firebase UID:', userError.message);
+          // Continue with null userId (anonymous user)
+        }
+      }
+    }
+
     // Save to history
     const history = new AnalyzerHistory({
-      userId,
+      userId: mongoUserId, // Use MongoDB ObjectId or null
       sessionId: req.session.sessionId,
       inputType,
       inputContent,
@@ -153,17 +176,48 @@ router.post('/analyze', analyzerRateLimit, async (req, res) => {
     await history.save();
 
     // Award points if user is authenticated and content is dangerous
-    // Note: Points are managed in Firestore, not MongoDB for Firebase users
-    // This would need to be updated via Firestore Admin SDK or API endpoint
+    let pointsAwarded = 0;
     if (userId && analysisResult.threatLevel === 'dangerous') {
-      // Points awarded: 10 (handled via Firestore in frontend or separate API call)
-      // For now, we just indicate points in the response
+      try {
+        // Check if userId is a MongoDB ObjectId or Firebase UID
+        let user = null;
+        
+        // Try to find by MongoDB ObjectId first (24 character hex string)
+        if (mongoose.Types.ObjectId.isValid(userId) && userId.length === 24) {
+          user = await User.findById(userId);
+        } else {
+          // If not a valid ObjectId, it's likely a Firebase UID - search by firebaseUid field
+          user = await User.findOne({ firebaseUid: userId });
+        }
+        
+        if (user) {
+          pointsAwarded = 10;
+          user.totalPoints += pointsAwarded;
+          
+          // Update level based on points
+          const newLevel = Math.floor(user.totalPoints / 500) + 1;
+          if (newLevel > user.level) {
+            user.level = newLevel;
+          }
+          
+          await user.save();
+        } else {
+          // User not found in MongoDB - they might be Firebase-only
+          // Points will be updated via Firestore in the frontend
+          pointsAwarded = 10; // Still indicate points were earned
+        }
+      } catch (userError) {
+        console.error('User points update error:', userError);
+        // Continue even if points update fails (Firebase users will be updated via Firestore)
+        // Still indicate points were earned so frontend can update Firestore
+        pointsAwarded = 10;
+      }
     }
 
     res.json({
       analysisResult,
       historyId: history._id,
-      pointsAwarded: (userId && analysisResult.threatLevel === 'dangerous') ? 10 : 0,
+      pointsAwarded,
       sessionId: req.session.sessionId
     });
   } catch (error) {

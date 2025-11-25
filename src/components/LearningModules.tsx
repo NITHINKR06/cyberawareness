@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/FirebaseAuthContext';
 import { useTranslation } from 'react-i18next';
 import { learningModules, quizzes } from '../data/mockData';
 import { BookOpen, CheckCircle, Star, ArrowLeft, ArrowRight } from 'lucide-react';
+import { userService } from '../services/backendApi';
+import { updateDoc, doc, getDoc } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 export default function LearningModules() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { t } = useTranslation();
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -13,14 +16,27 @@ export default function LearningModules() {
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [score, setScore] = useState(0);
+  const [completedModuleIds, setCompletedModuleIds] = useState<Set<string>>(new Set());
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const completedModuleIds = new Set<string>();
-  if (user) {
-    const completed = Math.floor((user.totalPoints / 150) * 0.6);
-    for (let i = 0; i < completed && i < learningModules.length; i++) {
-      completedModuleIds.add(learningModules[i].id);
-    }
-  }
+  // Load completed modules from Firestore
+  useEffect(() => {
+    const loadCompletedModules = async () => {
+      if (user?.id) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.id));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const completed = userData.completedModules || [];
+            setCompletedModuleIds(new Set(completed));
+          }
+        } catch (error) {
+          console.error('Error loading completed modules:', error);
+        }
+      }
+    };
+    loadCompletedModules();
+  }, [user?.id]);
 
   const module = selectedModule ? learningModules.find(m => m.id === selectedModule) : null;
   const moduleQuizzes = module ? quizzes.filter(q => q.moduleId === module.id || q.moduleId === (module as any).difficulty) : [];
@@ -61,13 +77,64 @@ export default function LearningModules() {
     setSelectedAnswers(newAnswers);
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (currentQuestion < moduleQuizzes.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
+      // Calculate score
+      const correctAnswers = selectedAnswers.filter((a, i) => a === moduleQuizzes[i].correctAnswer).length;
+      const totalQuestions = moduleQuizzes.length;
       const totalPoints = moduleQuizzes.reduce((sum, q) => sum + q.points, 0);
       setScore(totalPoints);
       setQuizCompleted(true);
+
+      // Update points and track completion
+      if (user && module && !completedModuleIds.has(module.id)) {
+        setIsUpdating(true);
+        try {
+          // Update backend (MongoDB) if user has backend account
+          try {
+            await userService.completeModule(module.id, correctAnswers, totalQuestions);
+          } catch (backendError) {
+            console.warn('Backend update failed (user might be Firebase-only):', backendError);
+          }
+
+          // Update Firestore
+          const userRef = doc(db, 'users', user.id);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const currentPoints = userData.totalPoints || 0;
+            const performanceRatio = totalQuestions > 0 ? correctAnswers / totalQuestions : 0;
+            const basePoints = 50;
+            const bonusPoints = Math.floor(basePoints * performanceRatio);
+            const pointsEarned = basePoints + bonusPoints;
+            const newTotalPoints = currentPoints + pointsEarned;
+            const newLevel = Math.floor(newTotalPoints / 500) + 1;
+
+            const completedModules = userData.completedModules || [];
+            if (!completedModules.includes(module.id)) {
+              completedModules.push(module.id);
+            }
+
+            await updateDoc(userRef, {
+              totalPoints: newTotalPoints,
+              level: Math.max(newLevel, userData.level || 1),
+              completedModules: completedModules,
+              lastActivity: new Date()
+            });
+
+            // Refresh user data in context
+            await refreshUser();
+            setCompletedModuleIds(new Set(completedModules));
+          }
+        } catch (error) {
+          console.error('Error updating points:', error);
+        } finally {
+          setIsUpdating(false);
+        }
+      }
     }
   };
 
@@ -97,9 +164,15 @@ export default function LearningModules() {
             <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" />
             <span className="text-2xl font-bold text-[rgb(var(--text-primary))]">{t('modules.pointsEarned', { points: score })}</span>
           </div>
+          {isUpdating && (
+            <p className="text-sm text-[rgb(var(--text-secondary))] mb-4">
+              {t('modules.updatingPoints', 'Updating your points...')}
+            </p>
+          )}
           <button
             onClick={handleBackToModules}
             className="btn-nav-active px-8 py-3"
+            disabled={isUpdating}
           >
             {t('modules.backToModules')}
           </button>

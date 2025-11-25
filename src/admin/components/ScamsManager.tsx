@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Shield } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { getApiBaseUrl } from '../../services/backendApi';
 import DataTable from './shared/DataTable';
 import '../styles/kali-theme.css';

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowRight, MessageSquare, Brain, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MessageSquare, Brain, CheckCircle, XCircle } from 'lucide-react';
 
 interface StoryStep {
   id: number;
@@ -30,7 +30,6 @@ export default function InteractiveStoryline({ scenario, onBack, onComplete }: I
   const [currentStep, setCurrentStep] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [showResult, setShowResult] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   // Dynamic storyline data based on scenario year
   const year = scenario.year || 2015; // Default to 2015 if not specified
@@ -131,12 +130,10 @@ export default function InteractiveStoryline({ scenario, onBack, onComplete }: I
   const currentStepData = storylineSteps[currentStep];
 
   const handleAnswerSelect = (answerId: string) => {
-    setIsAnimating(true);
     setUserAnswers(prev => ({ ...prev, [currentStep]: answerId }));
     
     setTimeout(() => {
       setShowResult(true);
-      setIsAnimating(false);
     }, 500);
   };
 

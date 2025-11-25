@@ -219,6 +219,16 @@ export const userService = {
   updatePoints: async (points: number, reason: string) => {
     const response = await api.post('/user/points', { points, reason });
     return response.data;
+  },
+
+  completeModule: async (moduleId: string, score: number, totalQuestions: number) => {
+    const response = await api.post('/user/modules/complete', { moduleId, score, totalQuestions });
+    return response.data;
+  },
+
+  getLeaderboard: async (limit?: number) => {
+    const response = await api.get('/user/leaderboard', { params: { limit } });
+    return response.data;
   }
 };
 

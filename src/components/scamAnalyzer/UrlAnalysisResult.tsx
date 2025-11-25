@@ -10,7 +10,6 @@ import {
   Lock,
   Unlock,
   Network,
-  Server,
   Cookie,
   FileWarning,
   ExternalLink,

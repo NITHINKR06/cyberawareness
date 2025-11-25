@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock, Zap, Shield, AlertTriangle, Play, Pause } from 'lucide-react';
+import { Clock, Zap, Shield, AlertTriangle } from 'lucide-react';
 import './TimeMachine.css';
 
 interface TimeMachineInterfaceProps {

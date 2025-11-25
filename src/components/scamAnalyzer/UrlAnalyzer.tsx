@@ -7,6 +7,8 @@ import { useAuth } from '../../contexts/FirebaseAuthContext';
 import { toast } from 'react-toastify';
 import { AnalysisResult } from './types';
 import { validateBasicInput } from './utils';
+import { updateDoc, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 interface UrlAnalyzerProps {
   onAnalysisComplete: (result: AnalysisResult) => void;
@@ -15,7 +17,7 @@ interface UrlAnalyzerProps {
 
 export default function UrlAnalyzer({ onAnalysisComplete, onError }: UrlAnalyzerProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [urlInput, setUrlInput] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -56,9 +58,37 @@ export default function UrlAnalyzer({ onAnalysisComplete, onError }: UrlAnalyzer
       setScanStatus('Scanning ports and network security...');
       const response = await analyzeContent('url', urlInput);
       const analysisResult = response.analysisResult;
+      const pointsAwarded = response.pointsAwarded || 0;
       setScanStatus('Analysis complete!');
       setTimeout(() => setScanStatus(''), 1000);
       onAnalysisComplete(analysisResult);
+
+      // Update Firestore if points were awarded (for Firebase users)
+      if (pointsAwarded > 0 && user?.id) {
+        try {
+          const userRef = doc(db, 'users', user.id);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const currentPoints = userData.totalPoints || 0;
+            const newTotalPoints = currentPoints + pointsAwarded;
+            const newLevel = Math.floor(newTotalPoints / 500) + 1;
+
+            await updateDoc(userRef, {
+              totalPoints: newTotalPoints,
+              level: Math.max(newLevel, userData.level || 1),
+              lastActivity: new Date()
+            });
+
+            // Refresh user data in context
+            await refreshUser();
+            toast.success(t('scamAnalyzer.pointsAwarded', `+${pointsAwarded} points awarded for detecting dangerous content!`));
+          }
+        } catch (firestoreError) {
+          console.error('Error updating Firestore points:', firestoreError);
+        }
+      }
 
       // Show results based on threat level
       if (analysisResult.threatLevel === 'dangerous') {
