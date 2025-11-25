@@ -1,10 +1,9 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import AnalyzerHistory from '../models/AnalyzerHistory.js';
-import User from '../models/User.js';
 import { authenticateToken } from './auth.js';
 import { verifyFirebaseAuth } from '../middleware/firebaseAdminAuth.js';
-import { analyzerRateLimit, urlAnalyzerRateLimit } from '../middleware/security.js';
+import { analyzerRateLimit } from '../middleware/security.js';
 import aiAnalyzer from '../services/aiAnalyzer.js';
 import configurableAnalyzer from '../services/aiAnalyzerConfigurable.js';
 
@@ -40,16 +39,10 @@ router.post('/analyze', analyzerRateLimit, async (req, res) => {
       });
     }
 
-    // URL analysis requires authentication and has stricter rate limiting
+    // URL analysis requires authentication
     if (inputType === 'url') {
-      // Apply stricter rate limiting for URL analysis
-      // Check rate limit using the URL analyzer rate limiter's key generator
       const authHeader = req.headers['authorization'];
       const token = authHeader && authHeader.split(' ')[1];
-      const rateLimitKey = token && token.length >= 20 ? `${token}-url-analyzer` : `${req.ip}-url-analyzer`;
-      
-      // Note: In production, you'd want to implement proper rate limiting here
-      // For now, we rely on the general rate limiter and authentication check
       
       if (!token) {
         return res.status(401).json({
