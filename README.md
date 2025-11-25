@@ -1,5 +1,7 @@
 # 🛡️ WALRUS - Cybersecurity & Digital Safety Platform
 
+> 🔖 **Collaboration Tag**: Open for contributors—follow the guide below to explore the platform’s capabilities without sharing credentials or environment secrets.
+
 <div align="center">
 
 **A comprehensive, gamified, multilingual, AI-powered cybersecurity education and protection platform**
@@ -18,6 +20,7 @@
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
+- [Collaboration Guide](#-collaboration-guide)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
@@ -42,6 +45,27 @@ WALRUS addresses critical cybersecurity challenges in India:
 - **1.39 lakh** cybercrime complaints filed in 2022
 
 Our platform transforms cybersecurity from a technical burden into an engaging, accessible, and community-driven experience.
+
+## 🤝 Collaboration Guide
+
+- **Who can join**: Educators, security researchers, designers, and full-stack engineers who want to improve citizen-focused cybersecurity tooling.
+- **Safe setup**: Clone the repo, install dependencies, and create your own `.env` from the template—never commit real API keys or secrets.
+- **What to explore**:
+  - `src/` for the React/Vite frontend, including Time Machine, learning modules, and localization assets.
+  - `server/` for Express services such as scam analysis, reporting, and admin tooling.
+  - `api/` for Vercel-ready serverless endpoints that mirror backend routes.
+- **How to contribute**:
+  1. Pick an issue (or open one) describing the enhancement or fix.
+  2. Use the provided scripts (`npm run dev:all`, `npm run test:all`) to validate changes locally.
+  3. Add or update documentation/tests relevant to the feature you touch.
+  4. Submit a PR summarizing user impact while omitting any sensitive config.
+- **Feature tour for collaborators**:
+  - *Scam Analyzer*: Exercise text, URL, and file analysis flows to validate AI and fallback heuristics.
+  - *Gamified Learning*: Review module progression, streak logic, and quiz feedback loops.
+  - *Community & Reporting*: Test post creation, moderation cues, and PDF export from user reports.
+  - *Admin & Analytics*: Verify role-based access, dashboard metrics, and user lifecycle operations.
+  - *Localization*: Ensure translations remain consistent when adding UI or copy updates.
+- **Security expectations**: Keep sample data generic, run lint/tests before PRs, and flag any potential vulnerabilities in issues labeled `security`.
 
 ### Current Status
 
