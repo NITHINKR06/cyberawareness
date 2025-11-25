@@ -7,6 +7,8 @@ import aiAnalyzer from '../services/aiAnalyzer.js';
 import configurableAnalyzer from '../services/aiAnalyzerConfigurable.js';
 
 import urlThreatIntelligenceService from '../services/urlThreatIntelligence.js';
+import cloudflareUrlScanner from '../services/cloudflareUrlScanner.js';
+import { transformCloudflareResult } from '../services/cloudflareTransformer.js';
 
 const router = express.Router();
 
@@ -55,9 +57,30 @@ router.post('/analyze', async (req, res) => {
     let analysisResult;
 
     if (inputType === 'url') {
-      // Use specialized URL threat intelligence service
-      console.log(`🔍 Analyzing URL: ${inputContent}`);
-      analysisResult = await urlThreatIntelligenceService.analyzeUrl(inputContent);
+      // Try Cloudflare URL Scanner first if configured, then fallback to Puppeteer
+      if (cloudflareUrlScanner.isConfigured()) {
+        try {
+          console.log(`🔍 Analyzing URL with Cloudflare: ${inputContent}`);
+          const cloudflareData = await cloudflareUrlScanner.scanUrl(inputContent, (status) => {
+            console.log(`Cloudflare scan status: ${status}`);
+          });
+          
+          analysisResult = transformCloudflareResult(
+            cloudflareData.result,
+            inputContent,
+            cloudflareData.screenshot
+          );
+          console.log('✅ Cloudflare scan completed successfully');
+        } catch (cloudflareError) {
+          console.warn('⚠️ Cloudflare scan failed, falling back to Puppeteer:', cloudflareError.message);
+          // Fallback to Puppeteer-based analysis
+          analysisResult = await urlThreatIntelligenceService.analyzeUrl(inputContent);
+        }
+      } else {
+        // Use specialized URL threat intelligence service (Puppeteer)
+        console.log(`🔍 Analyzing URL with Puppeteer: ${inputContent}`);
+        analysisResult = await urlThreatIntelligenceService.analyzeUrl(inputContent);
+      }
     } else {
       // Use AI analyzer for text, email, phone
       analysisResult = await analyzer.analyze(inputType, inputContent);
@@ -111,6 +134,48 @@ router.post('/analyze', async (req, res) => {
 });
 
 // ADD THIS NEW ROUTE to analyzer.js, before the existing '/history' route
+
+// Cloudflare URL Scanner endpoint (optional direct access)
+router.post('/cloudflare-scan', async (req, res) => {
+  try {
+    const { url } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+
+    if (!cloudflareUrlScanner.isConfigured()) {
+      return res.status(503).json({ 
+        error: 'Cloudflare URL Scanner is not configured. Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID environment variables.' 
+      });
+    }
+
+    // Submit scan and poll for results
+    const cloudflareData = await cloudflareUrlScanner.scanUrl(url, (status) => {
+      // Could implement Server-Sent Events (SSE) here for real-time progress
+      console.log(`Cloudflare scan progress: ${status}`);
+    });
+
+    // Transform to AnalysisResult format
+    const analysisResult = transformCloudflareResult(
+      cloudflareData.result,
+      url,
+      cloudflareData.screenshot
+    );
+
+    res.json({
+      success: true,
+      analysisResult,
+      scanId: cloudflareData.scanId
+    });
+  } catch (error) {
+    console.error('Cloudflare scan error:', error);
+    res.status(500).json({ 
+      error: 'Cloudflare scan failed', 
+      message: error.message 
+    });
+  }
+});
 
 // Vulnerable endpoint for the Security Sandbox demonstration
 router.post('/analyze-vulnerable', async (req, res) => {

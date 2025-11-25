@@ -63,10 +63,10 @@ APIVOID_API_KEY=your_apivoid_api_key
 # 4. Under Permissions, select "Account" > "URL Scanner" > "Edit"
 # 5. Copy the generated token
 # 6. Get your Account ID from Cloudflare Dashboard (right sidebar)
-# Note: These are FRONTEND environment variables (VITE_ prefix required)
-# Add to your .env file in the project root (not server/.env)
-VITE_CLOUDFLARE_API_TOKEN=your_cloudflare_api_token
-VITE_CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+# Note: These are BACKEND environment variables (no VITE_ prefix)
+# Add to your server/.env file (or backend environment variables in production)
+CLOUDFLARE_API_TOKEN=your_cloudflare_api_token
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
 
 # Server Port
 PORT=5000

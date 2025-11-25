@@ -36,44 +36,49 @@ The Cloudflare URL Scanner provides comprehensive URL analysis including:
 
 ### Step 3: Configure Environment Variables
 
-Add the following to your `.env` file in the **project root** (not in `server/.env`):
+Add the following to your **backend** `.env` file (in `server/.env` or your backend environment):
 
 ```env
-# Cloudflare URL Scanner API Configuration
-VITE_CLOUDFLARE_API_TOKEN=your_cloudflare_api_token_here
-VITE_CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id_here
+# Cloudflare URL Scanner API Configuration (Backend)
+CLOUDFLARE_API_TOKEN=your_cloudflare_api_token_here
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id_here
 ```
 
 **Important Notes:**
-- These are **frontend** environment variables, so they must be prefixed with `VITE_`
-- The `.env` file should be in the project root (same level as `package.json`)
-- For production deployments (Vercel, Netlify, etc.), add these as environment variables in your hosting platform's dashboard
+- These are **backend** environment variables (NO `VITE_` prefix)
+- Add to `server/.env` file for local development
+- For production deployments (Render, Railway, etc.), add these as environment variables in your backend hosting platform's dashboard
+- The API token stays secure on the server and is never exposed to the browser
 
-### Step 4: Restart Development Server
+### Step 4: Restart Backend Server
 
 After adding the environment variables:
 
 ```bash
-# Stop your current dev server (Ctrl+C)
-# Then restart
-npm run dev
+# Stop your current backend server (Ctrl+C)
+# Then restart the backend
+npm run server:dev
+# Or if using the combined command
+npm run dev:all
 ```
 
 ## How It Works
 
-### Automatic Fallback
+### Backend Integration with Automatic Fallback
 
-The URL analyzer will:
-1. **First try Cloudflare URL Scanner** (if configured)
-   - Submits URL for scanning
+The URL analyzer works entirely through the backend:
+1. **Backend tries Cloudflare URL Scanner first** (if configured)
+   - Submits URL for scanning via backend API
    - Polls for results (every 15 seconds)
    - Fetches screenshots
    - Transforms results to match existing format
+   - API token stays secure on the server
 
-2. **Fallback to Backend Analysis** (if Cloudflare fails or isn't configured)
+2. **Automatic Fallback to Puppeteer Analysis** (if Cloudflare fails or isn't configured)
    - Uses existing Puppeteer-based analysis
    - Uses LLM for threat detection
    - Maintains all existing features
+   - No changes needed in frontend code
 
 ### Features Enabled with Cloudflare
 
@@ -98,39 +103,30 @@ The system continues to work with:
 
 ## API Usage
 
-The Cloudflare URL Scanner service is available at:
-- **Service**: `src/services/cloudflareUrlScanner.ts`
-- **Transformer**: `src/services/cloudflareTransformer.ts`
+The Cloudflare URL Scanner is integrated into the backend:
+- **Backend Service**: `server/services/cloudflareUrlScanner.js`
+- **Transformer**: `server/services/cloudflareTransformer.js`
+- **API Endpoint**: `POST /api/analyzer/analyze` (automatically uses Cloudflare if configured)
+- **Direct Endpoint**: `POST /api/analyzer/cloudflare-scan` (optional direct access)
 
-### Example Usage
+### Automatic Integration
 
-```typescript
-import { cloudflareUrlScanner } from './services/cloudflareUrlScanner';
-import { transformCloudflareResult } from './services/cloudflareTransformer';
+The existing `/api/analyzer/analyze` endpoint automatically uses Cloudflare when:
+- Cloudflare API token and account ID are configured
+- Input type is `'url'`
+- Falls back to Puppeteer if Cloudflare fails or isn't configured
 
-// Check if configured
-if (cloudflareUrlScanner.isConfigured()) {
-  // Scan URL
-  const result = await cloudflareUrlScanner.scanUrl(url, (status) => {
-    console.log('Scan status:', status);
-  });
-  
-  // Get screenshot
-  const screenshot = await cloudflareUrlScanner.getScreenshotUrl(result.task.uuid);
-  
-  // Transform to AnalysisResult
-  const analysisResult = transformCloudflareResult(result, url, screenshot);
-}
-```
+No frontend changes needed - it works transparently through the existing `analyzeContent()` function.
 
 ## Troubleshooting
 
 ### "Cloudflare API not configured" Error
 
-- Check that `VITE_CLOUDFLARE_API_TOKEN` and `VITE_CLOUDFLARE_ACCOUNT_ID` are set in `.env`
-- Ensure variables are prefixed with `VITE_`
-- Restart your development server after adding variables
+- Check that `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are set in `server/.env`
+- Ensure variables are **NOT** prefixed with `VITE_` (these are backend variables)
+- Restart your **backend** server after adding variables
 - Check that the token has "Edit" permission for URL Scanner
+- Verify the variables are in the correct `.env` file (backend, not frontend)
 
 ### Scan Timeout
 
@@ -147,9 +143,11 @@ if (cloudflareUrlScanner.isConfigured()) {
 ## Security Notes
 
 - **Never commit** your API token to version control
-- Add `.env` to `.gitignore` if not already present
+- Add `server/.env` to `.gitignore` if not already present
 - Use environment variables in production deployments
 - The API token should have minimal required permissions (only URL Scanner Edit)
+- **Backend Integration**: The API token is now stored securely on the backend and never exposed to the browser
+- This is much more secure than the previous frontend implementation
 
 ## Rate Limits
 

@@ -1,24 +1,17 @@
 /**
- * Transform Cloudflare URL Scanner API response to AnalysisResult format
+ * Transform Cloudflare URL Scanner API response to AnalysisResult format (Backend)
  */
-
-import { AnalysisResult } from '../components/scamAnalyzer/types';
-import { CloudflareScanResult } from './cloudflareUrlScanner';
 
 /**
  * Transform Cloudflare scan result to AnalysisResult format
  */
-export function transformCloudflareResult(
-  cloudflareResult: CloudflareScanResult,
-  originalUrl: string,
-  screenshotUrl?: string | null
-): AnalysisResult {
+export function transformCloudflareResult(cloudflareResult, originalUrl, screenshotUrl = null) {
   const { task, page, data, meta, lists, verdicts } = cloudflareResult;
 
   // Determine threat level based on verdicts
-  let threatLevel: 'safe' | 'suspicious' | 'dangerous' = 'safe';
+  let threatLevel = 'safe';
   let threatScore = 0;
-  const indicators: string[] = [];
+  const indicators = [];
 
   if (verdicts.overall.malicious) {
     threatLevel = 'dangerous';
@@ -63,8 +56,8 @@ export function transformCloudflareResult(
 
   // Calculate network stats
   const requests = data.requests || [];
-  const networkTypes: Record<string, number> = {};
-  const domains = new Set<string>();
+  const networkTypes = {};
+  const domains = new Set();
 
   requests.forEach(req => {
     const type = req.type || 'other';
@@ -93,7 +86,7 @@ export function transformCloudflareResult(
   }
 
   // Build recommendations
-  const recommendations: string[] = [];
+  const recommendations = [];
   if (threatLevel === 'dangerous') {
     recommendations.push('Do not visit this website');
     recommendations.push('Do not enter any personal information');
@@ -114,7 +107,7 @@ export function transformCloudflareResult(
   const registrar = 'Unknown';
 
   // Build result
-  const result: AnalysisResult = {
+  const result = {
     url: originalUrl,
     finalUrl: page.url || originalUrl,
     scanDate: new Date().toISOString(),

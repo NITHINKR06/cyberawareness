@@ -1,5 +1,5 @@
 /**
- * Cloudflare URL Scanner API Service
+ * Cloudflare URL Scanner API Service (Backend)
  * 
  * This service integrates with Cloudflare's URL Scanner API to provide
  * comprehensive URL analysis including screenshots, network stats, and security information.
@@ -8,148 +8,37 @@
  * 1. Get API token from Cloudflare Dashboard > Account > API Tokens
  * 2. Create Custom Token with "URL Scanner" permission (Edit access level)
  * 3. Get your account_id from Cloudflare Dashboard
- * 4. Set environment variables:
- *    - VITE_CLOUDFLARE_API_TOKEN
- *    - VITE_CLOUDFLARE_ACCOUNT_ID
+ * 4. Set environment variables in server/.env:
+ *    - CLOUDFLARE_API_TOKEN
+ *    - CLOUDFLARE_ACCOUNT_ID
  */
-
-interface CloudflareScanRequest {
-  url: string;
-  screenshotsResolutions?: ('desktop' | 'mobile' | 'tablet')[];
-  customagent?: string;
-  referer?: string;
-  customHeaders?: Record<string, string>;
-  visibility?: 'Public' | 'Unlisted';
-}
-
-interface CloudflareScanResponse {
-  uuid: string;
-  api: string;
-  visibility: string;
-  url: string;
-  message: string;
-}
-
-interface CloudflareScanResult {
-  task: {
-    uuid: string;
-    url: string;
-    success: boolean;
-    status: string;
-  };
-  page: {
-    url: string;
-    domain: string;
-    ip: string;
-    country: string;
-    asn: number;
-    server: string;
-    title: string;
-    history: Array<{
-      url: string;
-      status: number;
-    }>;
-    screenshot?: {
-      desktop?: string;
-      mobile?: string;
-      tablet?: string;
-    };
-    domStructHash?: string;
-    favicon?: {
-      hash: string;
-    };
-  };
-  data: {
-    requests?: Array<{
-      url: string;
-      method: string;
-      status: number;
-      type: string;
-    }>;
-    cookies?: Array<{
-      name: string;
-      domain: string;
-      path: string;
-    }>;
-    console?: Array<{
-      level: string;
-      text: string;
-    }>;
-    performance?: {
-      loadEventEnd?: number;
-      domContentLoadedEventEnd?: number;
-    };
-  };
-  meta: {
-    processors: {
-      domainCategories?: string[];
-      phishing?: {
-        type?: string;
-        verified?: boolean;
-      };
-      radarRank?: number;
-      wappa?: Array<{
-        name: string;
-        category: string;
-      }>;
-      technologies?: Array<{
-        name: string;
-        category: string;
-      }>;
-    };
-  };
-  lists: {
-    ips?: Array<{
-      ip: string;
-      asn: number;
-      country: string;
-    }>;
-    domains?: Array<{
-      domain: string;
-      ip: string;
-    }>;
-    certificates?: Array<{
-      issuer: string;
-      valid: boolean;
-    }>;
-  };
-  verdicts: {
-    overall: {
-      malicious: boolean;
-      categories?: string[];
-    };
-  };
-}
 
 const CLOUDFLARE_API_BASE = 'https://api.cloudflare.com/client/v4';
 const POLL_INTERVAL = 15000; // 15 seconds
 const MAX_POLL_ATTEMPTS = 40; // 10 minutes max wait time
 
 class CloudflareUrlScannerService {
-  private apiToken: string | null;
-  private accountId: string | null;
-
   constructor() {
-    this.apiToken = import.meta.env.VITE_CLOUDFLARE_API_TOKEN || null;
-    this.accountId = import.meta.env.VITE_CLOUDFLARE_ACCOUNT_ID || null;
+    this.apiToken = process.env.CLOUDFLARE_API_TOKEN || null;
+    this.accountId = process.env.CLOUDFLARE_ACCOUNT_ID || null;
   }
 
   /**
    * Check if Cloudflare API is configured
    */
-  isConfigured(): boolean {
+  isConfigured() {
     return !!(this.apiToken && this.accountId);
   }
 
   /**
    * Submit a URL for scanning
    */
-  async submitScan(url: string, options?: Partial<CloudflareScanRequest>): Promise<CloudflareScanResponse> {
+  async submitScan(url, options = {}) {
     if (!this.isConfigured()) {
-      throw new Error('Cloudflare API token and account ID must be configured. Set VITE_CLOUDFLARE_API_TOKEN and VITE_CLOUDFLARE_ACCOUNT_ID environment variables.');
+      throw new Error('Cloudflare API token and account ID must be configured. Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID environment variables.');
     }
 
-    const requestBody: CloudflareScanRequest = {
+    const requestBody = {
       url,
       screenshotsResolutions: ['desktop', 'mobile'],
       visibility: 'Unlisted',
@@ -175,7 +64,7 @@ class CloudflareUrlScannerService {
       }
 
       return await response.json();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Cloudflare scan submission error:', error);
       throw new Error(`Failed to submit URL scan: ${error.message}`);
     }
@@ -184,7 +73,7 @@ class CloudflareUrlScannerService {
   /**
    * Get scan result by UUID
    */
-  async getScanResult(scanId: string): Promise<CloudflareScanResult | null> {
+  async getScanResult(scanId) {
     if (!this.isConfigured()) {
       throw new Error('Cloudflare API not configured');
     }
@@ -212,7 +101,7 @@ class CloudflareUrlScannerService {
       }
 
       return await response.json();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Cloudflare scan result fetch error:', error);
       throw new Error(`Failed to fetch scan result: ${error.message}`);
     }
@@ -221,7 +110,7 @@ class CloudflareUrlScannerService {
   /**
    * Poll for scan result until complete
    */
-  async pollScanResult(scanId: string, onProgress?: (status: string) => void): Promise<CloudflareScanResult> {
+  async pollScanResult(scanId, onProgress) {
     let attempts = 0;
 
     while (attempts < MAX_POLL_ATTEMPTS) {
@@ -255,10 +144,9 @@ class CloudflareUrlScannerService {
   }
 
   /**
-   * Get screenshot URL from scan result
-   * Returns a blob URL that can be used directly in img src
+   * Get screenshot as base64 or buffer
    */
-  async getScreenshotUrl(scanId: string, resolution: 'desktop' | 'mobile' | 'tablet' = 'desktop'): Promise<string | null> {
+  async getScreenshot(scanId, resolution = 'desktop') {
     if (!this.isConfigured()) {
       return null;
     }
@@ -275,7 +163,6 @@ class CloudflareUrlScannerService {
       );
 
       if (!response.ok) {
-        // Screenshot might not be available yet or for this resolution
         console.warn(`Screenshot not available for ${scanId} at ${resolution} resolution`);
         return null;
       }
@@ -287,8 +174,13 @@ class CloudflareUrlScannerService {
         return null;
       }
 
-      const blob = await response.blob();
-      return URL.createObjectURL(blob);
+      // Convert to base64 for easy transmission
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const base64 = buffer.toString('base64');
+      const dataUrl = `data:${contentType};base64,${base64}`;
+
+      return dataUrl;
     } catch (error) {
       console.error('Failed to fetch screenshot:', error);
       return null;
@@ -296,22 +188,28 @@ class CloudflareUrlScannerService {
   }
 
   /**
-   * Complete scan workflow: submit, poll, and return result
+   * Complete scan workflow: submit, poll, and return result with screenshot
    */
-  async scanUrl(url: string, onProgress?: (status: string) => void): Promise<CloudflareScanResult> {
+  async scanUrl(url, onProgress) {
     const scanResponse = await this.submitScan(url);
     
     if (onProgress) {
       onProgress('Queued');
     }
 
-    return await this.pollScanResult(scanResponse.uuid, onProgress);
+    const result = await this.pollScanResult(scanResponse.uuid, onProgress);
+    
+    // Get screenshot
+    const screenshot = await this.getScreenshot(scanResponse.uuid, 'desktop');
+    
+    return {
+      result,
+      screenshot,
+      scanId: scanResponse.uuid
+    };
   }
 }
 
 // Export singleton instance
-export const cloudflareUrlScanner = new CloudflareUrlScannerService();
-
-// Export types for use in components
-export type { CloudflareScanResult, CloudflareScanRequest, CloudflareScanResponse };
+export default new CloudflareUrlScannerService();
 

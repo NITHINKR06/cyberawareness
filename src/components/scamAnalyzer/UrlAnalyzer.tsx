@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe, Loader2 } from 'lucide-react';
 import { analyzeContent } from '../../services/backendApi';
-import { cloudflareUrlScanner } from '../../services/cloudflareUrlScanner';
-import { transformCloudflareResult } from '../../services/cloudflareTransformer';
 import { toast } from 'react-toastify';
 import { AnalysisResult } from './types';
 import { validateBasicInput } from './utils';
@@ -30,59 +28,16 @@ export default function UrlAnalyzer({ onAnalysisComplete, onError }: UrlAnalyzer
 
     setIsProcessing(true);
     onError('');
-    setScanStatus('');
+    setScanStatus('Analyzing URL...');
 
-    // Try Cloudflare URL Scanner first if configured
-    if (cloudflareUrlScanner.isConfigured()) {
-      try {
-        setScanStatus('Submitting to Cloudflare...');
-        toast.info('Using Cloudflare URL Scanner for deep analysis...');
-
-        // Submit scan and poll for results
-        const cloudflareResult = await cloudflareUrlScanner.scanUrl(
-          urlInput,
-          (status) => {
-            setScanStatus(`Cloudflare: ${status}`);
-          }
-        );
-
-        // Get screenshot
-        setScanStatus('Fetching screenshot...');
-        const screenshotUrl = await cloudflareUrlScanner.getScreenshotUrl(cloudflareResult.task.uuid, 'desktop');
-
-        // Transform Cloudflare result to AnalysisResult format
-        const analysisResult = transformCloudflareResult(cloudflareResult, urlInput, screenshotUrl);
-        
-        setScanStatus('');
-        onAnalysisComplete(analysisResult);
-
-        // Show results based on threat level
-        if (analysisResult.threatLevel === 'dangerous') {
-          toast.error(t('scamAnalyzer.highThreatDetected', 'High threat detected! Please be extremely cautious.'));
-        } else if (analysisResult.threatLevel === 'suspicious') {
-          toast.warning(t('scamAnalyzer.suspiciousContent', 'Suspicious content detected. Proceed with caution.'));
-        } else {
-          toast.success(t('scamAnalyzer.contentSafe', 'Content appears safe, but always stay vigilant!'));
-        }
-
-        setIsProcessing(false);
-        return;
-      } catch (cloudflareError: any) {
-        console.warn('Cloudflare URL Scanner failed, falling back to backend:', cloudflareError);
-        toast.warning('Cloudflare scan failed, using backend analysis...');
-        // Fall through to backend analysis
-      }
-    }
-
-    // Fallback to existing backend analysis
     try {
-      setScanStatus('Analyzing with backend...');
+      // Backend will automatically use Cloudflare if configured, otherwise falls back to Puppeteer
       const response = await analyzeContent('url', urlInput);
       const analysisResult = response.analysisResult;
       setScanStatus('');
       onAnalysisComplete(analysisResult);
 
-      // Show results based on Generative LLM AI analysis
+      // Show results based on threat level
       if (analysisResult.threatLevel === 'dangerous') {
         toast.error(t('scamAnalyzer.highThreatDetected', 'High threat detected! Please be extremely cautious.'));
       } else if (analysisResult.threatLevel === 'suspicious') {
@@ -120,11 +75,6 @@ export default function UrlAnalyzer({ onAnalysisComplete, onError }: UrlAnalyzer
       </div>
       <p className="text-sm text-gray-600 dark:text-gray-400">
         Deep analysis: Screenshots, Network Stats, Tech Detection & More
-        {cloudflareUrlScanner.isConfigured() && (
-          <span className="ml-2 text-purple-600 dark:text-purple-400 font-medium">
-            (Powered by Cloudflare)
-          </span>
-        )}
       </p>
       {scanStatus && (
         <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">
