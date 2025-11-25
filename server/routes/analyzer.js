@@ -160,10 +160,11 @@ router.post('/analyze', analyzerRateLimit, async (req, res) => {
     await history.save();
 
     // Award points if user is authenticated and content is dangerous
+    // Note: Points are managed in Firestore, not MongoDB for Firebase users
+    // This would need to be updated via Firestore Admin SDK or API endpoint
     if (userId && analysisResult.threatLevel === 'dangerous') {
-      await User.findByIdAndUpdate(userId, {
-        $inc: { totalPoints: 10 }
-      });
+      // Points awarded: 10 (handled via Firestore in frontend or separate API call)
+      // For now, we just indicate points in the response
     }
 
     res.json({
@@ -176,7 +177,7 @@ router.post('/analyze', analyzerRateLimit, async (req, res) => {
     console.error('Analysis error:', error.message);
     res.status(500).json({ error: 'Analysis failed. Please try again.' });
   }
-}
+});
 
 // ADD THIS NEW ROUTE to analyzer.js, before the existing '/history' route
 
