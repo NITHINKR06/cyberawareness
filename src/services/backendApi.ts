@@ -328,7 +328,7 @@ export const isAuthenticated = () => {
 export const keepAliveService = {
   ping: async () => {
     try {
-      const response = await fetch('https://wlarus.onrender.com', {
+      const response = await fetch('https://wlarus.onrender.com/api/health', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
