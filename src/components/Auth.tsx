@@ -12,6 +12,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
@@ -39,6 +40,7 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setValidationErrors({});
     setIsLoading(true);
     try {
@@ -62,6 +64,8 @@ export default function Auth() {
           return;
         }
         await register(username, email, password);
+        // Show success message about email verification
+        setSuccess('Registration successful! Please check your email to verify your account. Email verification helps prevent fake accounts.');
       }
     } catch (err: any) {
       setError(err.message || 'Authentication failed. Please try again.');
@@ -218,6 +222,17 @@ export default function Auth() {
               <div className="bg-red-900/20 border border-red-800/50 text-red-400 px-4 py-3 rounded-xl text-sm flex items-start font-mono">
                 <X className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
                 {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-900/20 border border-green-800/50 text-green-400 px-4 py-3 rounded-xl text-sm flex items-start font-mono">
+                <Check className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold mb-1">{success}</p>
+                  <p className="text-xs text-green-300/80">
+                    This helps prevent fake accounts and ensures account security. You can still use text analysis without verification, but URL analysis requires a verified account.
+                  </p>
+                </div>
               </div>
             )}
             {/* Submit */}

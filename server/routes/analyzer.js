@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import AnalyzerHistory from '../models/AnalyzerHistory.js';
 import User from '../models/User.js';
 import { authenticateToken } from './auth.js';
+import { verifyFirebaseAuth } from '../middleware/firebaseAdminAuth.js';
+import { analyzerRateLimit, urlAnalyzerRateLimit } from '../middleware/security.js';
 import aiAnalyzer from '../services/aiAnalyzer.js';
 import configurableAnalyzer from '../services/aiAnalyzerConfigurable.js';
 
@@ -15,8 +17,24 @@ const router = express.Router();
 // Flag to switch between original and configurable analyzer
 const USE_CONFIGURABLE_ANALYZER = false;
 
-// Analyze content (public endpoint - no auth required)
-router.post('/analyze', async (req, res) => {
+// Custom middleware to apply rate limiting based on request body
+const conditionalRateLimit = async (req, res, next) => {
+  // Parse body if available (Express body-parser should have run)
+  const { inputType } = req.body || {};
+  
+  // For URL analysis, use stricter rate limiting
+  if (inputType === 'url') {
+    return urlAnalyzerRateLimit(req, res, next);
+  } else {
+    // For text analysis, use standard rate limiting
+    return analyzerRateLimit(req, res, next);
+  }
+};
+
+// Analyze content endpoint
+// - Text analysis: Public (no auth required)
+// - URL analysis: Requires authentication
+router.post('/analyze', conditionalRateLimit, async (req, res) => {
   try {
     const { inputType, inputContent } = req.body;
 
@@ -35,18 +53,52 @@ router.post('/analyze', async (req, res) => {
       });
     }
 
+    // URL analysis requires authentication
+    if (inputType === 'url') {
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      
+      if (!token) {
+        return res.status(401).json({
+          error: 'Authentication required for URL analysis. Please login to use this feature.',
+          requiresAuth: true
+        });
+      }
+
+      // Verify Firebase token (basic validation - in production use Firebase Admin SDK)
+      if (token.length < 20 || token.length > 1000) {
+        return res.status(401).json({
+          error: 'Invalid authentication token. Please login again.',
+          requiresAuth: true
+        });
+      }
+    }
+
     // Get user ID from token if authenticated
     let userId = null;
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token) {
-      const JWT_SECRET = process.env.JWT_SECRET;
-      try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        userId = decoded.userId;
-      } catch (err) {
-        // Token invalid or expired, continue as anonymous
+      // Try Firebase UID first (current implementation)
+      if (token.length >= 20 && token.length <= 1000) {
+        // This is likely a Firebase UID
+        userId = token;
+      } else {
+        // Try JWT token (legacy)
+        const JWT_SECRET = process.env.JWT_SECRET;
+        try {
+          const decoded = jwt.verify(token, JWT_SECRET);
+          userId = decoded.userId;
+        } catch (err) {
+          // Token invalid or expired, continue as anonymous for text analysis
+          if (inputType === 'url') {
+            return res.status(401).json({
+              error: 'Invalid authentication token. Please login again.',
+              requiresAuth: true
+            });
+          }
+        }
       }
     }
 
@@ -131,7 +183,7 @@ router.post('/analyze', async (req, res) => {
     console.error('Analysis error:', error.message);
     res.status(500).json({ error: 'Analysis failed. Please try again.' });
   }
-});
+}
 
 // ADD THIS NEW ROUTE to analyzer.js, before the existing '/history' route
 

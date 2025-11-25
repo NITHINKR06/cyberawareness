@@ -144,6 +144,24 @@ export const analyzerRateLimit = createRateLimit(
   }
 );
 
+// Stricter rate limiting for URL analyzer (requires authentication)
+export const urlAnalyzerRateLimit = createRateLimit(
+  60 * 1000, // 1 minute
+  5, // 5 requests per minute (stricter than text analyzer)
+  'Too many URL analysis requests. Please wait before trying again.',
+  {
+    keyGenerator: ((req) => {
+      // Use user ID if authenticated, otherwise IP
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      if (token && token.length >= 20) {
+        return `${token}-url-analyzer`; // Per-user rate limiting
+      }
+      return `${req.ip}-url-analyzer`; // Per-IP rate limiting for unauthenticated
+    })
+  }
+);
+
 // Strict rate limiting for sensitive endpoints
 export const strictRateLimit = createRateLimit(
   5 * 60 * 1000, // 5 minutes

@@ -4,6 +4,7 @@ import whois from 'whois-json';
 import sslChecker from 'ssl-checker';
 import dns from 'dns';
 import { promisify } from 'util';
+import net from 'net';
 
 const lookup = promisify(dns.lookup);
 
@@ -150,26 +151,48 @@ class URLThreatIntelligenceService {
       const $ = cheerio.load(content);
       const title = $('title').text().trim();
 
-      // Get Cookies
+      // Get Cookies with detailed analysis
       let pageCookies = [];
+      let cookieSecurity = { secure: 0, httpOnly: 0, sameSite: 0, total: 0 };
       try {
         pageCookies = await retryOperation(() => page.cookies());
+        cookieSecurity.total = pageCookies.length;
+        pageCookies.forEach(cookie => {
+          if (cookie.secure) cookieSecurity.secure++;
+          if (cookie.httpOnly) cookieSecurity.httpOnly++;
+          if (cookie.sameSite && cookie.sameSite !== 'None') cookieSecurity.sameSite++;
+        });
       } catch (e) {
         console.warn('⚠️ Cookie fetch failed:', e.message);
       }
 
+      // Check for mixed content (HTTP resources on HTTPS page)
+      const mixedContent = this.detectMixedContent(content, finalUrl);
+
       // Technology Detection (Heuristic)
       const technologies = this.detectTechnologies($, response ? response.headers() : {}, content);
+
+      // Enhanced Security Header Analysis
+      const allHeaders = response ? response.headers() : {};
+      const securityHeadersAnalysis = this.analyzeSecurityHeaders(allHeaders, networkStats.securityHeaders);
 
       // Parallel Native Checks (Whois, SSL, DNS)
       const urlObj = new URL(finalUrl);
       const hostname = urlObj.hostname;
+      const port = urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80);
 
       const [whoisData, sslData, dnsData] = await Promise.allSettled([
         this.checkWhois(hostname),
         this.checkSSL(hostname),
         this.checkDNS(hostname)
       ]);
+
+      // Port scanning (after DNS resolution)
+      const ipAddress = dnsData.status === 'fulfilled' ? dnsData.value?.address : null;
+      const portScanData = await Promise.resolve(this.scanPorts(hostname, ipAddress)).then(
+        result => ({ status: 'fulfilled', value: result }),
+        error => ({ status: 'rejected', reason: error })
+      );
 
       // Compile Results
       const results = {
@@ -190,7 +213,26 @@ class URLThreatIntelligenceService {
         security: {
           ssl: sslData.status === 'fulfilled' ? sslData.value : { valid: false },
           headers: networkStats.securityHeaders,
-          score: this.calculateSecurityScore(sslData.value, networkStats.securityHeaders, whoisData.value)
+          headersAnalysis: securityHeadersAnalysis,
+          cookies: cookieSecurity,
+          mixedContent: mixedContent,
+          ports: portScanData.status === 'fulfilled' ? portScanData.value : { open: [], weak: [], secure: [] },
+          vulnerabilities: this.detectVulnerabilities(
+            sslData.value,
+            securityHeadersAnalysis,
+            cookieSecurity,
+            mixedContent,
+            portScanData.status === 'fulfilled' ? portScanData.value : null,
+            whoisData.value
+          ),
+          score: this.calculateSecurityScore(
+            sslData.value,
+            networkStats.securityHeaders,
+            whoisData.value,
+            cookieSecurity,
+            mixedContent,
+            portScanData.status === 'fulfilled' ? portScanData.value : null
+          )
         },
 
         // Network Info
@@ -208,8 +250,14 @@ class URLThreatIntelligenceService {
         page: {
           title: title,
           cookies: pageCookies.length,
+          cookieDetails: pageCookies.slice(0, 10), // Limit to first 10 for display
           consoleLogs: consoleLogs.length,
-          hasLoginForm: $('input[type="password"]').length > 0
+          consoleLogDetails: consoleLogs.slice(0, 10), // Limit to first 10
+          hasLoginForm: $('input[type="password"]').length > 0,
+          externalLinks: this.extractExternalLinks($, hostname),
+          scripts: this.extractScripts($),
+          iframes: $('iframe').length,
+          forms: $('form').length
         },
 
         // Verdict
@@ -335,23 +383,45 @@ class URLThreatIntelligenceService {
     return [...new Set(techs.map(t => JSON.stringify(t)))].map(s => JSON.parse(s));
   }
 
-  calculateSecurityScore(ssl, headers, whois) {
+  calculateSecurityScore(ssl, headers, whois, cookies, mixedContent, ports) {
     let score = 100;
 
     // SSL Deductions
     if (!ssl || !ssl.valid) score -= 40;
     else if (ssl.daysRemaining < 7) score -= 10;
+    else if (ssl.daysRemaining < 30) score -= 5;
 
     // Header Deductions
     if (!headers['Strict-Transport-Security']) score -= 10;
     if (!headers['Content-Security-Policy']) score -= 10;
     if (!headers['X-Frame-Options']) score -= 5;
     if (!headers['X-Content-Type-Options']) score -= 5;
+    if (!headers['Referrer-Policy']) score -= 3;
+    if (!headers['Permissions-Policy']) score -= 3;
+
+    // Cookie Security Deductions
+    if (cookies && cookies.total > 0) {
+      const secureRatio = cookies.secure / cookies.total;
+      const httpOnlyRatio = cookies.httpOnly / cookies.total;
+      if (secureRatio < 1) score -= (1 - secureRatio) * 10;
+      if (httpOnlyRatio < 0.8) score -= (1 - httpOnlyRatio) * 5;
+    }
+
+    // Mixed Content Deductions
+    if (mixedContent && mixedContent.count > 0) {
+      score -= Math.min(15, mixedContent.count * 3);
+    }
+
+    // Port Security Deductions
+    if (ports && ports.weak && ports.weak.length > 0) {
+      score -= ports.weak.length * 5;
+    }
 
     // Domain Age Deductions
     if (whois && whois.ageDays < 30) score -= 20;
+    else if (whois && whois.ageDays < 90) score -= 10;
 
-    return Math.max(0, score);
+    return Math.max(0, Math.min(100, score));
   }
 
   calculateVerdict(results) {
@@ -367,7 +437,10 @@ class URLThreatIntelligenceService {
     // 2. SSL
     if (!results.security.ssl.valid) {
       threatScore += 3;
-      indicators.push('Invalid SSL');
+      indicators.push('Invalid SSL Certificate');
+    } else if (results.security.ssl.daysRemaining < 7) {
+      threatScore += 2;
+      indicators.push('SSL Certificate Expiring Soon');
     }
 
     // 3. Login Form on New Domain
@@ -376,7 +449,48 @@ class URLThreatIntelligenceService {
       indicators.push('Login Form on New Domain');
     }
 
-    // 4. Suspicious Tech (e.g., none detected on a complex looking site is weird, but hard to score)
+    // 4. Security Headers
+    if (!results.security.headers['Strict-Transport-Security']) {
+      threatScore += 2;
+      indicators.push('Missing HSTS Header');
+    }
+    if (!results.security.headers['Content-Security-Policy']) {
+      threatScore += 2;
+      indicators.push('Missing CSP Header');
+    }
+
+    // 5. Cookie Security
+    if (results.security.cookies && results.security.cookies.total > 0) {
+      const insecureCookies = results.security.cookies.total - results.security.cookies.secure;
+      if (insecureCookies > 0) {
+        threatScore += 2;
+        indicators.push(`${insecureCookies} Insecure Cookie(s)`);
+      }
+    }
+
+    // 6. Mixed Content
+    if (results.security.mixedContent && results.security.mixedContent.count > 0) {
+      threatScore += 3;
+      indicators.push(`${results.security.mixedContent.count} Mixed Content Resource(s)`);
+    }
+
+    // 7. Weak Ports
+    if (results.security.ports && results.security.ports.weak && results.security.ports.weak.length > 0) {
+      threatScore += results.security.ports.weak.length * 2;
+      indicators.push(`${results.security.ports.weak.length} Weak Port(s) Open`);
+    }
+
+    // 8. Vulnerabilities
+    if (results.security.vulnerabilities && results.security.vulnerabilities.length > 0) {
+      threatScore += results.security.vulnerabilities.length * 2;
+      indicators.push(...results.security.vulnerabilities.map(v => v.title));
+    }
+
+    // 9. Suspicious patterns
+    if (results.page.externalLinks && results.page.externalLinks.length > 10) {
+      threatScore += 1;
+      indicators.push('High Number of External Links');
+    }
 
     results.threatScore = Math.min(10, threatScore);
     results.indicators = indicators;
@@ -424,11 +538,265 @@ class URLThreatIntelligenceService {
       return {
         valid: sslData.valid,
         daysRemaining: sslData.daysRemaining,
-        issuer: sslData.issuer ? (sslData.issuer.O || sslData.issuer.CN) : 'Unknown'
+        issuer: sslData.issuer ? (sslData.issuer.O || sslData.issuer.CN) : 'Unknown',
+        validFrom: sslData.validFrom,
+        validTo: sslData.validTo,
+        protocol: sslData.protocol || 'Unknown',
+        cipher: sslData.cipher || 'Unknown'
       };
     } catch (e) {
       return { valid: false };
     }
+  }
+
+  // Scan common ports for security assessment
+  async scanPorts(hostname, ipAddress) {
+    const targetIP = ipAddress || (await this.checkDNS(hostname))?.address;
+    if (!targetIP) {
+      return { open: [], weak: [], secure: [] };
+    }
+
+    // Common ports to check
+    const portsToCheck = [
+      { port: 21, name: 'FTP', secure: false },
+      { port: 22, name: 'SSH', secure: true },
+      { port: 23, name: 'Telnet', secure: false },
+      { port: 25, name: 'SMTP', secure: false },
+      { port: 53, name: 'DNS', secure: false },
+      { port: 80, name: 'HTTP', secure: false },
+      { port: 110, name: 'POP3', secure: false },
+      { port: 143, name: 'IMAP', secure: false },
+      { port: 443, name: 'HTTPS', secure: true },
+      { port: 445, name: 'SMB', secure: false },
+      { port: 1433, name: 'MSSQL', secure: false },
+      { port: 3306, name: 'MySQL', secure: false },
+      { port: 3389, name: 'RDP', secure: false },
+      { port: 5432, name: 'PostgreSQL', secure: false },
+      { port: 8080, name: 'HTTP-Proxy', secure: false },
+      { port: 8443, name: 'HTTPS-Alt', secure: true }
+    ];
+
+    const openPorts = [];
+    const weakPorts = [];
+    const securePorts = [];
+
+    // Scan ports with timeout
+    const scanPromises = portsToCheck.map(portInfo => 
+      this.checkPort(targetIP, portInfo.port, 2000)
+        .then(isOpen => {
+          if (isOpen) {
+            openPorts.push({ port: portInfo.port, name: portInfo.name });
+            if (portInfo.secure) {
+              securePorts.push({ port: portInfo.port, name: portInfo.name });
+            } else {
+              weakPorts.push({ port: portInfo.port, name: portInfo.name });
+            }
+          }
+        })
+        .catch(() => {}) // Ignore errors
+    );
+
+    await Promise.allSettled(scanPromises);
+
+    return { open: openPorts, weak: weakPorts, secure: securePorts };
+  }
+
+  // Check if a port is open
+  checkPort(host, port, timeout = 2000) {
+    return new Promise((resolve) => {
+      const socket = new net.Socket();
+      let resolved = false;
+
+      const onError = () => {
+        if (!resolved) {
+          resolved = true;
+          socket.destroy();
+          resolve(false);
+        }
+      };
+
+      socket.setTimeout(timeout);
+      socket.once('timeout', onError);
+      socket.once('error', onError);
+      socket.once('connect', () => {
+        if (!resolved) {
+          resolved = true;
+          socket.destroy();
+          resolve(true);
+        }
+      });
+
+      socket.connect(port, host);
+    });
+  }
+
+  // Detect mixed content (HTTP resources on HTTPS page)
+  detectMixedContent(content, pageUrl) {
+    if (!pageUrl.startsWith('https://')) {
+      return { count: 0, resources: [] };
+    }
+
+    const resources = [];
+    const httpPattern = /(src|href|action)=["'](http:\/\/[^"']+)["']/gi;
+    let match;
+
+    while ((match = httpPattern.exec(content)) !== null && resources.length < 20) {
+      resources.push(match[2]);
+    }
+
+    return {
+      count: resources.length,
+      resources: resources.slice(0, 10) // Limit to first 10
+    };
+  }
+
+  // Analyze security headers in detail
+  analyzeSecurityHeaders(allHeaders, securityHeaders) {
+    const analysis = {
+      present: [],
+      missing: [],
+      weak: [],
+      recommendations: []
+    };
+
+    const requiredHeaders = {
+      'Strict-Transport-Security': { required: true, weak: false },
+      'Content-Security-Policy': { required: true, weak: false },
+      'X-Frame-Options': { required: true, weak: false },
+      'X-Content-Type-Options': { required: true, weak: false },
+      'Referrer-Policy': { required: false, weak: false },
+      'Permissions-Policy': { required: false, weak: false },
+      'X-XSS-Protection': { required: false, weak: true } // Deprecated but sometimes present
+    };
+
+    Object.entries(requiredHeaders).forEach(([header, config]) => {
+      const value = allHeaders[header.toLowerCase()] || securityHeaders[header];
+      if (value) {
+        analysis.present.push({ name: header, value });
+        // Check for weak configurations
+        if (header === 'X-Frame-Options' && value !== 'DENY' && value !== 'SAMEORIGIN') {
+          analysis.weak.push({ name: header, issue: 'Weak configuration' });
+        }
+        if (header === 'Strict-Transport-Security' && !value.includes('max-age')) {
+          analysis.weak.push({ name: header, issue: 'Missing max-age directive' });
+        }
+      } else {
+        if (config.required) {
+          analysis.missing.push(header);
+          analysis.recommendations.push(`Add ${header} header`);
+        }
+      }
+    });
+
+    return analysis;
+  }
+
+  // Detect security vulnerabilities
+  detectVulnerabilities(ssl, headersAnalysis, cookies, mixedContent, ports, whois) {
+    const vulnerabilities = [];
+
+    // SSL Issues
+    if (!ssl || !ssl.valid) {
+      vulnerabilities.push({
+        severity: 'high',
+        title: 'Invalid SSL Certificate',
+        description: 'The website does not have a valid SSL certificate'
+      });
+    } else if (ssl.daysRemaining < 7) {
+      vulnerabilities.push({
+        severity: 'medium',
+        title: 'SSL Certificate Expiring Soon',
+        description: `SSL certificate expires in ${ssl.daysRemaining} days`
+      });
+    }
+
+    // Missing Security Headers
+    if (headersAnalysis.missing.length > 0) {
+      vulnerabilities.push({
+        severity: 'medium',
+        title: `Missing ${headersAnalysis.missing.length} Security Header(s)`,
+        description: `Missing: ${headersAnalysis.missing.join(', ')}`
+      });
+    }
+
+    // Weak Security Headers
+    if (headersAnalysis.weak.length > 0) {
+      vulnerabilities.push({
+        severity: 'low',
+        title: 'Weak Security Header Configuration',
+        description: 'Some security headers are configured weakly'
+      });
+    }
+
+    // Insecure Cookies
+    if (cookies && cookies.total > 0) {
+      const insecureCount = cookies.total - cookies.secure;
+      if (insecureCount > 0) {
+        vulnerabilities.push({
+          severity: 'medium',
+          title: `${insecureCount} Insecure Cookie(s)`,
+          description: 'Cookies are not marked as secure'
+        });
+      }
+    }
+
+    // Mixed Content
+    if (mixedContent && mixedContent.count > 0) {
+      vulnerabilities.push({
+        severity: 'high',
+        title: `${mixedContent.count} Mixed Content Resource(s)`,
+        description: 'HTTP resources loaded on HTTPS page'
+      });
+    }
+
+    // Weak Ports
+    if (ports && ports.weak && ports.weak.length > 0) {
+      vulnerabilities.push({
+        severity: 'high',
+        title: `${ports.weak.length} Weak Port(s) Open`,
+        description: `Open ports: ${ports.weak.map(p => `${p.name} (${p.port})`).join(', ')}`
+      });
+    }
+
+    // New Domain
+    if (whois && whois.ageDays < 30) {
+      vulnerabilities.push({
+        severity: 'low',
+        title: 'Very New Domain',
+        description: `Domain is only ${whois.ageDays} days old`
+      });
+    }
+
+    return vulnerabilities;
+  }
+
+  // Extract external links
+  extractExternalLinks($, hostname) {
+    const links = [];
+    $('a[href]').each((i, elem) => {
+      const href = $(elem).attr('href');
+      if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+        try {
+          const url = new URL(href);
+          if (url.hostname !== hostname) {
+            links.push({ url: href, text: $(elem).text().trim().substring(0, 50) });
+          }
+        } catch (e) {}
+      }
+    });
+    return links.slice(0, 20); // Limit to first 20
+  }
+
+  // Extract scripts
+  extractScripts($) {
+    const scripts = [];
+    $('script[src]').each((i, elem) => {
+      const src = $(elem).attr('src');
+      if (src) {
+        scripts.push(src);
+      }
+    });
+    return scripts.slice(0, 20); // Limit to first 20
   }
 
   normalizeUrl(url) {

@@ -8,6 +8,7 @@ import {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  sendEmailVerification,
   User as FirebaseUser
 } from 'firebase/auth';
 import { 
@@ -157,10 +158,24 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
         displayName: username
       });
 
-      // Create user document in Firestore
+      // Send email verification to prevent fake emails
+      try {
+        await sendEmailVerification(userCredential.user, {
+          url: window.location.origin + '/auth?verified=true',
+          handleCodeInApp: false
+        });
+        console.log('Email verification sent');
+      } catch (verificationError: any) {
+        console.warn('Failed to send verification email:', verificationError);
+        // Continue with registration even if email verification fails
+        // The user can verify later
+      }
+
+      // Create user document in Firestore with emailVerified flag
       await setDoc(doc(db, 'users', userCredential.user.uid), {
         username,
         email,
+        emailVerified: false, // Track verification status
         level: 1,
         totalPoints: 0,
         currentStreak: 0,
