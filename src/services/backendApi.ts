@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toastService } from '../utils/toast';
 
 // Use environment variable for API URL, fallback to relative path for production
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
@@ -53,11 +54,27 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle network errors (connection refused, etc.)
+    // Handle network errors (connection refused, server down, etc.)
     if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
-      console.error('API Error: Backend server is not running or unreachable. Please start the server on port 5000.');
-      // You could show a toast notification here if needed
+      console.error('API Error: Backend server is not running or unreachable.');
+      toastService.error('Please try again later.');
     }
+    // Handle timeout errors
+    else if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      console.error('API Error: Request timeout. Server may be slow or unavailable.');
+      toastService.error('Please try again later.');
+    }
+    // Handle server errors (5xx) and client errors (4xx including 401)
+    else if (error.response?.status >= 400) {
+      console.error('API Error:', error.response.status, error.response?.data);
+      toastService.error('Please try again later.');
+    }
+    // Handle connection refused or other connection errors
+    else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_CONNECTION_REFUSED') {
+      console.error('API Error: Connection refused. Server may be down.');
+      toastService.error('Please try again later.');
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -344,10 +361,15 @@ export const keepAliveService = {
           'Content-Type': 'application/json',
         },
       });
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
       console.log('Keep-alive ping sent: hy server dont sleep');
       return response;
     } catch (error) {
       console.warn('Keep-alive ping failed:', error);
+      // Show warning toast if server is unreachable
+      toastService.warning('Please try again later.');
       return null;
     }
   }

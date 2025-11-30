@@ -341,10 +341,10 @@ export default function AppLayout() {
       </div>
       
       <ToastContainer
-        position="top-center"
+        position="bottom-right"
         autoClose={3000}
         hideProgressBar={false}
-        newestOnTop={false}
+        newestOnTop={true}
         closeOnClick
         rtl={false}
         pauseOnFocusLoss

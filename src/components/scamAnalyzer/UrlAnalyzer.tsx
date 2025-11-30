@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Globe, Loader2, Lock } from 'lucide-react';
@@ -10,6 +10,8 @@ import { validateBasicInput } from './utils';
 import { updateDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 
+const STORAGE_KEY_URL_INPUT = 'scamAnalyzer_urlInput';
+
 interface UrlAnalyzerProps {
   onAnalysisComplete: (result: AnalysisResult) => void;
   onError: (error: string) => void;
@@ -19,9 +21,20 @@ export default function UrlAnalyzer({ onAnalysisComplete, onError }: UrlAnalyzer
   const { t } = useTranslation();
   const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
-  const [urlInput, setUrlInput] = useState<string>('');
+  const [urlInput, setUrlInput] = useState<string>(() => {
+    return localStorage.getItem(STORAGE_KEY_URL_INPUT) || '';
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [scanStatus, setScanStatus] = useState<string>('');
+
+  // Persist URL input to localStorage
+  useEffect(() => {
+    if (urlInput) {
+      localStorage.setItem(STORAGE_KEY_URL_INPUT, urlInput);
+    } else {
+      localStorage.removeItem(STORAGE_KEY_URL_INPUT);
+    }
+  }, [urlInput]);
 
   const handleAnalysis = async () => {
     // Check if user is authenticated
@@ -61,6 +74,12 @@ export default function UrlAnalyzer({ onAnalysisComplete, onError }: UrlAnalyzer
       const pointsAwarded = response.pointsAwarded || 0;
       setScanStatus('Analysis complete!');
       setTimeout(() => setScanStatus(''), 1000);
+      
+      // Save result to localStorage immediately to persist even if component unmounts
+      localStorage.setItem('scamAnalyzer_result', JSON.stringify(analysisResult));
+      localStorage.setItem('scamAnalyzer_analysisType', 'url');
+      localStorage.removeItem('scamAnalyzer_error');
+      
       onAnalysisComplete(analysisResult);
 
       // Update Firestore if points were awarded (for Firebase users)
@@ -119,6 +138,12 @@ export default function UrlAnalyzer({ onAnalysisComplete, onError }: UrlAnalyzer
           type: 'url', 
           message: err.message || t('scamAnalyzer.pleaseTryAgain', 'Please try again.') 
         });
+        
+        // Save error to localStorage to persist even if component unmounts
+        localStorage.setItem('scamAnalyzer_error', errorMsg);
+        localStorage.removeItem('scamAnalyzer_result');
+        localStorage.removeItem('scamAnalyzer_analysisType');
+        
         onError(errorMsg);
         toast.error(t('scamAnalyzer.analysisFailed', 'Analysis failed: {{message}}', { 
           message: err.message || t('scamAnalyzer.serverError', 'Server error. Please check your Generative LLM API key configuration (Gemini or ChatGPT).') 

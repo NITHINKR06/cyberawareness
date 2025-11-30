@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield, Loader2 } from 'lucide-react';
 import { analyzeContent } from '../../services/backendApi';
@@ -9,6 +9,8 @@ import { useAuth } from '../../contexts/FirebaseAuthContext';
 import { updateDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 
+const STORAGE_KEY_TEXT_INPUT = 'scamAnalyzer_textInput';
+
 interface TextAnalyzerProps {
   onAnalysisComplete: (result: AnalysisResult) => void;
   onError: (error: string) => void;
@@ -17,8 +19,19 @@ interface TextAnalyzerProps {
 export default function TextAnalyzer({ onAnalysisComplete, onError }: TextAnalyzerProps) {
   const { t } = useTranslation();
   const { user, refreshUser } = useAuth();
-  const [textInput, setTextInput] = useState<string>('');
+  const [textInput, setTextInput] = useState<string>(() => {
+    return localStorage.getItem(STORAGE_KEY_TEXT_INPUT) || '';
+  });
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Persist text input to localStorage
+  useEffect(() => {
+    if (textInput) {
+      localStorage.setItem(STORAGE_KEY_TEXT_INPUT, textInput);
+    } else {
+      localStorage.removeItem(STORAGE_KEY_TEXT_INPUT);
+    }
+  }, [textInput]);
 
   const handleAnalysis = async () => {
     const validation = validateBasicInput('text', textInput);
@@ -36,6 +49,12 @@ export default function TextAnalyzer({ onAnalysisComplete, onError }: TextAnalyz
       const response = await analyzeContent('text', textInput);
       const analysisResult = response.analysisResult;
       const pointsAwarded = response.pointsAwarded || 0;
+      
+      // Save result to localStorage immediately to persist even if component unmounts
+      localStorage.setItem('scamAnalyzer_result', JSON.stringify(analysisResult));
+      localStorage.setItem('scamAnalyzer_analysisType', 'text');
+      localStorage.removeItem('scamAnalyzer_error');
+      
       onAnalysisComplete(analysisResult);
 
       // Update Firestore if points were awarded (for Firebase users)
@@ -79,6 +98,12 @@ export default function TextAnalyzer({ onAnalysisComplete, onError }: TextAnalyz
         type: 'text', 
         message: err.message || t('scamAnalyzer.pleaseTryAgain', 'Please try again.') 
       });
+      
+      // Save error to localStorage to persist even if component unmounts
+      localStorage.setItem('scamAnalyzer_error', errorMsg);
+      localStorage.removeItem('scamAnalyzer_result');
+      localStorage.removeItem('scamAnalyzer_analysisType');
+      
       onError(errorMsg);
       toast.error(t('scamAnalyzer.analysisFailed', 'Analysis failed: {{message}}', { 
         message: err.message || t('scamAnalyzer.serverError', 'Server error. Please check your Generative LLM API key configuration (Gemini or ChatGPT).') 
