@@ -12,6 +12,22 @@
 
 ---
 
+## 🎯 What is WALRUS?
+
+**WALRUS** (Web Application for Learning, Reporting, and Understanding Security) is a comprehensive cybersecurity education and protection platform designed specifically to address the growing digital safety challenges in India. 
+
+WALRUS is an all-in-one solution that combines:
+
+- **AI-Powered Protection**: Advanced scam detection system that analyzes text, URLs, emails, and phone numbers in real-time to help users identify potential threats before they become victims
+- **Interactive Learning**: Gamified cybersecurity education modules that make learning about digital safety engaging and accessible to everyone, regardless of technical background
+- **Community Platform**: A space where users can share experiences, report scams, and learn from each other's encounters with cyber threats
+- **Multilingual Support**: Fully localized in English, Hindi, and Kannada to ensure accessibility across diverse Indian communities
+- **Time Machine Experience**: Interactive scenarios that teach users about cybersecurity threats across different time periods (2015, 2025, 2035), helping them understand the evolution of digital fraud
+
+The platform transforms complex cybersecurity concepts into an engaging, user-friendly experience that empowers citizens to protect themselves online. Whether you're checking if a suspicious message is a scam, learning about phishing attacks, or reporting a fraudulent website, WALRUS provides the tools and knowledge needed to stay safe in the digital world.
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
