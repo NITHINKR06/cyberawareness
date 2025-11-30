@@ -64,7 +64,24 @@ api.interceptors.response.use(
       console.error('API Error: Request timeout. Server may be slow or unavailable.');
       toastService.error('Please try again later.');
     }
-    // Handle server errors (5xx) and client errors (4xx including 401)
+    // Handle specific error codes
+    else if (error.response?.status === 501) {
+      console.error('API Error: 501 - Not Implemented', error.response?.data);
+      toastService.error('This feature is not yet implemented on the server.');
+    }
+    else if (error.response?.status === 401) {
+      console.error('API Error: 401 - Unauthorized', error.response?.data);
+      toastService.error('Authentication required. Please log in.');
+    }
+    else if (error.response?.status === 403) {
+      console.error('API Error: 403 - Forbidden', error.response?.data);
+      toastService.error('You do not have permission to access this resource.');
+    }
+    else if (error.response?.status === 404) {
+      console.error('API Error: 404 - Not Found', error.response?.data);
+      toastService.error('The requested resource was not found.');
+    }
+    // Handle other server errors (5xx) and client errors (4xx)
     else if (error.response?.status >= 400) {
       console.error('API Error:', error.response.status, error.response?.data);
       toastService.error('Please try again later.');

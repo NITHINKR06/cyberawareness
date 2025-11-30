@@ -74,7 +74,12 @@
       "socialEngineering": "Social Engineering",
       "dataProtection": "Data Protection",
       "networkSecurity": "Network Security"
-    }
+    },
+    "recentActivity": "Recent Activity",
+    "reports": "Reports",
+    "analyses": "Analyses",
+    "loadingActivities": "Loading activities...",
+    "noActivities": "No activities yet. Start by analyzing scams or reporting suspicious content!"
   },
   "modules": {
     "title": "Learning Modules",

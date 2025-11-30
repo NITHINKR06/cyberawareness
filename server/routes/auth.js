@@ -1,5 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 import { validateUserInput, rateLimitValidation, sanitizeInput } from '../middleware/validation.js';
 import { authRateLimit } from '../middleware/security.js';
 import { csrfProtectionMiddleware } from '../middleware/csrfProtection.js';
@@ -80,14 +81,54 @@ router.get('/verify', async (req, res) => {
   });
 });
 
-// Middleware to authenticate token - can be adapted for Firebase tokens
-function authenticateToken(req, res, next) {
-  // This should verify Firebase ID tokens instead of JWT
-  // Use Firebase Admin SDK to verify tokens
-  return res.status(501).json({ 
-    error: 'Token authentication not implemented',
-    message: 'Use Firebase Admin SDK to verify Firebase ID tokens'
-  });
+// Middleware to authenticate token - adapted for Firebase tokens
+// This middleware finds or creates a MongoDB User from Firebase UID
+async function authenticateToken(req, res, next) {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // For now, we treat the token as the Firebase UID
+    // In production, you should verify the Firebase ID token using Firebase Admin SDK
+    // const decodedToken = await admin.auth().verifyIdToken(token);
+    // const firebaseUid = decodedToken.uid;
+    
+    // TEMPORARY: Use token directly as Firebase UID (basic validation)
+    // This is NOT secure for production - implement proper Firebase Admin SDK verification
+    if (token.length < 20 || token.length > 1000) {
+      return res.status(401).json({ error: 'Invalid token format' });
+    }
+
+    const firebaseUid = token;
+
+    // Find or create MongoDB User from Firebase UID
+    let user = await User.findOne({ firebaseUid });
+    
+    if (!user) {
+      // If user doesn't exist, create a placeholder user
+      // In production, you should get user details from Firebase Auth
+      user = new User({
+        username: `user_${firebaseUid.substring(0, 8)}`, // Generate a username
+        email: `${firebaseUid}@firebase.local`, // Placeholder email
+        firebaseUid: firebaseUid,
+        // No password required for Firebase users
+      });
+      
+      await user.save();
+    }
+
+    // Set userId for use in routes (MongoDB ObjectId)
+    req.userId = user._id;
+    req.firebaseUserId = firebaseUid;
+    
+    next();
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return res.status(401).json({ error: 'Authentication failed' });
+  }
 }
 
 export default router;
