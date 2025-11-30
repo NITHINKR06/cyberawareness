@@ -81,22 +81,25 @@ Our platform transforms cybersecurity from a technical burden into an engaging, 
 ### Current Status
 
 ✅ **Fully Functional Features:**
-- AI-powered scam analyzer with multi-format support
-- Gamified learning modules with quizzes and achievements
-- Community forums and discussion boards
-- Scam reporting system with PDF generation
-- Time Machine interactive scenarios (3 eras: 2015, 2025, 2035)
-- Admin panel with user management and analytics
-- Comprehensive multilingual support (English, Hindi, Kannada) with 32KB+ translations each
-- Security sandbox for practice
-- Dark/Light theme support
-- Responsive design for mobile and desktop
+- **AI-Powered Scam Analyzer**: Multi-format analysis (text, URL, email, phone) with Hugging Face AI integration, OCR support, and fallback pattern detection
+- **Gamified Learning System**: 5 comprehensive cybersecurity education modules with interactive quizzes, achievements, and leaderboards
+- **Community Platform**: Discussion forums with posts, comments, topics, and admin moderation tools
+- **Scam Reporting System**: Comprehensive reporting with categorization, PDF generation, and status tracking
+- **Time Machine**: Interactive scenarios across 3 eras (2015, 2025, 2035) with decision-based storylines
+- **Admin Panel**: Complete admin dashboard with user management, content moderation, analytics, and system statistics
+- **Multilingual Support**: Full localization in English, Hindi (हिंदी), and Kannada (ಕನ್ನಡ) with 870+ translation keys per language
+- **Security Sandbox**: Practice environment for security concepts
+- **User Profile & Settings**: Profile management, preferences, and settings customization
+- **Theme System**: Dark/Light theme support with persistent preferences
+- **Responsive Design**: Mobile-first design optimized for all screen sizes
 
 🚀 **Deployment Ready:**
-- Configured for Vercel serverless deployment
-- MongoDB Atlas integration
-- Firebase authentication
-- Production-ready security middleware
+- **Vercel Serverless**: Configured for serverless deployment with `api/[...path].js` catch-all routing
+- **Render Support**: Optimized for Render.com deployment with keep-alive functionality
+- **MongoDB Atlas**: Cloud database integration with connection pooling and retry logic
+- **Firebase Authentication**: Complete Firebase Auth integration for user authentication (replaces legacy JWT auth)
+- **Production Security**: Comprehensive security middleware stack (XSS, CSRF, NoSQL injection, rate limiting, security headers)
+- **70+ API Endpoints**: Fully implemented REST API across 9 route modules
 
 ## ✨ Features
 
@@ -144,22 +147,28 @@ Our platform transforms cybersecurity from a technical burden into an engaging, 
 ## 🚀 Tech Stack
 
 ### Frontend
-- **Framework**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
+- **Framework**: React 18.3 + TypeScript 5.5
+- **Build Tool**: Vite 5.4
+- **Styling**: Tailwind CSS 3.4
 - **Icons**: Lucide React
-- **Internationalization**: react-i18next
-- **Charts**: Recharts
+- **Internationalization**: react-i18next with browser language detection
+- **Charts**: Recharts 3.2
 - **Notifications**: React Toastify
+- **Routing**: React Router DOM 7.9
+- **Markdown**: react-markdown with remark-gfm
+- **Animations**: GSAP 3.13, Rive (for interactive animations)
+- **Date Handling**: date-fns 4.1
 
 ### Backend
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB with Mongoose
-- **Authentication**: JWT + Firebase Auth
-- **Security**: Helmet, CORS, Rate Limiting
-- **File Processing**: Multer, Tesseract.js (OCR)
-- **PDF Generation**: jsPDF
+- **Runtime**: Node.js (v18+)
+- **Framework**: Express.js 5.x
+- **Database**: MongoDB with Mongoose 8.x
+- **Authentication**: Firebase Authentication (primary) + Firebase Admin SDK for backend verification
+- **Security**: Helmet.js, CORS, express-rate-limit, express-slow-down, custom security middleware
+- **File Processing**: Multer (file uploads), Tesseract.js (OCR), Puppeteer (web scraping)
+- **PDF Generation**: jsPDF + jspdf-autotable
+- **Session Management**: express-session with secure cookie configuration
+- **URL Intelligence**: Cloudflare URL Scanner, Google Safe Browsing API (optional), Whois lookup
 
 ### AI & Services
 - **Primary AI Analysis**: Hugging Face API with customizable models
@@ -255,13 +264,19 @@ SESSION_SECRET=your-session-secret-key
 PORT=5000
 NODE_ENV=development
 
-# Firebase (for admin panel)
+# Firebase (Required for user authentication)
 VITE_FIREBASE_API_KEY=your-firebase-api-key
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
 VITE_FIREBASE_APP_ID=your-app-id
+
+# Firebase Admin (Required for backend authentication verification)
+# Download service account key from Firebase Console → Project Settings → Service Accounts
+FIREBASE_ADMIN_PROJECT_ID=your-project-id
+FIREBASE_ADMIN_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
+FIREBASE_ADMIN_PRIVATE_KEY=your-private-key
 
 # AI Analysis (Required for scam detection)
 # Get from: https://huggingface.co/settings/tokens
@@ -280,10 +295,18 @@ GEMINI_API_KEY=your-gemini-api-key
 ### Step 4: Firebase Setup
 
 1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-2. Enable Authentication with Email/Password
-3. Create a Firestore database
-4. Copy your Firebase config to `.env`
-5. Set up Firestore security rules
+2. Enable Authentication with Email/Password provider
+3. Create a Firestore database (start in production mode or test mode)
+4. Copy your Firebase web app config to `.env` (VITE_FIREBASE_* variables)
+5. Set up Firebase Admin SDK:
+   - Go to Project Settings → Service Accounts
+   - Click "Generate New Private Key" to download service account JSON
+   - Extract the values and add to `.env`:
+     - `FIREBASE_ADMIN_PROJECT_ID`
+     - `FIREBASE_ADMIN_CLIENT_EMAIL`
+     - `FIREBASE_ADMIN_PRIVATE_KEY` (full key including `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`)
+6. Set up Firestore security rules (see `firestore.rules` in project root)
+7. Configure Firestore indexes if needed for complex queries
 
 ### Step 5: Run the Application
 
@@ -389,9 +412,29 @@ The platform features comprehensive multilingual support with:
 
 ### User Journey
 
-1. **Anonymous User**: Use Scam Analyzer without registration
-2. **Registered User**: Access learning modules, achievements, and community
-3. **Admin User**: Manage users, moderate content, view analytics
+1. **Anonymous User**: 
+   - Use Scam Analyzer for text analysis (no registration required)
+   - Browse public community posts
+   - View learning modules (limited access)
+   - Access Time Machine scenarios
+
+2. **Registered User** (Firebase Authentication):
+   - Full access to Scam Analyzer (including URL analysis)
+   - Complete learning modules with progress tracking
+   - Earn achievements and view leaderboard
+   - Create and manage scam reports
+   - Participate in community discussions
+   - Access Security Sandbox
+   - Manage profile and settings
+
+3. **Admin User** (Firebase Admin Authentication):
+   - All registered user features
+   - Admin dashboard with system statistics
+   - User management (view, ban, delete users)
+   - Content moderation (posts, comments, topics)
+   - Reports management
+   - Scam database management
+   - Analytics and insights
 
 ### Key Workflows
 
@@ -404,64 +447,134 @@ The platform features comprehensive multilingual support with:
 ## 📚 API Documentation
 
 ### Authentication
+**Note**: User authentication is handled by Firebase on the frontend. Backend endpoints use Firebase Admin SDK for token verification.
+
 ```
-POST /api/auth/register    # User registration
-POST /api/auth/login       # User login
-GET  /api/auth/profile     # Get user profile
-PUT  /api/auth/profile     # Update user profile
+GET  /api/auth/test        # Test endpoint (returns auth status)
+POST /api/auth/register    # DEPRECATED - Use Firebase Auth instead
+POST /api/auth/login        # DEPRECATED - Use Firebase Auth instead
+GET  /api/auth/profile      # Get user profile (requires Firebase token)
+PUT  /api/auth/profile      # Update user profile (requires Firebase token)
 ```
 
 ### Analyzer
 ```
-POST /api/analyzer/analyze           # Analyze content
-GET  /api/analyzer/history           # Get analysis history
-GET  /api/analyzer/session/:id       # Get session history
+POST /api/analyzer/analyze           # Analyze content (text/URL/email/phone)
+                                     # - Text analysis: Public (no auth)
+                                     # - URL analysis: Requires authentication
+GET  /api/analyzer/history           # Get user's analysis history (requires auth)
+GET  /api/analyzer/session/:id     # Get specific session history (requires auth)
+GET  /api/analyzer/configuration     # Get analyzer configuration (if configurable mode enabled)
 ```
 
 ### Community
 ```
-GET    /api/community/posts          # Get community posts
-POST   /api/community/posts          # Create new post
-GET    /api/community/comments/:id   # Get post comments
-POST   /api/community/comments       # Add comment
+GET    /api/community/posts          # Get all community posts (with pagination)
+POST   /api/community/posts          # Create new post (requires auth)
+GET    /api/community/posts/:id      # Get specific post details
+PUT    /api/community/posts/:id      # Update post (requires auth)
+DELETE /api/community/posts/:id      # Delete post (requires auth)
+GET    /api/community/comments/:id   # Get comments for a post
+POST   /api/community/comments       # Add comment (requires auth)
+PUT    /api/community/comments/:id   # Update comment (requires auth)
+DELETE /api/community/comments/:id   # Delete comment (requires auth)
+GET    /api/community/topics         # Get all topics
+POST   /api/community/topics         # Create topic (admin only)
 ```
 
 ### Reports
 ```
-POST /api/reports                    # Submit scam report
-GET  /api/reports                    # Get user reports
-GET  /api/reports/:id                # Get specific report
+POST   /api/reports                  # Submit scam report (requires auth)
+GET    /api/reports                  # Get user's reports (requires auth)
+GET    /api/reports/:id              # Get specific report details (requires auth)
+PUT    /api/reports/:id              # Update report (requires auth)
+DELETE /api/reports/:id              # Delete report (requires auth)
+GET    /api/reports/export/:id       # Export report as PDF (requires auth)
 ```
 
 ### Scenarios (Time Machine)
 ```
-GET  /api/scenarios                  # Get all scenarios
+GET  /api/scenarios                  # Get all scenarios across all eras
 GET  /api/scenarios/:era            # Get scenarios by era (2015, 2025, 2035)
-GET  /api/scenarios/:id             # Get specific scenario details
+GET  /api/scenarios/id/:id          # Get specific scenario details by ID
 ```
 
-### OCR
+### OCR & File Processing
 ```
-POST /api/ocr/analyze                # Analyze image with OCR
+POST /api/ocr/analyze                # Analyze image with OCR (extract text from images)
+                                     # Supports: PNG, JPG, JPEG formats
+                                     # Returns: Extracted text for further analysis
+```
+
+### User Management
+```
+GET  /api/user/profile              # Get user profile (requires auth)
+PUT  /api/user/profile              # Update user profile (requires auth)
+GET  /api/user/history              # Get user's complete history (reports + analyzer)
+```
+
+### Configuration
+```
+GET  /api/config/validation-rules    # Get validation rules configuration
+GET  /api/config/health             # Health check endpoint
 ```
 
 ### Admin
+**All admin endpoints require admin authentication via Firebase Admin SDK**
+
 ```
-GET  /api/admin/stats                # Get system statistics
-GET  /api/admin/users                # Get users list
-PUT  /api/admin/users/:id            # Update user
-POST /api/admin/users/:id/ban        # Ban user
+# Dashboard & Statistics
+GET  /api/admin/stats                # Get system statistics and analytics
+GET  /api/admin/analytics            # Get detailed analytics data
+
+# User Management
+GET  /api/admin/users                # Get all users (with pagination/filters)
+GET  /api/admin/users/:id            # Get specific user details
+PUT  /api/admin/users/:id            # Update user (role, status, etc.)
+POST /api/admin/users/:id/ban        # Ban/unban user
+DELETE /api/admin/users/:id          # Delete user
+
+# Content Management
+GET  /api/admin/posts                # Get all posts (admin view)
+PUT  /api/admin/posts/:id            # Moderate/update post
+DELETE /api/admin/posts/:id          # Delete post
+GET  /api/admin/comments             # Get all comments
+PUT  /api/admin/comments/:id         # Moderate comment
+DELETE /api/admin/comments/:id        # Delete comment
+GET  /api/admin/topics               # Get all topics
+POST /api/admin/topics               # Create topic
+PUT  /api/admin/topics/:id           # Update topic
+DELETE /api/admin/topics/:id          # Delete topic
+
+# Reports Management
+GET  /api/admin/reports              # Get all reports
+PUT  /api/admin/reports/:id          # Update report status
+GET  /api/admin/scams                # Get scam database entries
+POST /api/admin/scams                # Add scam to database
+PUT  /api/admin/scams/:id            # Update scam entry
+DELETE /api/admin/scams/:id           # Delete scam entry
 ```
 
 ## 🚀 Deployment
 
 ### Current Deployment Status
 
-The project is configured for **Vercel serverless deployment** with:
+The project supports multiple deployment platforms:
+
+**Vercel (Serverless - Recommended):**
 - Frontend: Static site deployment (Vite build)
-- Backend: Serverless functions via `api/[...path].js`
+- Backend: Serverless functions via `api/[...path].js` catch-all route
 - Database: MongoDB Atlas (cloud)
 - Authentication: Firebase Auth
+- Auto-scaling and edge network
+
+**Render.com (Traditional Server):**
+- Frontend: Static site deployment
+- Backend: Web service with Express.js
+- Database: MongoDB Atlas (cloud)
+- Authentication: Firebase Auth
+- Built-in keep-alive functionality to prevent server sleep
+- Automatic SSL certificates
 
 ### Vercel Deployment
 
@@ -485,6 +598,27 @@ vercel --prod
 - 30-second function timeout
 
 See `md/DEPLOYMENT_README.md` for detailed deployment instructions for multiple platforms.
+
+### Render Deployment
+
+The project includes built-in support for Render.com deployment:
+
+```bash
+# The server automatically detects Render environment
+# Configure these environment variables in Render dashboard:
+# - MONGODB_URI (required)
+# - FIREBASE_ADMIN_* (required for auth)
+# - HUGGINGFACE_API_KEY (required for AI analysis)
+# - JWT_SECRET, SESSION_SECRET (required for security)
+```
+
+**Features:**
+- Automatic environment detection
+- Keep-alive ping functionality (prevents server sleep)
+- MongoDB connection retry logic
+- Production-ready error handling
+
+See `md/RENDER_DEPLOYMENT.md` for step-by-step Render deployment guide.
 
 ### Heroku
 
@@ -546,7 +680,7 @@ npm run test:manual            # Manual testing guide
 
 ## 🛡️ Security Features
 
-- **Authentication**: JWT tokens + Firebase Auth
+- **Authentication**: Firebase Authentication (frontend) + Firebase Admin SDK (backend verification)
 - **Authorization**: Role-based access control
 - **Input Validation**: Server-side validation and sanitization
 - **XSS Protection**: HTML sanitization using DOMPurify (isomorphic-dompurify)
