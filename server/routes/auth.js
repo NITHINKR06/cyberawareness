@@ -85,10 +85,16 @@ router.get('/verify', async (req, res) => {
 // This middleware finds or creates a MongoDB User from Firebase UID
 async function authenticateToken(req, res, next) {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+      return res.status(401).json({ error: 'Authentication required', message: 'No authorization header provided' });
+    }
+
+    const token = authHeader.split(' ')[1];
     
     if (!token) {
-      return res.status(401).json({ error: 'Authentication required' });
+      return res.status(401).json({ error: 'Authentication required', message: 'No token provided in authorization header' });
     }
 
     // For now, we treat the token as the Firebase UID
@@ -99,7 +105,7 @@ async function authenticateToken(req, res, next) {
     // TEMPORARY: Use token directly as Firebase UID (basic validation)
     // This is NOT secure for production - implement proper Firebase Admin SDK verification
     if (token.length < 20 || token.length > 1000) {
-      return res.status(401).json({ error: 'Invalid token format' });
+      return res.status(401).json({ error: 'Invalid token format', message: 'Token length validation failed' });
     }
 
     const firebaseUid = token;
@@ -110,24 +116,38 @@ async function authenticateToken(req, res, next) {
     if (!user) {
       // If user doesn't exist, create a placeholder user
       // In production, you should get user details from Firebase Auth
-      user = new User({
-        username: `user_${firebaseUid.substring(0, 8)}`, // Generate a username
-        email: `${firebaseUid}@firebase.local`, // Placeholder email
-        firebaseUid: firebaseUid,
-        // No password required for Firebase users
-      });
-      
-      await user.save();
+      try {
+        user = new User({
+          username: `user_${firebaseUid.substring(0, 8)}`, // Generate a username
+          email: `${firebaseUid}@firebase.local`, // Placeholder email
+          firebaseUid: firebaseUid,
+          // No password required for Firebase users
+        });
+        
+        await user.save();
+        console.log(`Created new MongoDB user for Firebase UID: ${firebaseUid.substring(0, 8)}...`);
+      } catch (createError) {
+        console.error('Error creating user:', createError);
+        // If creation fails (e.g., duplicate username), try to find again
+        user = await User.findOne({ firebaseUid });
+        if (!user) {
+          throw createError;
+        }
+      }
     }
 
     // Set userId for use in routes (MongoDB ObjectId)
     req.userId = user._id;
     req.firebaseUserId = firebaseUid;
     
+    // Continue to the next middleware/route handler
     next();
   } catch (error) {
     console.error('Authentication error:', error);
-    return res.status(401).json({ error: 'Authentication failed' });
+    return res.status(401).json({ 
+      error: 'Authentication failed', 
+      message: error.message || 'Failed to authenticate user'
+    });
   }
 }
 

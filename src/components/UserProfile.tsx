@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/FirebaseAuthContext';
-import { User, Mail, Award, Calendar, Save, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Award, Calendar, Save, ArrowLeft, Eye, EyeOff, History, Trophy, Clock, FileText, Search } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { userService } from '../services/backendApi';
+import { badges } from '../data/mockData';
 
 export default function UserProfile() {
   const { user, updateUser } = useAuth();
@@ -22,6 +24,8 @@ export default function UserProfile() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [activityHistory, setActivityHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
 
   useEffect(() => {
     if (user) {
@@ -31,6 +35,27 @@ export default function UserProfile() {
         email: user.email || '',
       }));
     }
+  }, [user]);
+
+  // Load activity history
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!user) return;
+      try {
+        setLoadingHistory(true);
+        const history = await userService.getHistory();
+        setActivityHistory(history.history || []);
+      } catch (error) {
+        console.error('Error loading activity history:', error);
+      } finally {
+        setLoadingHistory(false);
+      }
+    };
+
+    loadHistory();
+    // Refresh every 30 seconds
+    const interval = setInterval(loadHistory, 30000);
+    return () => clearInterval(interval);
   }, [user]);
 
   const validateForm = () => {
@@ -119,6 +144,31 @@ export default function UserProfile() {
       confirmPassword: '',
     }));
     setErrors({});
+  };
+
+  // Calculate earned badges based on user points
+  const earnedBadges = badges.filter(b => (user?.totalPoints || 0) >= b.requirementPoints);
+  const nextBadge = badges.find(b => (user?.totalPoints || 0) < b.requirementPoints);
+
+  const getBadgeColor = (tier: string) => {
+    switch (tier) {
+      case 'bronze': return 'from-amber-600 to-amber-800';
+      case 'silver': return 'from-gray-400 to-gray-600';
+      case 'gold': return 'from-yellow-400 to-yellow-600';
+      case 'platinum': return 'from-cyan-400 to-blue-600';
+      default: return 'from-gray-400 to-gray-600';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -383,6 +433,145 @@ export default function UserProfile() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Badges Section */}
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Trophy className="w-6 h-6 text-indigo-500" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            {t('profile.badges', 'Your Badges')}
+          </h2>
+        </div>
+
+        {earnedBadges.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {earnedBadges.map((badge) => (
+              <div
+                key={badge.id}
+                className={`bg-gradient-to-br ${getBadgeColor(badge.tier)} p-4 rounded-lg shadow-md`}
+              >
+                <div className="flex items-center gap-3">
+                  <Award className="w-8 h-8 text-white" />
+                  <div>
+                    <p className="font-bold text-white">{badge.name}</p>
+                    <p className="text-xs text-white/80">{badge.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            {t('profile.noBadges', 'No badges earned yet. Keep earning points to unlock badges!')}
+          </p>
+        )}
+
+        {nextBadge && (
+          <div className="border-2 border-dashed rounded-lg p-4 bg-white/5 dark:bg-white/5 border-gray-300 dark:border-gray-600">
+            <div className="flex items-center gap-3">
+              <Award className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+              <div>
+                <p className="font-bold text-gray-900 dark:text-white">{nextBadge.name}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('profile.nextBadge', 'Earn {{points}} more points to unlock', { 
+                    points: nextBadge.requirementPoints - (user?.totalPoints || 0)
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Activity History Section */}
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <History className="w-6 h-6 text-cyan-500" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            {t('profile.activityHistory', 'Activity History')}
+          </h2>
+        </div>
+
+        {loadingHistory ? (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Loading history...</p>
+          </div>
+        ) : activityHistory.length > 0 ? (
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {activityHistory.map((activity, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-4 p-4 bg-white/5 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-white/10 dark:hover:bg-white/10 transition-colors"
+              >
+                <div className="flex-shrink-0 mt-1">
+                  {activity.type === 'report' ? (
+                    <FileText className="w-5 h-5 text-red-500" />
+                  ) : activity.type === 'analysis' ? (
+                    <Search className="w-5 h-5 text-blue-500" />
+                  ) : (
+                    <Clock className="w-5 h-5 text-gray-500" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {activity.type === 'report' 
+                          ? t('profile.reportActivity', 'Scam Report Submitted')
+                          : activity.type === 'analysis'
+                          ? t('profile.analysisActivity', 'Content Analysis')
+                          : activity.description || t('profile.activity', 'Activity')
+                        }
+                      </p>
+                      {activity.content && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 truncate">
+                          {activity.content}
+                        </p>
+                      )}
+                      {activity.url && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 truncate">
+                          {activity.url}
+                        </p>
+                      )}
+                      {activity.threatLevel && (
+                        <span className={`inline-block mt-2 px-2 py-1 rounded text-xs font-medium ${
+                          activity.threatLevel === 'dangerous' 
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                            : activity.threatLevel === 'suspicious'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        }`}>
+                          {activity.threatLevel}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-shrink-0 text-right">
+                      {activity.createdAt && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDate(activity.createdAt)}
+                        </p>
+                      )}
+                      {activity.pointsAwarded && activity.pointsAwarded > 0 && (
+                        <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mt-1">
+                          +{activity.pointsAwarded} {t('profile.points', 'points')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <History className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
+            <p className="text-gray-600 dark:text-gray-400">
+              {t('profile.noHistory', 'No activity history yet. Start analyzing content or reporting scams to see your activity here!')}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

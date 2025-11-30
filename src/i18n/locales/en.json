@@ -396,7 +396,16 @@
     "confirmPassword": "Confirm Password",
     "confirmPasswordPlaceholder": "Confirm new password",
     "updateProfile": "Update Profile",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "badges": "Your Badges",
+    "noBadges": "No badges earned yet. Keep earning points to unlock badges!",
+    "nextBadge": "Earn {{points}} more points to unlock",
+    "activityHistory": "Activity History",
+    "reportActivity": "Scam Report Submitted",
+    "analysisActivity": "Content Analysis",
+    "activity": "Activity",
+    "points": "points",
+    "noHistory": "No activity history yet. Start analyzing content or reporting scams to see your activity here!"
   },
   "timeMachine": {
     "title": "Time Machine",
